@@ -105,60 +105,64 @@ var
 begin
   html := text;
   tmpstr := TStringList.Create;
-  for i := 0 to param.Count - 1 do
-  begin
-    key := param.Names[i];
-    value := param.ValueFromIndex[i];
-    jo := SO(value);
-    if (not jo.IsType(TSuperType.stObject)) and (not jo.IsType(TSuperType.stArray)) then
+  try
+    for i := 0 to param.Count - 1 do
     begin
-      html := foreachvalue(html, key, value, isok);
-      if isok then
+      key := param.Names[i];
+      value := param.ValueFromIndex[i];
+      jo := SO(value);
+      if (not jo.IsType(TSuperType.stObject)) and (not jo.IsType(TSuperType.stArray)) then
       begin
-        tmpstr.Add(key);
+        html := foreachvalue(html, key, value, isok);
+        if isok then
+        begin
+          tmpstr.Add(key);
+        end;
+      end;
+
+    end;
+    for i := 0 to tmpstr.Count - 1 do
+    begin
+      param.Delete(param.IndexOfName(tmpstr.Strings[i]));
+    end;
+    tmpstr.Clear;
+    for i := 0 to param.Count - 1 do
+    begin
+      key := param.Names[i];
+      value := param.ValueFromIndex[i];
+      jo := SO(value);
+
+      if jo.IsType(TSuperType.stObject) then
+      begin
+        html := foreachjson(html, key, jo, isok);
+        if isok then
+        begin
+          tmpstr.Add(key);
+        end;
+      end
+      else if jo.IsType(TSuperType.stArray) then
+      begin
+        html := foreachlist(html, key, jo, isok);
+        if isok then
+        begin
+          tmpstr.Add(key);
+        end;
+      end
+      else
+      begin
+        html := foreachif(html, key, value, isok);
       end;
     end;
-
-  end;
-  for i := 0 to tmpstr.Count - 1 do
-  begin
-    param.Delete(param.IndexOfName(tmpstr.Strings[i]));
-  end;
-  tmpstr.Clear;
-  for i := 0 to param.Count - 1 do
-  begin
-    key := param.Names[i];
-    value := param.ValueFromIndex[i];
-    jo := SO(value);
-
-    if jo.IsType(TSuperType.stObject) then
+    for i := 0 to tmpstr.Count - 1 do
     begin
-      html := foreachjson(html, key, jo, isok);
-      if isok then
-      begin
-        tmpstr.Add(key);
-      end;
-    end
-    else if jo.IsType(TSuperType.stArray) then
-    begin
-      html := foreachlist(html, key, jo, isok);
-      if isok then
-      begin
-        tmpstr.Add(key);
-      end;
-    end
-    else
-    begin
-      html := foreachif(html, key, value, isok);
+      param.Delete(param.IndexOfName(tmpstr.Strings[i]));
     end;
+  finally
+    tmpstr.Clear;
+    tmpstr.Free;
   end;
-  for i := 0 to tmpstr.Count - 1 do
-  begin
-    param.Delete(param.IndexOfName(tmpstr.Strings[i]));
-  end;
-  tmpstr.Clear;
-  html := foreachsetif(html);
   param.Clear;
+  html := foreachsetif(html);
   Result := html;
 end;
 
@@ -423,7 +427,7 @@ var
   match: TMatch;
   s: string;
   html: string;
-  opt:TRegExOptions;
+  opt: TRegExOptions;
 begin
 
   matchs := TRegEx.Matches(text, '<#if[\s\S]*?</#if>');
