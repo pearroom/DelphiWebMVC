@@ -1,0 +1,27 @@
+body,td,th {font-family: Verdana, Arial, Helvetica, sans-serif;font-size: 14px;color: #1d1007; line-height:24px}
+
+.dialog1100 .modal-dialog {
+	width: 1100px;
+}
+
+.dialog500 .modal-dialog {
+	width: 500px;
+}
+
+.dialog700 .modal-dialog {
+	width: 700px;
+}
+
+.dialog800 .modal-dialog {
+	width: 800px;
+}
+
+.dialog600 .modal-dialog {
+	width: 600px;
+}
+.dialog300 .modal-dialog {
+	width: 300px;
+}
+.dialog400 .modal-dialog {
+	width: 400px;
+}

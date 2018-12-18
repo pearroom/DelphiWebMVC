@@ -1,0 +1,38 @@
+unit SessionList2;
+
+interface
+
+uses
+  System.SysUtils, System.Classes;
+
+type
+  TSessionList2 = class
+    SessionLs_vlue: TStringList;
+    SessionLs_timerout: TStringList;
+  public
+    function getValueByKey(sessionid:string):string;
+    function getTimeroutByKey(sessionid:string):string;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  end;
+
+implementation
+
+{ TSessionList2 }
+
+constructor TSessionList2.Create(AOwner: TComponent);
+begin
+  inherited;
+  SessionLs_vlue := TStringList.Create;
+  SessionLs_timerout := TStringList.Create;
+end;
+
+destructor TSessionList2.Destroy;
+begin
+  SessionLs_vlue.Free;
+  SessionLs_timerout.Free;
+  inherited;
+end;
+
+end.
+

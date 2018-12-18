@@ -1,0 +1,41 @@
+﻿<html>
+    <head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<#include file=/public.html>
+    <title>DelphiMVC</title>        
+    </head>
+    <body>    
+        <div style="margin-top: 10px;"></div>
+        <div style="width:90%;margin-left: auto;margin-right: auto;">
+        <div class="panel panel-default" >
+            <button id="users" onclick="menuclick(this.id)" class="btn btn-default" style="margin: 4px;">用户管理</button>
+            <button id="kucun" onclick="menuclick(this.id)" class="btn btn-default" style="margin: 4px;">GET/POST工具</button>
+            <button id="xiaoshou" onclick="menuclick(this.id)" class="btn btn-default" style="margin: 4px;">标签使用</button>
+            <button id="caiwu" onclick="menuclick(this.id)" class="btn btn-default" style="margin: 4px;">文件上传</button>
+            <div style="float: right; line-height: 40px;"><span style="font-size: 14px; margin-right: 40px;"> 登录用户: #{name} </span></div>
+        </div>
+           <div style="margin-top: -15px;" id="_content_">
+		   <div style='text-align:center; height:400px;margin-top:100px;width:90%;margin-left:auto;margin-right:auto;'>
+		   <h4>delphi技术开发的Web框架MVC模式，只需把精力放在模型与视图的设计上,让delphi开发web系统更方便，
+		   代码在delphi10.2下编译通过,webbroker 使用http.sys,性能上有很大提升。</h4>
+		   <br/>
+		   <h4>delphimvc介绍:</h4>
+		   <h4><a href='https://my.oschina.net/delphimvc'>https://my.oschina.net/delphimvc</a></h4>
+		   <h4>代码库:</h4>
+		   <h4><a href='https://gitee.com/pearroom/DelphiWebMVC'>https://gitee.com/pearroom/DelphiWebMVC</a></h4>
+		   </div>
+		   
+		   
+		   </div>           
+        </div>
+          
+    </body>
+    <script>
+        function menuclick(s)
+        {
+            $("#_content_").load('/'+s+'/');
+        }
+    </script> 
+</html>

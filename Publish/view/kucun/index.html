@@ -1,0 +1,41 @@
+<div>
+    <table style="width:100%">
+        <tr>
+            <td width=90>
+                
+                <select name="mtype" id="mtype" class="form-control" required="required">
+                    <option value="GET">GET</option>
+                </select>
+                
+            </td>
+            <td>
+                
+                <input type="text" name="url" id="url" class="form-control"  required="required" pattern="" title="">
+                
+            </td>
+            <td>
+                
+                <button type="button" id="btnok" class="btn btn-default">请求</button>
+                
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                
+                <textarea style="margin-top: 2px;" name="msg" id="msg" class="form-control" rows="30" required="required"></textarea>
+                
+            </td>
+        </tr>
+    </table>
+</div>
+<script>
+$("#btnok").click(function(){
+    $.post("/kucun/getdata", {m:$("#mtype").val(),url:$("#url").val()},
+        function (ret) {
+            $("#msg").val(ret);
+          
+        },
+        "text"
+    );
+});
+</script>
