@@ -1,23 +1,25 @@
 # DelphiWebMVC使用说明:
-
+	版本:1.0
+	运行时使用管理员权限。
 	项目用到mORMot代码库,可到这里下载。
-	项目用到TScriptControl 组件请自行安装。
-	链接：https://pan.baidu.com/s/19j1QesY7kwluiK6tSd7jXQ 提取码：p24h 
-	测试项目：http://47.98.102.37:8001/
+	下载地址：https://pan.baidu.com/s/19j1QesY7kwluiK6tSd7jXQ 提取码：p24h 	
+	项目用到TScriptControl 组件请自行安装,不清楚的可百度搜索
+	测试项目：http://mvc.delphiwebmvc.com:8000/
 	讨论QQ群: 685072623
 
 	开发工具:delphi xe10.2 
 	数据库支持MySQL,SQLite,MSSQL,Oracle,其它数据库可自行进行添加。
 	
-	Action : 控制器类存放目录
-	Common : 框架相关代码
-	Config : 项目配置相关代码
-	Module : 数据库引擎及webbroker服务代码
-	Syn : https.sys相关类库
-	bin : 视图页面js,css,html,数据库配置相关资源
-
-	数据库连接与服务端口修改：
-	配置bin/config.ini 文件
+	Controller  : 控制器类存放目录
+	Common 		: 框架相关代码
+	Config 		: 项目配置相关代码
+	Module 		: 数据库引擎及webbroker服务代码
+	Syn 		: https.sys相关类库
+	Publish 	: 视图页面js,css,html,数据库配置相关资源
+	Project 	: 工程文件
+	
+	数据库与服务配置：
+	Publish/config.ini文件
 	例：
 	[Server]
 	Root=
@@ -48,7 +50,7 @@
 	POOL_ExpireTimeout=90000
 	POOL_MaximumItems=50
 
-	使用数据库设置：
+	数据库设置：
 	unit uConfig;
 
 	interface
@@ -71,7 +73,7 @@
 
 
 	路由配置：
-	在Config/uRouleMap.pas 配置相关路由
+	Config/uRouleMap.pas配置相关路由
 	例:
 	unit uRouleMap;
 
@@ -89,33 +91,36 @@
 	implementation
 
 	uses
-	  LoginAction, UsersAction, MainAction, IndexAction, KuCunAction;
+	  MainController, CaiWuController, FirstController, IndexController, KuCunController, LoginController, UsersController, XiaoShouController;
 
 	constructor TRouleMap.Create;
 	begin
-	  inherited; //必须继承
-	 //参数说明: 路径;控制器;视图目录
-	  SetRoule('/', TLoginAction, 'login');
-	  SetRoule('/Main', TMainAction, 'main');
-	  SetRoule('/Users', TUsersAction, 'users');
-	  SetRoule('/kucun', TKuCunAction, 'kucun');
+	  inherited;
+	  //路径,控制器,视图目录
+	  SetRoule('/', TLoginController, 'login');
+	  SetRoule('/Main', TMainController, 'main');
+	  SetRoule('/Users', TUsersController, 'users');
+	  SetRoule('/kucun', TKuCunController, 'kucun');
+	  SetRoule('/caiwu', TCaiWuController, 'caiwu');
+	  SetRoule('/xiaoshou', TXiaoShouController, 'xiaoshou');
 	end;
 
 	end.
 
+
 	控制器开发：
-	存放在Action文件夹
+	存放在Controller文件夹
 	例:
-	unit LoginAction;
+	unit LoginController;
 
 	interface
 
 	uses
 	  System.SysUtils, System.Classes, FireDAC.Stan.Intf, Data.DB, superobject,
-	  BaseAction;
+	  BaseController;
 
 	type
-	  TLoginAction = class(TBaseAction)
+	  TLoginController = class(TBaseController)
 	  public
 		procedure index();
 		procedure check();
@@ -127,10 +132,10 @@
 	uses
 	  uTableMap;
 
-	procedure TLoginAction.check();
+	procedure TLoginController.check();
 	var
 	  json: string;
-	  sdata, ret: ISuperObject;
+	  sdata, ret, wh: ISuperObject;
 	  username, pwd: string;
 	  sql: string;
 	begin
@@ -141,38 +146,43 @@
 		  username := Input('username');
 		  pwd := Input('pwd');
 		  Sessionset('username', username);
-		  json:=Sessionget('username');
-		  sql := ' and username=' + Q(username) + ' and pwd=' + Q(pwd);
-		  sdata := Db.FindFirst(tb_users, sql);
+		  json := Sessionget('username');
+		  wh := SO();
+		  wh.S['username'] := username;
+		  wh.S['pwd'] := pwd;
+		  sdata := Db.FindFirst(tb_users, wh);
 		  if (sdata <> nil) then
 		  begin
-			json:=sdata.AsString;
+			json := sdata.AsString;
 			Sessionset('username', username);
 			Sessionset('name', sdata.S['name']);
 			ret.I['code'] := 0;
 			ret.S['message'] := '登录成功';
-		  end else begin
+		  end
+		  else
+		  begin
 			ret.I['code'] := -1;
 			ret.S['message'] := '登录失败';
 		  end;
 		  ShowJson(ret);
-		except on e:Exception do
-		  ShowText(e.ToString);
+		except
+		  on e: Exception do
+			ShowText(e.ToString);
 		end;
 
 	  end;
 	end;
 
-	procedure TLoginAction.checknum;
+	procedure TLoginController.checknum;
 	var
-	  num:string;
+	  num: string;
 	begin
 	  Randomize;
-	  num:= inttostr(Random(9))+inttostr(Random(9))+inttostr(Random(9))+inttostr(Random(9));
-	  View.ShowCheckIMG(num,60,30);
+	  num := inttostr(Random(9)) + inttostr(Random(9)) + inttostr(Random(9)) + inttostr(Random(9));
+	  View.ShowCheckIMG(num, 60, 30);
 	end;
 
-	procedure TLoginAction.index();
+	procedure TLoginController.index();
 	begin
 	  with View do
 	  begin
@@ -182,11 +192,11 @@
 
 	end.
 
-	拦截器配置：
-	在 Config/BaseAction.pas 修改 TBaseAction.Interceptor 函数 
 
+	拦截器配置：
+	Config/BaseAction.pas 修改 TBaseAction.Interceptor 函数 
 	例：
-	function TBaseAction.Interceptor: boolean;  //拦截器
+	function TBaseController.Interceptor: boolean;  //拦截器
 	var
 	  url: string;
 	begin
@@ -199,7 +209,8 @@
 		  Result := true;
 		  exit;
 		end;
-		if (url <> '/') and (url <> '/index') 
+		if (url <> '/') 
+		and (url <> '/index') 
 		and (url <> '/check') 
 		and (url <> '/checknum') 
 		and (url <> '/favicon.ico') then
@@ -214,7 +225,7 @@
 	  end;
 	end;
 	
-	框架当前实现标记：
+	框架标记：
     setAttr('ls',list.AsString);
     setAttr('key1','1');
     setAttr('key2','2');
@@ -223,7 +234,6 @@
     setAttr('user',jo.ToString);
 	
 	<#include file=/public.html>
-
 	#{username}
 	#{user.name}
 	<#if key1 eq 1 and key2 eq 2 or key3 eq 3 >

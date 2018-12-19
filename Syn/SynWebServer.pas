@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  SynZip, SynWebReqRes, uConfig;
+  SynZip, SynWebReqRes, uConfig, command, superobject;
 
 var
   RequestHandler: TWebRequestHandler = nil;
@@ -51,26 +51,30 @@ end;
 { TSynWebServer }
 
 constructor TSynWebServer.Create(AOwner: TComponent; Root: string; Port: string);
+var
+  jo: ISuperObject;
 begin
   inherited Create;
   FActive := False;
   FOwner := AOwner;
-  if (FOwner <> nil) and (FOwner.InheritsFrom(TWebRequestHandler)) then
-    FReqHandler := TWebRequestHandler(FOwner)
-  else
-    FReqHandler := GetRequestHandler;
-  FIniFile := TIniFile.Create(WebApplicationDirectory + config);
-  FRoot := FIniFile.ReadString('Server', 'Root', '');
-  FPort := FIniFile.ReadString('Server', 'Port', '8001');
- // FIniFile.Free;
-  FHttpServer := THttpApiServer.Create(False);
-  FHttpServer.AddUrl(StringTOUTF8(FRoot), StringTOUTF8(FPort), False, '+', true);
-  FHttpServer.RegisterCompress(CompressDeflate);
+  jo := OpenConfigFile();
+  if jo <> nil then
+  begin
+    if (FOwner <> nil) and (FOwner.InheritsFrom(TWebRequestHandler)) then
+      FReqHandler := TWebRequestHandler(FOwner)
+    else
+      FReqHandler := GetRequestHandler;
+    FPort := jo.O['Server'].S['Port'];
+    FRoot := Root;
+    FHttpServer := THttpApiServer.Create(False);
+    FHttpServer.AddUrl(StringTOUTF8(FRoot), StringTOUTF8(FPort), False, '+', true);
+    FHttpServer.RegisterCompress(CompressDeflate);
   // our server will deflate html :)
-  FHttpServer.OnRequest := Process;
-  FHttpServer.HTTPQueueLength := 5000;
-  FHttpServer.Clone(7); // will use a thread pool of 32 threads in total
-  FActive := true;
+    FHttpServer.OnRequest := Process;
+    FHttpServer.HTTPQueueLength := 10000;
+    FHttpServer.Clone(10); // will use a thread pool of 32 threads in total
+    FActive := true;
+  end;
 end;
 
 destructor TSynWebServer.Destroy;

@@ -19,7 +19,7 @@ uses
   uConfig in '..\Config\uConfig.pas',
   uRouleMap in '..\Config\uRouleMap.pas',
   uTableMap in '..\Config\uTableMap.pas',
-  command in '..\Common\Command.pas',
+  Command in '..\Common\Command.pas',
   SynHTTPWebBrokerBridge in '..\Syn\SynHTTPWebBrokerBridge.pas',
   SynWebApp in '..\Syn\SynWebApp.pas',
   SynWebEnv in '..\Syn\SynWebEnv.pas',
@@ -40,7 +40,8 @@ uses
   MainController in '..\Controller\MainController.pas',
   UsersController in '..\Controller\UsersController.pas',
   XiaoShouController in '..\Controller\XiaoShouController.pas',
-  SessionList in '..\Common\SessionList.pas';
+  SessionList in '..\Common\SessionList.pas',
+  DES in '..\Common\DES.pas';
 
 {$R *.res}
 

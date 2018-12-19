@@ -33,19 +33,23 @@ var
   AFile: TFileStream;
   ret: ISuperObject;
   k: integer;
+  path: string;
 begin
   with view do
   begin
     k := Request.Files.Count - 1;
-    FFileName := AppPath + 'upfile\' + Request.Files[k].FileName;
+    path := AppPath + 'upfile';
+    if not DirectoryExists(path) then
+    begin
+      CreateDir(path);
+    end;
+    FFileName := path + '\' + Request.Files[k].FileName;
     AFile := TFileStream.Create(FFileName, fmCreate);
     try
       Request.Files[k].Stream.Position := 0;
       AFile.CopyFrom(Request.Files[k].Stream, Request.Files[k].Stream.Size);  //测试保存文件，通过。
-
     finally
       AFile.Free;
-
     end;
     ret := SO();
     ret.I['code'] := 0;
