@@ -2,12 +2,10 @@
 	版本:1.0
 	运行时使用管理员权限。
 	项目用到mORMot代码库,可到这里下载。
-	下载地址：https://pan.baidu.com/s/19j1QesY7kwluiK6tSd7jXQ 提取码：p24h 	
 	项目用到TScriptControl 组件请自行安装,不清楚的可百度搜索
-	测试项目：http://mvc.delphiwebmvc.com:8000/
-	讨论QQ群: 685072623
 
 	开发工具:delphi xe10.2 
+	注意:win10系统以管理员权限运行
 	数据库支持MySQL,SQLite,MSSQL,Oracle,其它数据库可自行进行添加。
 	
 	Controller  : 控制器类存放目录
@@ -18,58 +16,94 @@
 	Publish 	: 视图页面js,css,html,数据库配置相关资源
 	Project 	: 工程文件
 	
-	数据库与服务配置：
-	Publish/config.ini文件
+	数据库与服务配置(可加密配置)：
+	Publish/config.json文件
 	例：
-	[Server]
-	Root=
-	Port=8001
+	{
+		"Server": {
+			"Port": "8001"
+		},
+		"MYSQL": {
+			"DriverID": "MySQL",
+			"Server": "127.0.0.1",
+			"Port": "3307",
+			"Database": "test",
+			"User_Name": "root",
+			"Password": "root",
+			"CharacterSet": "utf8",
+			"Compress": "False",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		},
+		"SQLite": {
+			"DriverID": "SQLite",
+			"Database": "sqlite.db",
+			"User_Name": "",
+			"Password": "",
+			"OpenMode": "CreateUTF8",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		},
+		"MSSQL": {
+			"DriverID": "MSSQL",
+			"Server": "127.0.0.1",
+			"Port": "1433",
+			"Database": "Northwind",
+			"User_Name": "sa",
+			"Password": "",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		},
+		"ORACLE": {
+			"DriverID": "Ora",
+			"CharacterSet": "UTF8",
+			"Database": "192.168.178.102:1521/orcl",
+			"User_Name": "",
+			"Password": "",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		}
+	}
 
-	[MYSQL]  
-	Server=127.0.0.1
-	Port=3307
-	DriverID=MySQL
-	Database=test
-	User_Name=root
-	Password=root
-	CharacterSet=utf8
-	Compress=False
-	Pooled=True
-	POOL_CleanupTimeout=30000
-	POOL_ExpireTimeout=90000
-	POOL_MaximumItems=50
-
-	[SQLite]
-	DriverID=SQLite
-	Database=sqlite.db
-	User_Name=
-	Password=
-	OpenMode=CreateUTF8
-	Pooled=true;
-	POOL_CleanupTimeout=30000
-	POOL_ExpireTimeout=90000
-	POOL_MaximumItems=50
-
-	数据库设置：
+	框架各项参数设置：
 	unit uConfig;
 
 	interface
-	uses DBMySql,DBSQLite,DBMSSQL,DBMSSQL12,DBOracle;
-	type TDB = TDBMySql;          // TDBMySql,TDBSQLite,TDBMSSQL,TDBMSSQL12(2012版本以上),TDBOracle
+
+	uses
+	  DBMySql, DBSQLite, DBMSSQL, DBMSSQL12, DBOracle;
+
+	type
+	  TDB = TDBSQLite;                // TDBMySql,TDBSQLite,TDBMSSQL,TDBMSSQL12(2012版本以上),TDBOracle
+
 	const
-	  db_type='MYSQL';            // MYSQL,SQLite,MSSQL,ORACLE
-	  db_start = true;            // 启用数据库
-	  template = 'view';          // 模板根目录
-	  template_type = '.html';    // 模板文件类型
-	  session_start = true;       // 启用session
-	  session_timer = 0;          // session过期时间分钟  0 不过期
-	  config = 'config.ini';      // 数据库配置文件地址
-	  open_log=true;              // 打开日志
-	  default_charset='utf-8';    // 字符集
+	  db_type = 'SQLite';             // MYSQL,SQLite,MSSQL,ORACLE
+	  db_start = true;                // 启用数据库
+	  template = 'view';              // 模板根目录
+	  template_type = '.html';        // 模板文件类型
+	  session_start = true;           // 启用session
+	  session_timer = 0;              // session过期时间分钟  0 不过期
+	  config = 'config.json';         // 配置文件地址
+	  open_log = true;                // 开启日志
+	  open_cache = true;              // 开启缓存模式open_debug=false时有效
+	  open_interceptor = true;        // 开启拦截器
+	  default_charset = 'utf-8';      // 字符集
+	  password_key = '';              // 配置文件秘钥设置,为空时不启用秘钥,结合加密工具使用.
+
+	  open_debug = False;              // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
 
 	implementation
 
 	end.
+
 
 
 	路由配置：
@@ -194,26 +228,51 @@
 
 
 	拦截器配置：
-	Config/BaseAction.pas 修改 TBaseAction.Interceptor 函数 
+	Config/uInterceptor.pas
 	例：
-	function TBaseController.Interceptor: boolean;  //拦截器
+	unit uInterceptor;
+
+	interface
+
+	uses
+	  System.SysUtils, View, System.Classes;
+
+	type
+	  TInterceptor = class
+		urls: TStringList;
+		function execute(View: TView; error: Boolean): Boolean;
+		constructor Create;
+		destructor Destroy; override;
+	  end;
+
+	implementation
+
+	{ TInterceptor }
+
+	constructor TInterceptor.Create;
+	begin
+	  urls := TStringList.Create;
+	  //拦截器默认关闭状态uConfig文件修改
+	  //不需要拦截的地址添加到下面
+	  urls.Add('/');
+	  urls.Add('/check');
+	  urls.Add('/checknum');
+	end;
+
+	function TInterceptor.execute(View: TView; error: Boolean): Boolean;
 	var
 	  url: string;
 	begin
 	  Result := false;
 	  with View do
 	  begin
-		url := LowerCase(Request.PathInfo);
-		if (Error) then
+		if (error) then
 		begin
 		  Result := true;
 		  exit;
 		end;
-		if (url <> '/') 
-		and (url <> '/index') 
-		and (url <> '/check') 
-		and (url <> '/checknum') 
-		and (url <> '/favicon.ico') then
+		url := LowerCase(Request.PathInfo);
+		if urls.IndexOf(url) < 0 then
 		begin
 		  if (SessionGet('username') = '') then
 		  begin
@@ -224,6 +283,16 @@
 		end;
 	  end;
 	end;
+
+	destructor TInterceptor.Destroy;
+	begin
+	  urls.Free;
+	  inherited;
+	end;
+
+	end.
+
+
 	
 	框架标记：
     setAttr('ls',list.AsString);
