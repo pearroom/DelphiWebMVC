@@ -112,30 +112,9 @@
             <Form>DM</Form>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\Common\BaseController.pas"/>
-        <DCCReference Include="..\Common\DBMySql.pas"/>
-        <DCCReference Include="..\Common\Page.pas"/>
-        <DCCReference Include="..\Common\Roule.pas"/>
-        <DCCReference Include="..\Common\RouleItem.pas"/>
-        <DCCReference Include="..\Common\superobject.pas"/>
-        <DCCReference Include="..\Common\ThSessionClear.pas"/>
-        <DCCReference Include="..\Common\View.pas"/>
         <DCCReference Include="..\Config\uConfig.pas"/>
         <DCCReference Include="..\Config\uRouleMap.pas"/>
         <DCCReference Include="..\Config\uTableMap.pas"/>
-        <DCCReference Include="..\Common\Command.pas"/>
-        <DCCReference Include="..\Syn\SynHTTPWebBrokerBridge.pas"/>
-        <DCCReference Include="..\Syn\SynWebApp.pas"/>
-        <DCCReference Include="..\Syn\SynWebEnv.pas"/>
-        <DCCReference Include="..\Syn\SynWebReqRes.pas"/>
-        <DCCReference Include="..\Syn\SynWebServer.pas"/>
-        <DCCReference Include="..\Syn\SynWebUtils.pas"/>
-        <DCCReference Include="..\Common\DBSQLite.pas"/>
-        <DCCReference Include="..\Common\DBBase.pas"/>
-        <DCCReference Include="..\Common\DBMSSQL.pas"/>
-        <DCCReference Include="..\Common\DBMSSQL12.pas"/>
-        <DCCReference Include="..\Common\DBOracle.pas"/>
-        <DCCReference Include="..\Common\HTMLParser.pas"/>
         <DCCReference Include="..\Controller\CaiWuController.pas"/>
         <DCCReference Include="..\Controller\FirstController.pas"/>
         <DCCReference Include="..\Controller\IndexController.pas"/>
@@ -144,9 +123,32 @@
         <DCCReference Include="..\Controller\MainController.pas"/>
         <DCCReference Include="..\Controller\UsersController.pas"/>
         <DCCReference Include="..\Controller\XiaoShouController.pas"/>
-        <DCCReference Include="..\Common\SessionList.pas"/>
-        <DCCReference Include="..\Common\DES.pas"/>
         <DCCReference Include="..\Config\uInterceptor.pas"/>
+        <DCCReference Include="..\Service\Interface\UsersInterface.pas"/>
+        <DCCReference Include="..\Service\UsersService.pas"/>
+        <DCCReference Include="..\Module\Common\BaseController.pas"/>
+        <DCCReference Include="..\Module\Common\command.pas"/>
+        <DCCReference Include="..\Module\Common\DBBase.pas"/>
+        <DCCReference Include="..\Module\Common\DBMSSQL.pas"/>
+        <DCCReference Include="..\Module\Common\DBMSSQL12.pas"/>
+        <DCCReference Include="..\Module\Common\DBMySql.pas"/>
+        <DCCReference Include="..\Module\Common\DBOracle.pas"/>
+        <DCCReference Include="..\Module\Common\DBSQLite.pas"/>
+        <DCCReference Include="..\Module\Common\DES.pas"/>
+        <DCCReference Include="..\Module\Common\HTMLParser.pas"/>
+        <DCCReference Include="..\Module\Common\Page.pas"/>
+        <DCCReference Include="..\Module\Common\Roule.pas"/>
+        <DCCReference Include="..\Module\Common\RouleItem.pas"/>
+        <DCCReference Include="..\Module\Common\SessionList.pas"/>
+        <DCCReference Include="..\Module\Common\superobject.pas"/>
+        <DCCReference Include="..\Module\Common\ThSessionClear.pas"/>
+        <DCCReference Include="..\Module\Common\View.pas"/>
+        <DCCReference Include="..\Module\Syn\SynHTTPWebBrokerBridge.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebApp.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebEnv.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebReqRes.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebServer.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebUtils.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

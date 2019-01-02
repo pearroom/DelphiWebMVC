@@ -19,8 +19,8 @@ object DM: TDM
     FormatOptions.OwnMapRules = True
     FormatOptions.MapRules = <>
     Active = True
-    Left = 228
-    Top = 96
+    Left = 220
+    Top = 88
   end
   object FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink
     Left = 72

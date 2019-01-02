@@ -90,10 +90,6 @@ object Main: TMain
     object ts2: TTabSheet
       Caption = #21152#23494#24037#20855
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 329
-      ExplicitHeight = 256
       object grp1: TGroupBox
         Left = 0
         Top = 0
@@ -102,7 +98,6 @@ object Main: TMain
         Align = alTop
         Caption = #31192#38053
         TabOrder = 0
-        ExplicitWidth = 329
         object edtkey: TEdit
           AlignWithMargins = True
           Left = 5
@@ -111,7 +106,7 @@ object Main: TMain
           Height = 26
           Align = alClient
           TabOrder = 0
-          ExplicitWidth = 324
+          ExplicitHeight = 21
         end
         object btnkey: TBitBtn
           Left = 261
@@ -122,9 +117,6 @@ object Main: TMain
           Caption = #21152#23494
           TabOrder = 1
           OnClick = btnkeyClick
-          ExplicitLeft = 344
-          ExplicitTop = 80
-          ExplicitHeight = 25
         end
         object btn1: TBitBtn
           Left = 336
@@ -135,8 +127,6 @@ object Main: TMain
           Caption = #35299#23494
           TabOrder = 2
           OnClick = btn1Click
-          ExplicitLeft = 357
-          ExplicitTop = 23
         end
       end
       object grp2: TGroupBox
@@ -147,10 +137,6 @@ object Main: TMain
         Align = alClient
         Caption = #21152#23494#32467#26524
         TabOrder = 1
-        ExplicitLeft = 112
-        ExplicitTop = 120
-        ExplicitWidth = 185
-        ExplicitHeight = 105
         object mmokeyvalue: TMemo
           AlignWithMargins = True
           Left = 5
@@ -160,7 +146,6 @@ object Main: TMain
           Align = alClient
           ScrollBars = ssVertical
           TabOrder = 0
-          ExplicitHeight = 113
         end
       end
       object grp3: TGroupBox
@@ -180,8 +165,6 @@ object Main: TMain
           Align = alClient
           ScrollBars = ssVertical
           TabOrder = 0
-          ExplicitLeft = 10
-          ExplicitTop = 23
         end
       end
     end

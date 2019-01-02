@@ -17,7 +17,10 @@ type
 implementation
 
 uses
-  uTableMap;
+  uTableMap, UsersService, UsersInterface;
+
+var
+  users_service: IUsersInterface;
 
 procedure TLoginController.check();
 var
@@ -27,24 +30,24 @@ var
   sql: string;
 begin
   ret := SO();
+
   with View do
   begin
+    users_service := TUsersService.Create(Db);
     try
       username := Input('username');
       pwd := Input('pwd');
       Sessionset('username', username);
-
       wh := SO();
       wh.S['username'] := username;
       wh.S['pwd'] := pwd;
-      sdata := Db.FindFirst(tb_users, wh);
+      sdata := users_service.checkuser(wh);
       if (sdata <> nil) then
       begin
         json := sdata.AsString;
-
         Sessionset('username', username);
         Sessionset('name', sdata.S['name']);
-        SessionSet('user',sdata.AsString);
+        SessionSet('user', sdata.AsString);
         json := Sessionget('user');
         ret.I['code'] := 0;
         ret.S['message'] := 'µÇÂ¼³É¹¦';
@@ -73,6 +76,8 @@ begin
 end;
 
 procedure TLoginController.index();
+var
+  ret: boolean;
 begin
   with View do
   begin

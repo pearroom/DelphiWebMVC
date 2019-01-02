@@ -54,7 +54,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Winapi.Windows, Winapi.ShellApi, command, wnDM, SessionList, DES, uInterceptor;
+  Winapi.Windows, Winapi.ShellApi, command, wnDM, SessionList, DES, WebModule,
+  uInterceptor;
 
 procedure TMain.WMSysCommand(var Msg: TWMSysCommand);
 begin
@@ -68,12 +69,12 @@ end;
 
 procedure TMain.btn1Click(Sender: TObject);
 begin
-  if (Trim(edtkey.Text) = '') or (Trim(mmokeyvalue.Text)='') then
+  if (Trim(edtkey.Text) = '') or (Trim(mmokeyvalue.Text) = '') then
   begin
     ShowMessage('秘钥与加密结果必填！');
     exit;
   end;
-  ShowMessage(DeCryptStr(mmokeyvalue.Text,edtkey.Text));
+  ShowMessage(DeCryptStr(mmokeyvalue.Text, edtkey.Text));
 end;
 
 procedure TMain.btnCloseClick(Sender: TObject);
@@ -83,7 +84,7 @@ end;
 
 procedure TMain.btnkeyClick(Sender: TObject);
 begin
-  if (Trim(edtkey.Text) = '') or (Trim(mmokey.Text)='') then
+  if (Trim(edtkey.Text) = '') or (Trim(mmokey.Text) = '') then
   begin
     ShowMessage('秘钥与加密内容必填！');
     exit;
@@ -109,14 +110,14 @@ begin
   jo := OpenConfigFile();
   if jo <> nil then
   begin
+    SessionName := '__guid_session';
     FPort := jo.O['Server'].S['Port'];
     edtport.Text := FPort;
     FServer := TSynHTTPWebBrokerBridge.Create(Self);
-    SessionName := '__guid_session';
     RouleMap := TRouleMap.Create;
     SessionListMap := TSessionList.Create;
-    _Interceptor:=TInterceptor.Create;
     TThSessionClear.Create(false);
+    _Interceptor := TInterceptor.Create;
     setDataBase(jo);
   end;
 
@@ -126,10 +127,10 @@ procedure TMain.CloseServer;
 begin
   if SessionListMap <> nil then
   begin
-    FreeAndNil(_Interceptor);
     FreeAndNil(SessionListMap);
     FreeAndNil(RouleMap);
     FreeAndNil(DM);
+    FreeAndNil(_Interceptor);
     FServer.Free;
   end;
 end;

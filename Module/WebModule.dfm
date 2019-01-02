@@ -1,5 +1,6 @@
 object WM: TWM
   OldCreateOrder = False
+  OnCreate = WebModuleCreate
   Actions = <>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 230
@@ -47,7 +48,7 @@ object WM: TWM
         Extensions = 'woff '
       end
       item
-        MimeType = 'application/font-woff'
+        MimeType = 'application/font-woff2'
         Extensions = 'woff2 '
       end
       item
@@ -63,6 +64,12 @@ object WM: TWM
         Extensions = 'txt'
       end
       item
+        MimeType = 'image/svg+xml'
+        Extensions = 'svg;svgz'
+      end
+      item
+        MimeType = 'application/vnd.android.package-archive'
+        Extensions = 'apk'
       end>
     WebDirectories = <
       item
@@ -75,7 +82,7 @@ object WM: TWM
       end>
     RootDirectory = '.'
     VirtualPath = '/'
-    Left = 184
-    Top = 60
+    Left = 112
+    Top = 76
   end
 end
