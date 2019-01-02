@@ -14,8 +14,8 @@ type
 implementation
 
 uses
-  MainController, CaiWuController, FirstController, IndexController, KuCunController, LoginController, UsersController, XiaoShouController;
-
+  MainController, CaiWuController, FirstController, IndexController,
+  KuCunController, LoginController, UsersController, XiaoShouController;
 
 constructor TRouleMap.Create;
 begin
@@ -27,7 +27,6 @@ begin
   SetRoule('/kucun', TKuCunController, 'kucun');
   SetRoule('/caiwu', TCaiWuController, 'caiwu');
   SetRoule('/xiaoshou', TXiaoShouController, 'xiaoshou');
-
 
 end;
 

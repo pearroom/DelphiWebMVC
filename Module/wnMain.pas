@@ -54,7 +54,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Winapi.Windows, Winapi.ShellApi, command, wnDM, SessionList, DES;
+  Winapi.Windows, Winapi.ShellApi, command, wnDM, SessionList, DES, uInterceptor;
 
 procedure TMain.WMSysCommand(var Msg: TWMSysCommand);
 begin
@@ -115,6 +115,7 @@ begin
     SessionName := '__guid_session';
     RouleMap := TRouleMap.Create;
     SessionListMap := TSessionList.Create;
+    _Interceptor:=TInterceptor.Create;
     TThSessionClear.Create(false);
     setDataBase(jo);
   end;
@@ -125,6 +126,7 @@ procedure TMain.CloseServer;
 begin
   if SessionListMap <> nil then
   begin
+    FreeAndNil(_Interceptor);
     FreeAndNil(SessionListMap);
     FreeAndNil(RouleMap);
     FreeAndNil(DM);

@@ -8,7 +8,7 @@ uses
   wnMain in '..\Module\wnMain.pas' {Main},
   WebModule in '..\Module\WebModule.pas' {WM: TWebModule},
   wnDM in '..\Module\wnDM.pas' {DM: TDataModule},
-  BaseController in '..\Config\BaseController.pas',
+  BaseController in '..\Common\BaseController.pas',
   DBMySql in '..\Common\DBMySql.pas',
   Page in '..\Common\Page.pas',
   Roule in '..\Common\Roule.pas',
@@ -41,7 +41,8 @@ uses
   UsersController in '..\Controller\UsersController.pas',
   XiaoShouController in '..\Controller\XiaoShouController.pas',
   SessionList in '..\Common\SessionList.pas',
-  DES in '..\Common\DES.pas';
+  DES in '..\Common\DES.pas',
+  uInterceptor in '..\Config\uInterceptor.pas';
 
 {$R *.res}
 

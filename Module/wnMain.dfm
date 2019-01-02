@@ -25,7 +25,6 @@ object Main: TMain
     Height = 33
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 337
     object ButtonOpenBrowser: TButton
       Left = 76
       Top = 1
@@ -35,7 +34,6 @@ object Main: TMain
       Caption = 'Open Browser'
       TabOrder = 0
       OnClick = ButtonOpenBrowserClick
-      ExplicitWidth = 187
     end
     object btnClose: TButton
       Left = 347
@@ -46,7 +44,6 @@ object Main: TMain
       Caption = 'Close'
       TabOrder = 1
       OnClick = btnCloseClick
-      ExplicitLeft = 263
     end
     object edtport: TEdit
       AlignWithMargins = True
@@ -77,12 +74,8 @@ object Main: TMain
     MultiLine = True
     Style = tsFlatButtons
     TabOrder = 1
-    ExplicitWidth = 337
-    ExplicitHeight = 287
     object ts1: TTabSheet
       Caption = #26085#24535
-      ExplicitWidth = 329
-      ExplicitHeight = 256
       object mmolog: TMemo
         AlignWithMargins = True
         Left = 3
@@ -92,13 +85,13 @@ object Main: TMain
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitWidth = 323
-        ExplicitHeight = 250
       end
     end
     object ts2: TTabSheet
       Caption = #21152#23494#24037#20855
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 329
       ExplicitHeight = 256
       object grp1: TGroupBox

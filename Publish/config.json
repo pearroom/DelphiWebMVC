@@ -1,0 +1,53 @@
+{
+	"Server": {
+		"Port": "8001"
+	},
+	"MYSQL": {
+		"DriverID": "MySQL",
+		"Server": "127.0.0.1",
+		"Port": "3307",
+		"Database": "test",
+		"User_Name": "root",
+		"Password": "root",
+		"CharacterSet": "utf8",
+		"Compress": "False",
+		"Pooled": "True",
+		"POOL_CleanupTimeout": "30000",
+		"POOL_ExpireTimeout": "90000",
+		"POOL_MaximumItems": "50"
+	},
+	"SQLite": {
+		"DriverID": "SQLite",
+		"Database": "sqlite.db",
+		"User_Name": "",
+		"Password": "",
+		"OpenMode": "CreateUTF8",
+		"Pooled": "True",
+		"POOL_CleanupTimeout": "30000",
+		"POOL_ExpireTimeout": "90000",
+		"POOL_MaximumItems": "50"
+	},
+	"MSSQL": {
+		"DriverID": "MSSQL",
+		"Server": "127.0.0.1",
+		"Port": "1433",
+		"Database": "Northwind",
+		"User_Name": "sa",
+		"Password": "",
+		"Pooled": "True",
+		"POOL_CleanupTimeout": "30000",
+		"POOL_ExpireTimeout": "90000",
+		"POOL_MaximumItems": "50"
+	},
+	"ORACLE": {
+		"DriverID": "Ora",
+		"CharacterSet": "UTF8",
+		"Database": "192.168.178.102:1521/orcl",
+		"User_Name": "",
+		"Password": "",
+		"Pooled": "True",
+		"POOL_CleanupTimeout": "30000",
+		"POOL_ExpireTimeout": "90000",
+		"POOL_MaximumItems": "50"
+	}
+}

@@ -1,0 +1,32 @@
+﻿<html>
+  <head>
+    <title></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="/assest/vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/assest/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/assest/confirm/jquery-confirm.min.js"></script>    
+    <script type="text/javascript" src="/assest/validation/js/formValidation.min.js"></script>
+    <script type="text/javascript" src="/assest/validation/js/language/zh_CN.js"></script>
+    <script type="text/javascript" src="/assest/validation/js/framework/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="/assest/icheck/icheck.min.js"></script>
+    <script type="text/javascript" src="/assest/fun.js"></script>
+    <link rel="stylesheet" href="/assest/icheck/skins/all.css" />
+    <link rel="stylesheet" href="/assest/vendor/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/assest/confirm/jquery-confirm.min.css" />    
+    <link rel="stylesheet" href="/assest/validation/css/formValidation.min.css" />
+   
+    <link rel="stylesheet" href="/assest/css/default.css" />    
+  </head>
+
+  <body>
+<table class="table table-bordered">
+    <#for list='sdata' htmlfile='table.html' />
+    
+    <input type="checkbox" <#if when='sex=男' then='checked=checked' else='' />  />
+</table>
+  </body>
+</html>
+
