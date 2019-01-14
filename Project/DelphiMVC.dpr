@@ -40,12 +40,13 @@ uses
   superobject in '..\Module\Common\superobject.pas',
   ThSessionClear in '..\Module\Common\ThSessionClear.pas',
   View in '..\Module\Common\View.pas',
-  SynHTTPWebBrokerBridge in '..\Module\Syn\SynHTTPWebBrokerBridge.pas',
   SynWebApp in '..\Module\Syn\SynWebApp.pas',
   SynWebEnv in '..\Module\Syn\SynWebEnv.pas',
   SynWebReqRes in '..\Module\Syn\SynWebReqRes.pas',
   SynWebServer in '..\Module\Syn\SynWebServer.pas',
-  SynWebUtils in '..\Module\Syn\SynWebUtils.pas';
+  SynWebUtils in '..\Module\Syn\SynWebUtils.pas',
+  LogUnit in '..\Module\Common\LogUnit.pas',
+  PackageManager in '..\Module\Common\PackageManager.pas';
 
 {$R *.res}
 var
@@ -53,10 +54,9 @@ var
 
 begin
   Application.Initialize;
-  Application.Title := 'DelphiMVC';
-
+  Application.Title := 'DelphiWebMVC';
+  hMutex := CreateMutex(nil, false, PChar(Application.Title));
   try
-    hMutex := CreateMutex(nil, false, PChar(Application.Title));
     if GetLastError = Error_Already_Exists then
     begin
       Application.MessageBox(PChar(Application.Title + '已经启动'), '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
@@ -65,7 +65,6 @@ begin
   finally
     ReleaseMutex(hMutex);
   end;
-
   if WebRequestHandler <> nil then
     WebRequestHandler.WebModuleClass := WebModuleClass;
   Application.CreateForm(TMain, Main);

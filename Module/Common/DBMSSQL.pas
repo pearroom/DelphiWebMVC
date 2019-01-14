@@ -7,13 +7,9 @@ uses
 
 type
   TDBMSSQL = class(TDBBase)
-  private
-    FPageKey: string;
-    procedure SetPageKey(const Value: string);
   public
     function FindFirst(tablename: string; where: string = ''): ISuperObject; overload; override;
     function QueryPage(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): ISuperObject; override;
-    property PageKey: string read FPageKey write SetPageKey;
   end;
 
 implementation
@@ -43,7 +39,7 @@ begin
     Exit;
   if PageKey = '' then
   begin
-    DBlog('PageKeyŒ¥…Ë÷√');
+    DBlog('PageKey Ù–‘Œ¥…Ë÷√');
     exit;
   end;
   if Trim(order) <> '' then
@@ -70,11 +66,6 @@ begin
     FreeAndNil(CDS);
   end;
 
-end;
-
-procedure TDBMSSQL.SetPageKey(const Value: string);
-begin
-  FPageKey := Value;
 end;
 
 end.

@@ -5,15 +5,18 @@ interface
 uses
   System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes, Web.HTTPApp,
   uConfig, System.DateUtils, SessionList, MSScriptControl_TLB, superobject,
-  uInterceptor, uRouleMap;
+  uInterceptor, uRouleMap, PackageManager;
 
 var
   RouleMap: TRouleMap = nil;
   SessionListMap: TSessionList = nil;
   SessionName: string;
-  _Interceptor: TInterceptor;
   rooturl: string;
   RTTIContext: TRttiContext;
+  _Interceptor: TInterceptor;
+  _PackageManager: TPackageManager = nil;
+
+function OpenPackageConfigFile(): ISuperObject;
 
 function OpenConfigFile(): ISuperObject;
 
@@ -23,12 +26,10 @@ procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
 
 function DateTimeToGMT(const ADate: TDateTime): string;
 
-procedure log(msg: string);
-
 implementation
 
 uses
-  wnMain, DES;
+  wnMain, DES, LogUnit;
 
 procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
 var
@@ -133,6 +134,39 @@ begin
 
 end;
 
+function OpenPackageConfigFile(): ISuperObject;
+var
+  f: TStringList;
+  jo: ISuperObject;
+  txt: string;
+  key: string;
+begin
+  key := password_key;
+  f := TStringList.Create;
+  try
+    try
+      f.LoadFromFile(WebApplicationDirectory + package_config);
+      txt := f.Text.Trim;
+      if Trim(key) = '' then
+      begin
+        txt := f.Text;
+      end
+      else
+      begin
+        txt := DeCryptStr(txt, key);
+      end;
+      jo := SO(txt);
+    except
+      log(package_config + '配置文件错误,服务启动失败');
+      jo := nil;
+    end;
+  finally
+    f.Free;
+  end;
+
+  Result := jo;
+end;
+
 function OpenConfigFile(): ISuperObject;
 var
   f: TStringList;
@@ -157,7 +191,7 @@ begin
       jo := SO(txt);
       jo.O['Server'].S['Port'];
     except
-      log('配置文件错误,服务启动失败');
+      log(config + '配置文件错误,服务启动失败');
       jo := nil;
     end;
   finally
@@ -180,7 +214,7 @@ begin
       txt := f.Text.Trim;
       jo := SO(txt);
     except
-      log('MIME配置文件错误,服务启动失败');
+      log(mime + '配置文件错误,服务启动失败');
       jo := nil;
     end;
   finally
@@ -188,48 +222,6 @@ begin
   end;
 
   Result := jo;
-end;
-
-procedure log(msg: string);
-var
-  log: string;
-  tf: TextFile;
-  logfile: string;
-  fi: THandle;
-begin
-  if open_log then
-  begin
-  //  CoInitialize(nil);
-    try
-      log := FormatDateTime('yyyy-MM-dd hh:mm:ss', Now) + #13#10 + msg;
-      if Main.mmolog.Lines.Count > 1000 then
-        main.mmolog.Clear;
-      Main.mmolog.Lines.Add(log);
-      logfile := WebApplicationDirectory + 'log\';
-      if not DirectoryExists(logfile) then
-      begin
-        CreateDir(logfile);
-      end;
-      logfile := logfile + 'log_' + FormatDateTime('yyyyMMdd', Now) + '.txt';
-
-      AssignFile(tf, logfile);
-      if FileExists(logfile) then
-      begin
-        Append(tf);
-      end
-      else
-      begin
-        fi := FileCreate(logfile);
-        FileClose(fi);
-        Rewrite(tf);
-      end;
-      Writeln(tf, log);
-      Flush(tf);
-      CloseFile(tf);
-    finally
-   //   CoUnInitialize;
-    end;
-  end;
 end;
 
 function DateTimeToGMT(const ADate: TDateTime): string;

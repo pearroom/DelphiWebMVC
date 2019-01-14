@@ -18,7 +18,7 @@ var
 implementation
 
 uses
-  command, superobject;
+  command, superobject, LogUnit;
 
 {$R *.dfm}
 
@@ -44,6 +44,7 @@ var
   ja: TSuperArray;
   I: Integer;
 begin
+
   WebFile.WebFileExtensions.Clear;
   json := OpenMIMEFile;
   if json <> nil then
@@ -53,8 +54,13 @@ begin
     begin
       with WebFile.WebFileExtensions.Add do
       begin
-        Extensions := ja[I]['Extensions'].AsString;
-        MimeType := ja[I]['MimeType'].AsString;
+        try
+          Extensions := ja[I]['Extensions'].AsString;
+          MimeType := ja[I]['MimeType'].AsString;
+        except
+          log('MIME配置文件错误,服务启动失败');
+          break;
+        end;
       end;
     end;
   end;

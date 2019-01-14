@@ -21,9 +21,15 @@ type
     Error: Boolean;
     function isPOST: Boolean;
     function isGET: Boolean;
-    function isNil(text: string): Boolean; //ÅÐ¶Ï¿ÕÖµ
-    function isNotNil(text: string): Boolean; //ÅÐ¶Ï¿ÕÖµ
-    function Interceptor: boolean; //À¹½ØÆ÷
+    function isPut:Boolean;
+    function isAny:Boolean;
+    function isDelete:Boolean;
+    function isHead:Boolean;
+    function isPatch:Boolean;
+
+    function isNil(text: string): Boolean;
+    function isNotNil(text: string): Boolean;
+    function Interceptor: boolean;
     procedure CreateView();
     function HttpGet(url: string; encode: TEncoding): string;
     constructor Create();
@@ -53,9 +59,24 @@ begin
 
 end;
 
+function TBaseController.isAny: Boolean;
+begin
+  Result := Request.MethodType = mtAny;
+end;
+
+function TBaseController.isDelete: Boolean;
+begin
+  Result := Request.MethodType = mtDelete;
+end;
+
 function TBaseController.isGET: Boolean;
 begin
   Result := Request.MethodType = mtGet;
+end;
+
+function TBaseController.isHead: Boolean;
+begin
+  Result := Request.MethodType = mtHead;
 end;
 
 function TBaseController.isNil(text: string): Boolean;
@@ -71,9 +92,19 @@ begin
   Result := not isNil(text);
 end;
 
+function TBaseController.isPatch: Boolean;
+begin
+  Result := Request.MethodType = mtPatch;
+end;
+
 function TBaseController.isPOST: Boolean;
 begin
   Result := Request.MethodType = mtPost;
+end;
+
+function TBaseController.isPut: Boolean;
+begin
+  Result := Request.MethodType = mtPut;
 end;
 
 procedure TBaseController.SetActionPath(const Value: string);

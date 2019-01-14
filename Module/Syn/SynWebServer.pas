@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  SynZip, SynWebReqRes, uConfig, command, superobject;
+  SynZip, SynWebReqRes, uConfig, command, superobject, LogUnit;
 
 var
   RequestHandler: TWebRequestHandler = nil;
@@ -60,20 +60,28 @@ begin
   jo := OpenConfigFile();
   if jo <> nil then
   begin
-    if (FOwner <> nil) and (FOwner.InheritsFrom(TWebRequestHandler)) then
-      FReqHandler := TWebRequestHandler(FOwner)
-    else
-      FReqHandler := GetRequestHandler;
-    FPort := jo.O['Server'].S['Port'];
-    FRoot := Root;
-    FHttpServer := THttpApiServer.Create(False);
-    FHttpServer.AddUrl(StringTOUTF8(FRoot), StringTOUTF8(FPort), False, '+', true);
-    FHttpServer.RegisterCompress(CompressDeflate);
-  // our server will deflate html :)
-    FHttpServer.OnRequest := Process;
-    FHttpServer.HTTPQueueLength := 10000;
-    FHttpServer.Clone(10); // will use a thread pool of 32 threads in total
-    FActive := true;
+    try
+      if (FOwner <> nil) and (FOwner.InheritsFrom(TWebRequestHandler)) then
+        FReqHandler := TWebRequestHandler(FOwner)
+      else
+        FReqHandler := GetRequestHandler;
+      FPort := jo.O['Server'].S['Port'];
+      FRoot := Root;
+      FHttpServer := THttpApiServer.Create(False);
+      FHttpServer.AddUrl(StringTOUTF8(FRoot), StringTOUTF8(FPort), False, '+', true);
+      FHttpServer.RegisterCompress(CompressDeflate);
+      FHttpServer.OnRequest := Process;
+      FHttpServer.HTTPQueueLength := 10000;
+      FHttpServer.Clone(10);
+      FActive := true;
+    except
+      on E: Exception do
+      begin
+
+        log(E.Message);
+
+      end;
+    end;
   end;
 end;
 

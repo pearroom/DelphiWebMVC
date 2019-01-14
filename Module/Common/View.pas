@@ -49,7 +49,7 @@ type
 implementation
 
 uses
-  SessionList, command;
+  SessionList, command, LogUnit;
 
 { TView }
 
@@ -144,7 +144,8 @@ end;
 
 procedure TView.ShowJSON(jo: ISuperObject);
 begin
-  Response.ContentType := 'application/Json; charset=' + default_charset;
+  Response.ContentType := 'text/json; charset=' + default_charset;
+ // Response.ContentType := 'text/json';
   Response.Content := jo.AsString;
   Response.SendResponse;
 end;
@@ -380,18 +381,13 @@ var
   S: string;
 begin
   S := '';
-  if (Trim(action) <> '') then
-  begin
-    S := action + '/';
-    if (Trim(path) <> '') then
-    begin
-      S := '/' + S + path;
-    end;
-    Response.Content := '<script>window.location.href=''' + S + ''';</script>';
-    Response.SendResponse;
-   // Response.SendRedirect(S);
-  end;
-
+  if action.Trim <> '' then
+    S := '/' + action;
+  if path.Trim <> '' then
+    S := S + '/' + path;
+  if S.Trim = '' then
+    S := '/';
+  Response.SendRedirect(S);
 end;
 
 procedure TView.SessionSet(key, value: string);

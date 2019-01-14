@@ -12,9 +12,11 @@ type
   TDBBase = class
   private
     FFields: string;
+    FPageKey: string;
     function getJSONWhere(JSONwhere: ISuperObject): string;
     procedure SetFields(const Value: string);
     function filterSQL(sql: string): string;
+    procedure SetPageKey(const Value: string);
 
     { Private declarations }
   public
@@ -22,6 +24,7 @@ type
     TMP_CDS: TFDQuery;
     dataset: TFDQuery;
     property Fields: string read FFields write SetFields; // 用来设置查询时显示那些字段
+    property PageKey: string read FPageKey write SetPageKey; //分页ID设置 mssql2000 使用
     { Public declarations }
     procedure DBlog(msg: string);
     procedure StartTransaction(); //启动事务
@@ -57,7 +60,7 @@ type
 implementation
 
 uses
-  uConfig, command;
+  uConfig,  LogUnit;
 
 function TDBBase.AddData(tablename: string): TFDQuery;
 begin
@@ -178,7 +181,7 @@ begin
       except
         on e: Exception do
         begin
-          log(e.ToString);
+          log('数据库连接失败:'+e.ToString);
           condb.Connected := False
         end;
       end;
@@ -429,6 +432,11 @@ end;
 procedure TDBBase.SetFields(const Value: string);
 begin
   FFields := Value;
+end;
+
+procedure TDBBase.SetPageKey(const Value: string);
+begin
+  FPageKey := Value;
 end;
 
 function TDBBase.Find(tablename, where: string): ISuperObject;

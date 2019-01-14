@@ -37,7 +37,6 @@ begin
     try
       username := Input('username');
       pwd := Input('pwd');
-      Sessionset('username', username);
       wh := SO();
       wh.S['username'] := username;
       wh.S['pwd'] := pwd;
@@ -78,11 +77,19 @@ end;
 procedure TLoginController.index();
 var
   ret: boolean;
+  jo:ISuperObject;
 begin
-  with View do
-  begin
-    ShowHTML('Login');
-  end;
+
+  if isGET then
+    with View do
+    begin
+      users_service := TUsersService.Create(Db);
+      jo:=SO();
+      jo.S['id']:='1212';
+      users_service.checkuser(jo);
+      SessionRemove('username');
+      ShowHTML('Login');
+    end;
 end;
 
 end.

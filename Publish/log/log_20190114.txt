@@ -1,0 +1,54 @@
+2019-01-14 11:03:33
+服务启动
+2019-01-14 11:03:35
+创建Session-0FEF3C0B6D8847499A095E7CD2B9C600
+2019-01-14 11:36:02
+服务启动
+2019-01-14 12:01:38
+服务启动
+2019-01-14 12:01:50
+服务启动
+2019-01-14 13:17:46
+服务启动
+2019-01-14 13:17:50
+创建Session-33E48910659447B4BDF0ABF34E26F872
+2019-01-14 13:20:10
+服务启动
+2019-01-14 13:20:12
+创建Session-9466B1570C464CFDA8F6255DF1885D50
+2019-01-14 13:20:12
+Access violation at address 005B226A in module 'DelphiMVC.exe'. Read of address 00000004
+2019-01-14 13:20:37
+Access violation at address 005B226A in module 'DelphiMVC.exe'. Read of address 00000004
+2019-01-14 13:57:02
+服务启动
+2019-01-14 13:57:06
+[FireDAC][Phys][MySQL] Lost connection to MySQL server at 'reading initial communication packet', system error: 0
+2019-01-14 13:58:10
+服务启动
+2019-01-14 14:00:57
+服务启动
+2019-01-14 14:01:04
+数据库连接失败:[FireDAC][Phys][MySQL] Lost connection to MySQL server at 'reading initial communication packet', system error: 0
+2019-01-14 14:01:20
+数据库连接失败:[FireDAC][Phys][MySQL] Lost connection to MySQL server at 'reading initial communication packet', system error: 0
+2019-01-14 14:06:49
+服务启动
+2019-01-14 14:08:32
+服务启动
+2019-01-14 14:08:34
+Access violation at address 00409B0F in module 'DelphiMVC.exe'. Read of address FFFFFFF4
+2019-01-14 14:08:35
+Access violation at address 00409B0F in module 'DelphiMVC.exe'. Read of address FFFFFFF4
+2019-01-14 14:08:39
+Access violation at address 00409B0F in module 'DelphiMVC.exe'. Read of address FFFFFFF4
+2019-01-14 14:09:01
+服务启动
+2019-01-14 14:29:25
+服务启动
+2019-01-14 14:31:42
+服务启动
+2019-01-14 14:32:33
+服务启动
+2019-01-14 14:57:21
+服务启动

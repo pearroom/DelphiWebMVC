@@ -18,6 +18,9 @@ type
 
 implementation
 
+uses
+  LogUnit;
+
 { TThSession }
 procedure TThSessionClear.clearMap();
 var
