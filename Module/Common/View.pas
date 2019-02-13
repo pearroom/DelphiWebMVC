@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit View;
 
 interface
@@ -5,7 +12,8 @@ interface
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, Web.HTTPProd, System.StrUtils,
   FireDAC.Comp.Client, Page, superobject, uConfig, Web.ReqMulti, Vcl.Imaging.jpeg,
-  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser;
+  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser, SimpleXML,
+  Winapi.ActiveX;
 
 type
   TView = class
@@ -19,6 +27,7 @@ type
     procedure makeSession;
   public
     Db: TDB;
+   // Db2: TDB2; //第2个数据源
     ActionP: string;
     Response: TWebResponse;
     Request: TWebRequest;
@@ -37,6 +46,7 @@ type
     procedure ShowDSJSON(cds: TFDQuery);        // 数据集转换为json显示
     procedure ShowText(text: string);           // 显示文本，json格式需转换后显示
     procedure ShowJSON(jo: ISuperObject);       // 显示 json
+    procedure ShowXML(xml: IXmlDocument);        // 显示 xml 数据
     procedure ShowPage(count: Integer; data: ISuperObject);   //渲染分页数据
     procedure Redirect(action: string; path: string = '');        // 跳转 action 路由,path 路径
     procedure ShowCheckIMG(num: string; width, height: Integer);  // 显示验证码
@@ -94,6 +104,13 @@ begin
   Response.SendResponse;
 end;
 
+procedure TView.ShowXML(xml: IXmlDocument);
+begin
+  Response.ContentType := 'application/xml; charset=' + default_charset;
+  Response.Content := xml.XML;
+  Response.SendResponse;
+end;
+
 procedure TView.Success(code: Integer; msg: string);
 var
   jo: ISuperObject;
@@ -127,11 +144,11 @@ begin
       try
         page := TPage.Create(S, params, self.url);
         htmlcontent := page.HTML;
-        htmlpars.Parser(htmlcontent, params, self.url);
-        Response.Content := htmlcontent;
       finally
         FreeAndNil(page);
       end;
+      htmlpars.Parser(htmlcontent, params, self.url);
+      Response.Content := htmlcontent;
     end;
 
   end
@@ -144,9 +161,8 @@ end;
 
 procedure TView.ShowJSON(jo: ISuperObject);
 begin
-  Response.ContentType := 'text/json; charset=' + default_charset;
- // Response.ContentType := 'text/json';
-  Response.Content := jo.AsString;
+  Response.ContentType := 'application/json; charset=' + default_charset;
+  Response.Content := jo.AsJSon();
   Response.SendResponse;
 end;
 
@@ -246,10 +262,9 @@ end;
 
 constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath: string);
 begin
-
-  params := TStringList.Create;
-  htmlpars := THTMLParser.Create;
   Db := TDB.Create();
+  params := TStringList.Create;
+  htmlpars := THTMLParser.Create(Db);
   self.ActionP := ActionPath;
   if (Trim(self.ActionP) <> '') then
   begin
@@ -260,48 +275,26 @@ begin
   self.Request := Request_;
 
   if (session_start) then
-    CreateSession;
+    CreateSession();
 
 end;
 
 procedure TView.CreateSession;
-var
-  timerout: TDateTime;
-  iscreate: boolean;
-  k: Integer;
-  s: string;
 begin
 
-  iscreate := false;
-
   sessionid := CookiesValue(SessionName);
-  if (sessionid <> '') then
-  begin
-    s := SessionListMap.getTimeroutByKey(sessionid);
-    if not (s = '') then
-    begin
-      if (session_timer = 0) then
-      begin
-        timerout := Now + (1 / 24 / 60) * 60;   //1小时过期
-        SessionListMap.setTimeroutByKey(sessionid, DateTimeToStr(timerout));
-      end;
-    end;
-  end
-  else
+  if sessionid = '' then
   begin
     sessionid := GetGUID();
-    iscreate := true;
-  end;
-  if (iscreate) and (sessionid <> '') then
-  begin
     with Cookies() do
     begin
       Path := '/';
       Name := SessionName;
       value := sessionid;
     end;
-    log('创建Session-' + sessionid);
+    log('创建Session:' + sessionid);
   end;
+
 end;
 
 function TView.GetGUID: string;
@@ -319,12 +312,8 @@ end;
 destructor TView.Destroy;
 begin
   FreeAndNil(htmlpars);
-  params.Clear;
-//  FreeAndNil(Page);
   FreeAndNil(params);
-
   FreeAndNil(Db);
-
   inherited;
 end;
 
@@ -397,10 +386,12 @@ var
 begin
   if (not session_start) then
     exit;
+
   s := SessionListMap.getValueByKey(sessionid);
   if (s = '') then
   begin
     makeSession;
+   // checksession;
     s := '{}';
   end;
   jo := SO(s);
@@ -417,8 +408,15 @@ begin
   if (not session_start) then
     exit;
   s := SessionListMap.getValueByKey(sessionid);
-  jo := SO(s);
-  Result := jo.S[key];
+  if s = '' then
+  begin
+    Result := '';
+  end
+  else
+  begin
+    jo := SO(s);
+    Result := jo.S[key];
+  end;
  // result := SessionListMap.get(sessionid).jo.Values[key];
 end;
 
@@ -428,6 +426,8 @@ var
   jo: ISuperObject;
 begin
   Result := true;
+  if (not session_start) then
+    exit;
   try
     s := SessionListMap.getValueByKey(sessionid);
     if s = '' then

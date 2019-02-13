@@ -1,3 +1,12 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
+
+
 unit BaseController;
 
 interface
@@ -21,12 +30,11 @@ type
     Error: Boolean;
     function isPOST: Boolean;
     function isGET: Boolean;
-    function isPut:Boolean;
-    function isAny:Boolean;
-    function isDelete:Boolean;
-    function isHead:Boolean;
-    function isPatch:Boolean;
-
+    function isPut: Boolean;
+    function isAny: Boolean;
+    function isDelete: Boolean;
+    function isHead: Boolean;
+    function isPatch: Boolean;
     function isNil(text: string): Boolean;
     function isNotNil(text: string): Boolean;
     function Interceptor: boolean;
@@ -162,10 +170,10 @@ begin
   ret := '';
   if Trim(url) <> '' then
   begin
-    http := TNetHTTPClient.Create(nil);
-    html := TStringStream.Create('', encode);
-    http.UserAgent := 'User-Agent:Mozilla/4.0(compatible;MSIE7.0;WindowsNT5.1;360SE)';
     try
+      http := TNetHTTPClient.Create(nil);
+      html := TStringStream.Create('', encode);
+      http.UserAgent := 'User-Agent:Mozilla/4.0(compatible;MSIE7.0;WindowsNT5.1;360SE)';
       try
         http.Get(url, html);
         ret := (html.DataString);
@@ -173,8 +181,9 @@ begin
         ret := '请求异常';
       end;
     finally
-      http.Free;
-      html.Free;
+      html.Clear;
+      FreeAndNil(html);
+      FreeAndNil(http);
     end;
   end;
   Result := ret;

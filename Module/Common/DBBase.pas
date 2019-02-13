@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit DBBase;
 
 interface
@@ -60,7 +67,7 @@ type
 implementation
 
 uses
-  uConfig,  LogUnit;
+  uConfig, LogUnit;
 
 function TDBBase.AddData(tablename: string): TFDQuery;
 begin
@@ -70,7 +77,6 @@ begin
   if (Trim(tablename) = '') then
     Exit;
   try
-    TMP_CDS.Connection := condb;
     TMP_CDS.Close();
     TMP_CDS.sql.Text := 'select * from ' + tablename + ' where 1=2';
     TMP_CDS.Open();
@@ -130,7 +136,9 @@ begin
         else if (ftype = ftBoolean) then
           jo.B[Fields[i].DisplayLabel] := Fields[i].AsBoolean
         else
+        begin
           jo.S[Fields[i].DisplayLabel] := Fields[i].AsString;
+        end;
       end;
       ja.AsArray.Add(jo);
       Next;
@@ -152,51 +160,49 @@ end;
 
 function TDBBase.closeDB: Boolean;
 begin
-  if db_start then
-  begin
-    try
-      try
-        condb.Connected := false;
-      except
-        on e: Exception do
-        begin
-          log(e.ToString);
-        end;
-      end;
-    finally
-      Result := condb.Connected;
-    end;
 
+  try
+    try
+      condb.Connected := false;
+    except
+      on e: Exception do
+      begin
+        log(e.ToString);
+      end;
+    end;
+  finally
+    Result := condb.Connected;
   end;
+
 end;
 
 function TDBBase.TryConnDB: Boolean;
 begin
-  if db_start then
-  begin
-    try
-      try
-        if not condb.Connected then
-          condb.Connected := true;
-      except
-        on e: Exception do
-        begin
-          log('数据库连接失败:'+e.ToString);
-          condb.Connected := False
-        end;
-      end;
-    finally
-      Result := condb.Connected;
-    end;
 
+  try
+    try
+      if not condb.Connected then
+        condb.Connected := true;
+    except
+      on e: Exception do
+      begin
+        log('数据库连接失败:' + e.ToString);
+        condb.Connected := False
+      end;
+    end;
+  finally
+    Result := condb.Connected;
   end;
+
 end;
 
 constructor TDBBase.Create();
 begin
-  TMP_CDS := TFDQuery.Create(nil);
+
   condb := TFDConnection.Create(nil);
   condb.ConnectionDefName := db_type;
+  TMP_CDS := TFDQuery.Create(nil);
+  TMP_CDS.Connection := condb;
 
 end;
 
@@ -226,7 +232,7 @@ begin
   Result := false;
   if (where <> '') then
   begin
-    sql := 'delete from ' + tablename + ' where 1=1 ' + sql;
+    sql := 'delete from ' + tablename + ' where 1=1 ' + where;
     Result := ExecSQL(sql);
   end;
 
@@ -289,7 +295,6 @@ begin
   try
     sql := 'select * from ' + tablename + ' where ' + key + ' = ' + value;
     sql := filterSQL(sql);
-    TMP_CDS.Connection := condb;
     TMP_CDS.Close();
     TMP_CDS.sql.Text := sql;
     TMP_CDS.Open();
@@ -309,20 +314,17 @@ begin
 end;
 
 function TDBBase.ExecSQL(sql: string): Boolean;
-var
-  CDS: TFDQuery;
 begin
   Result := False;
 
   if not TryConnDB then
     Exit;
-  CDS := TFDQuery.Create(nil);
+
   try
     try
       sql := filterSQL(sql);
-      CDS.Connection := condb;
-      CDS.sql.Text := sql;
-      CDS.ExecSQL;
+      TMP_CDS.sql.Text := sql;
+      TMP_CDS.ExecSQL;
       Result := true;
     except
       on e: Exception do
@@ -333,7 +335,7 @@ begin
 
     end;
   finally
-    FreeAndNil(CDS);
+
   end;
 end;
 
@@ -345,21 +347,19 @@ end;
 function TDBBase.Query(sql: string): ISuperObject;
 var
   ja: ISuperObject;
-  CDS: TFDQuery;
+  CDS1: TFDQuery;
 begin
   Result := nil;
   if not TryConnDB then
     Exit;
-  CDS := TFDQuery.Create(nil);
+
   try
 
     try
-      CDS.Connection := condb;
       sql := filterSQL(sql);
-      CDS.Open(sql);
+      TMP_CDS.Open(sql);
       Fields := '';
-      ja := CDSToJSONArray(CDS);
-      CDS.Close;
+      ja := CDSToJSONArray(TMP_CDS);
       Result := ja;
     except
       on e: Exception do
@@ -368,14 +368,12 @@ begin
       end;
     end;
   finally
-    FreeAndNil(CDS);
+   // FreeAndNil(CDS1);
   end;
 
 end;
 
 function TDBBase.Query(sql: string; var cds: TFDQuery): Boolean;
-var
-  ja: ISuperObject;
 begin
   Result := false;
   if not TryConnDB then
@@ -403,14 +401,14 @@ begin
   Result := nil;
   if not TryConnDB then
     Exit;
-  CDS := TFDQuery.Create(nil);
+
   try
     try
-      CDS.Connection := condb;
+
       sql := filterSQL(sql);
-      CDS.Open(sql);
+      TMP_CDS.Open(sql);
       Fields := '';
-      result := CDSToJSONObject(CDS);
+      result := CDSToJSONObject(TMP_CDS);
     except
       on e: Exception do
       begin
@@ -419,7 +417,7 @@ begin
     end;
 
   finally
-    FreeAndNil(CDS);
+   // FreeAndNil(CDS);
   end;
 
 end;

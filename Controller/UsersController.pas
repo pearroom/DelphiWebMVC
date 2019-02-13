@@ -70,6 +70,7 @@ begin
   with View do
   begin
     sdata := Db.Find(tb_users, 'limit 10');
+
     setAttr('sdata', sdata.AsString);
     ShowHTML('index');
   end;

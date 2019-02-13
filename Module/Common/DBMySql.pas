@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit DBMySql;
 
 interface
@@ -17,6 +24,7 @@ implementation
 
 
 { TDBSQLite }
+
 function TDBMySql.FindFirst(tablename: string; where: string = ''): ISuperObject;
 var
   sql: string;

@@ -72,6 +72,7 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
         <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
+        <DCC_UsePackage>vcl;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <Icon_MainIcon>favicon.ico</Icon_MainIcon>
@@ -83,14 +84,15 @@
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <DCC_DcuOutput>..\Temp</DCC_DcuOutput>
+        <DCC_UsePackage>vcl;rtl;</DCC_UsePackage>
         <UsePackages>true</UsePackages>
-        <DCC_UsePackage>vcl</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_DebugInformation>0</DCC_DebugInformation>
+        <DCC_UsePackage>vcl;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <DCC_DcuOutput>..\Temp</DCC_DcuOutput>
@@ -101,7 +103,7 @@
         <DCC_ExeOutput>..\Publish\Release</DCC_ExeOutput>
         <Icon_MainIcon>..\Publish\favicon.ico</Icon_MainIcon>
         <UsePackages>true</UsePackages>
-        <DCC_UsePackage>vcl</DCC_UsePackage>
+        <DCC_UsePackage>vcl;</DCC_UsePackage>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -132,16 +134,18 @@
         <DCCReference Include="..\Config\uInterceptor.pas"/>
         <DCCReference Include="..\Service\Interface\UsersInterface.pas"/>
         <DCCReference Include="..\Service\UsersService.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebApp.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebEnv.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebReqRes.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebServer.pas"/>
+        <DCCReference Include="..\Module\Syn\SynWebUtils.pas"/>
         <DCCReference Include="..\Module\Common\BaseController.pas"/>
-        <DCCReference Include="..\Module\Common\command.pas"/>
-        <DCCReference Include="..\Module\Common\DBBase.pas"/>
-        <DCCReference Include="..\Module\Common\DBMSSQL.pas"/>
-        <DCCReference Include="..\Module\Common\DBMSSQL12.pas"/>
-        <DCCReference Include="..\Module\Common\DBMySql.pas"/>
-        <DCCReference Include="..\Module\Common\DBOracle.pas"/>
-        <DCCReference Include="..\Module\Common\DBSQLite.pas"/>
+        <DCCReference Include="..\Module\Common\BaseService.pas"/>
+        <DCCReference Include="..\Module\Common\Command.pas"/>
         <DCCReference Include="..\Module\Common\DES.pas"/>
         <DCCReference Include="..\Module\Common\HTMLParser.pas"/>
+        <DCCReference Include="..\Module\Common\LogUnit.pas"/>
+        <DCCReference Include="..\Module\Common\PackageManager.pas"/>
         <DCCReference Include="..\Module\Common\Page.pas"/>
         <DCCReference Include="..\Module\Common\Roule.pas"/>
         <DCCReference Include="..\Module\Common\RouleItem.pas"/>
@@ -149,13 +153,15 @@
         <DCCReference Include="..\Module\Common\superobject.pas"/>
         <DCCReference Include="..\Module\Common\ThSessionClear.pas"/>
         <DCCReference Include="..\Module\Common\View.pas"/>
-        <DCCReference Include="..\Module\Syn\SynWebApp.pas"/>
-        <DCCReference Include="..\Module\Syn\SynWebEnv.pas"/>
-        <DCCReference Include="..\Module\Syn\SynWebReqRes.pas"/>
-        <DCCReference Include="..\Module\Syn\SynWebServer.pas"/>
-        <DCCReference Include="..\Module\Syn\SynWebUtils.pas"/>
-        <DCCReference Include="..\Module\Common\LogUnit.pas"/>
-        <DCCReference Include="..\Module\Common\PackageManager.pas"/>
+        <DCCReference Include="..\Module\Common\BasePackage.pas"/>
+        <DCCReference Include="..\Module\Common\DBBase.pas"/>
+        <DCCReference Include="..\Module\Common\DBMSSQL.pas"/>
+        <DCCReference Include="..\Module\Common\DBMSSQL12.pas"/>
+        <DCCReference Include="..\Module\Common\DBMySql.pas"/>
+        <DCCReference Include="..\Module\Common\DBOracle.pas"/>
+        <DCCReference Include="..\Module\Common\DBSQLite.pas"/>
+        <DCCReference Include="..\Module\Common\SimpleXML.pas"/>
+        <DCCReference Include="..\Module\Common\FreeMemory.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -183,17 +189,17 @@
             </Delphi.Personality>
             <Deployment Version="3">
                 <DeployFile LocalName="\DelphiMVC.exe" Configuration="Release" Class="ProjectOutput"/>
-                <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Login.htm" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Check.htm" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Login.css" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="..\Publish\DelphiMVC.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>DelphiMVC.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="View\Login\Login.htm" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="View\Login\Check.htm" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="View\Login\Login.css" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>

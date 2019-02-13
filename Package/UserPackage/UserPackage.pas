@@ -3,12 +3,13 @@ unit UserPackage;
 interface
 
 uses
-  System.Classes,Vcl.Controls,uConfig,superobject;
+  System.Classes, Vcl.Controls, uConfig, superobject, BasePackage;
 
 type
-  TUserPackage = class(TPersistent)
-  Published
-    function getdata(Db:TDB;map:ISuperObject): ISuperObject;
+  TUserPackageV2 = class(TBasePackage)
+  published
+    function checkuser(map: ISuperObject): ISuperObject;
+    function getAlldata(map: ISuperObject): ISuperObject;
   end;
 
 implementation
@@ -16,21 +17,27 @@ implementation
 uses
   uTableMap;
 
-{ TUserPackage }
+{ TUserPackageV2 }
 
-function TUserPackage.getdata(Db:TDB;map:ISuperObject): ISuperObject;
+function TUserPackageV2.checkuser(map: ISuperObject): ISuperObject;
 var
-  s:string;
+  s: string;
 begin
-  s:=map.AsString;
-  Result := db.FindFirst(tb_users);
+
+  s := map.AsString;
+  Result := db.FindFirst(tb_users, map);
+end;
+
+function TUserPackageV2.getAlldata(map: ISuperObject): ISuperObject;
+begin
+  Result := db.Find(tb_users,'');
 end;
 
 initialization
-  RegisterClass(TUserPackage);
+  RegisterClass(TUserPackageV2);
 
 finalization
-  UnRegisterClass(TUserPackage);
+  UnRegisterClass(TUserPackageV2);
 
 end.
 

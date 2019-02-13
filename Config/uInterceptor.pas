@@ -24,7 +24,9 @@ begin
   //不需要拦截的地址添加到下面
   urls.Add('/');
   urls.Add('/check');
+  urls.Add('/getAlldata');
   urls.Add('/checknum');
+  urls.Add('/getxml');
 end;
 
 function TInterceptor.execute(View: TView; error: Boolean): Boolean;
@@ -59,5 +61,4 @@ begin
 end;
 
 end.
-
 

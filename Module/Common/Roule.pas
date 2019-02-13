@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit Roule;
 
 interface
@@ -19,8 +26,6 @@ type
   end;
 
 implementation
-
-{ TRoule }
 
 { TRoule }
 
@@ -71,7 +76,6 @@ begin
     begin
       url := LeftStr(url, url.Length - 1);
     end;
-
 
     tmp.Delimiter := '/';
     tmp.DelimitedText := url;

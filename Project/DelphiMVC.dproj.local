@@ -1,4 +1,63 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
-	<Transactions/>
+	<Transactions>
+	</Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="..\..\DelphiWebMVC2.0"/>
+    <File Path="..\Config"/>
+    <File Path="..\Config\uConfig.pas"/>
+    <File Path="..\Config\uInterceptor.pas"/>
+    <File Path="..\Config\uRouleMap.pas"/>
+    <File Path="..\Config\uTableMap.pas"/>
+    <File Path="..\Controller"/>
+    <File Path="..\Controller\CaiWuController.pas"/>
+    <File Path="..\Controller\FirstController.pas"/>
+    <File Path="..\Controller\IndexController.pas"/>
+    <File Path="..\Controller\KuCunController.pas"/>
+    <File Path="..\Controller\LoginController.pas"/>
+    <File Path="..\Controller\MainController.pas"/>
+    <File Path="..\Controller\UsersController.pas"/>
+    <File Path="..\Controller\XiaoShouController.pas"/>
+    <File Path="..\Module"/>
+    <File Path="..\Module\Common"/>
+    <File Path="..\Module\Common\BaseController.pas"/>
+    <File Path="..\Module\Common\BasePackage.pas"/>
+    <File Path="..\Module\Common\BaseService.pas"/>
+    <File Path="..\Module\Common\Command.pas"/>
+    <File Path="..\Module\Common\DBBase.pas"/>
+    <File Path="..\Module\Common\DBMSSQL.pas"/>
+    <File Path="..\Module\Common\DBMSSQL12.pas"/>
+    <File Path="..\Module\Common\DBMySql.pas"/>
+    <File Path="..\Module\Common\DBOracle.pas"/>
+    <File Path="..\Module\Common\DBSQLite.pas"/>
+    <File Path="..\Module\Common\DES.pas"/>
+    <File Path="..\Module\Common\FreeMemory.pas"/>
+    <File Path="..\Module\Common\HTMLParser.pas"/>
+    <File Path="..\Module\Common\LogUnit.pas"/>
+    <File Path="..\Module\Common\PackageManager.pas"/>
+    <File Path="..\Module\Common\Page.pas"/>
+    <File Path="..\Module\Common\Roule.pas"/>
+    <File Path="..\Module\Common\RouleItem.pas"/>
+    <File Path="..\Module\Common\SessionList.pas"/>
+    <File Path="..\Module\Common\SimpleXML.pas"/>
+    <File Path="..\Module\Common\superobject.pas"/>
+    <File Path="..\Module\Common\ThSessionClear.pas"/>
+    <File Path="..\Module\Common\View.pas"/>
+    <File Path="..\Module\Syn"/>
+    <File Path="..\Module\Syn\SynWebApp.pas"/>
+    <File Path="..\Module\Syn\SynWebEnv.pas"/>
+    <File Path="..\Module\Syn\SynWebReqRes.pas"/>
+    <File Path="..\Module\Syn\SynWebServer.pas"/>
+    <File Path="..\Module\Syn\SynWebUtils.pas"/>
+    <File Path="..\Module\WebModule.pas"/>
+    <File Path="..\Module\WebModule.dfm"/>
+    <File Path="..\Module\wnDM.pas"/>
+    <File Path="..\Module\wnDM.dfm"/>
+    <File Path="..\Module\wnMain.pas"/>
+    <File Path="..\Module\wnMain.dfm"/>
+    <File Path="..\Service"/>
+    <File Path="..\Service\Interface"/>
+    <File Path="..\Service\Interface\UsersInterface.pas"/>
+    <File Path="..\Service\UsersService.pas"/>
+  </ProjectSortOrder>
 </BorlandProject>

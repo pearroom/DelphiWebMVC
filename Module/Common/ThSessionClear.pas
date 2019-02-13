@@ -1,9 +1,16 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit ThSessionClear;
 
 interface
 
 uses
-  System.Classes, System.SysUtils, uConfig, Winapi.Windows, command, superobject;
+  System.Classes, System.SysUtils, uConfig, Command;
 
 type
   TThSessionClear = class(TThread)
@@ -26,20 +33,25 @@ procedure TThSessionClear.clearMap();
 var
   i: integer;
   k: integer;
-  s: string;
+  key, s: string;
 begin
   try
     if SessionListMap <> nil then
     begin
-      k := SessionListMap.SessionLs_timerout.Count;
-      for i := 0 to k - 1 do
+      for key in SessionListMap.SessionLs_timerout.Keys do
       begin
-        s := SessionListMap.SessionLs_timerout.ValueFromIndex[i];
-        if Now() >= StrToDateTime(s) then
+        s := SessionListMap.SessionLs_timerout.Items[key];
+        if s.Trim <> '' then
         begin
-          log('清理Session' + SessionListMap.SessionLs_timerout.KeyNames[i]);
-          SessionListMap.deleteSession(i);
-          break;
+          if Now() >= StrToDateTime(s) then
+          begin
+            if SessionListMap.deleteSession(key) then
+            begin
+              log('清理Session-' + key);
+              break;
+            end;
+
+          end;
         end;
       end;
 
@@ -50,14 +62,19 @@ begin
 end;
 
 procedure TThSessionClear.Execute;
+var
+  k: Integer;
 begin
-  FreeOnTerminate := true;
+  k := 0;
   while not Terminated do
   begin
-    try
-      Synchronize(clearMap);
-    finally
-      Sleep(5000);
+    Sleep(100);
+    Inc(k);
+    if k >= 100 then
+    begin
+      k := 0;
+      clearMap;
+
     end;
 
   end;

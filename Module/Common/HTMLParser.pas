@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit HTMLParser;
 
 interface
@@ -10,6 +17,7 @@ uses
 type
   THTMLParser = class
   private
+    Db: TDB;
     procedure foreachinclude(var text: string; param: TStringList; url: string);
     procedure foreachclear(var text: string);
     function foreachvalue(text: string; key: string; value: string; var isok: Boolean): string;
@@ -24,14 +32,14 @@ type
     function checkifwhere(where: string): boolean;
   public
     procedure Parser(var text: string; param: TStringList; url: string);
-    constructor Create();
-    destructor Destroy; override;
+    constructor Create(_Db: TDB);
+
   end;
 
 implementation
 
 uses
-  command, MSScriptControl_TLB;
+  command, DBSQLite;
 
 function THTMLParser.foreachvalue(text, key, value: string; var isok: Boolean): string;
 var
@@ -63,49 +71,33 @@ end;
 
 function THTMLParser.checkifwhere(where: string): boolean;
 var
-  ret: boolean;
   s: string;
-  script: TScriptControl;
+  sn: Integer;
 begin
-
-  ret := false;
-  where := where.Replace('neq', '!==');
-  where := where.Replace('eq', '==');
-  where := where.Replace('and', '&&');
-  where := where.Replace('or', '||');
-  where := where.Replace('gte', '>=').Replace('ge', '>=');
-  where := where.Replace('gt', '>=');
-  where := where.Replace('lte', '<=').Replace('le', '<=');
-  where := where.Replace('lt', '<');
+  where := where.Replace('neq', ' != ');
+  where := where.Replace('eq', ' = ');
+  where := where.Replace('and', ' and ');
+  where := where.Replace('or', ' or ');
+  where := where.Replace('gte', ' >= ').Replace('ge', ' >= ');
+  where := where.Replace('gt', ' >= ');
+  where := where.Replace('lte', ' <= ').Replace('le', ' <= ');
+  where := where.Replace('lt', ' < ');
+  where := where.Replace('==', ' = ');
   try
-    CoInitialize(nil);
-    try
-      script := TScriptControl.Create(nil);
-      script.Language := 'javascript';
-      s := script.Eval(where);
-      ret := s = 'True';
-    except
-      ret := false;
-    end;
-  finally
-    script.free;
-    CoUnInitialize;
+    Db.TMP_CDS.Open('select ' + where + ' as sn');
+    sn := Db.TMP_CDS.FieldByName('sn').AsInteger;
+    Result := sn = 1;
+  except
+    Result := false;
   end;
-  Result := ret;
 
 end;
 
-constructor THTMLParser.Create();
+constructor THTMLParser.Create(_Db: TDB);
 begin
-  inherited;
-
+  self.Db := _Db;
 end;
 
-destructor THTMLParser.Destroy;
-begin
-  //script.Free;
-  inherited;
-end;
 
 function THTMLParser.foreach(text: string; param: TStringList): string;
 var
@@ -175,6 +167,7 @@ begin
     tmpstr.Free;
   end;
   param.Clear;
+
   html := foreachsetif(html);
   Result := html;
 end;

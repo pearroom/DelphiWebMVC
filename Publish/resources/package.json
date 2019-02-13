@@ -1,0 +1,19 @@
+{
+	"userpackage": {
+		"package": "./Package/User/V2/UserPackage.bpl",
+		"ver": "0.2",
+		"TUserPackage": {
+			"classname":"TUserPackageV2",
+			"checkuser":"checkuser",
+			"getAlldata":"getAlldata"
+		}
+	},
+	"loginpackage": {
+		"package": "./Package/Login/LoginPackage.bpl",
+		"ver": "0.1",
+		"TLoginPackage": {
+			"classname":"TLoginPackage",
+			"getdata": "getdata"
+		}
+	}	
+}

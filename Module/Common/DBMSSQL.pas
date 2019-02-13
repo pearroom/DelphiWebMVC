@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit DBMSSQL;
 
 interface
@@ -63,7 +70,8 @@ begin
 
     end;
   finally
-    FreeAndNil(CDS);
+    CDS.Free;
+    //FreeAndNil(CDS);
   end;
 
 end;

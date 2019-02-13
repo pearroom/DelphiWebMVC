@@ -53,6 +53,8 @@ end;
 constructor TSynWebServer.Create(AOwner: TComponent; Root: string; Port: string);
 var
   jo: ISuperObject;
+  Compress: string;
+  HTTPQueueLength, ChildThreadCount: integer;
 begin
   inherited Create;
   FActive := False;
@@ -61,25 +63,30 @@ begin
   if jo <> nil then
   begin
     try
+      FPort := jo.O['Server'].S['Port'];
+      Compress := jo.O['Server'].S['Compress'];
+      HTTPQueueLength := jo.O['Server'].i['HTTPQueueLength'];
+      ChildThreadCount := jo.O['Server'].i['ChildThreadCount'];
+
       if (FOwner <> nil) and (FOwner.InheritsFrom(TWebRequestHandler)) then
         FReqHandler := TWebRequestHandler(FOwner)
       else
         FReqHandler := GetRequestHandler;
-      FPort := jo.O['Server'].S['Port'];
       FRoot := Root;
       FHttpServer := THttpApiServer.Create(False);
       FHttpServer.AddUrl(StringTOUTF8(FRoot), StringTOUTF8(FPort), False, '+', true);
-      FHttpServer.RegisterCompress(CompressDeflate);
+      if UpperCase(Compress) = UpperCase('deflate') then
+        FHttpServer.RegisterCompress(CompressDeflate)
+      else if UpperCase(Compress) = UpperCase('gzip') then
+        FHttpServer.RegisterCompress(CompressGZip);
       FHttpServer.OnRequest := Process;
-      FHttpServer.HTTPQueueLength := 10000;
-      FHttpServer.Clone(10);
+      FHttpServer.HTTPQueueLength := HTTPQueueLength;
+      FHttpServer.Clone(ChildThreadCount);
       FActive := true;
     except
       on E: Exception do
       begin
-
         log(E.Message);
-
       end;
     end;
   end;

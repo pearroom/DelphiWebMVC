@@ -1,8 +1,9 @@
 # DelphiWebMVC使用说明:
-	版本:1.0
+	版本:2.0
 	运行时使用管理员权限。
-	项目用到mORMot代码库,可到这里下载。
-	项目用到TScriptControl 组件请自行安装,不清楚的可百度搜索
+	项目用到mORMot代码库,主页下载。
+	项目主页：http://www.delphiwebmvc.com
+	讨论QQ群: 685072623
 
 	开发工具:delphi xe10.2 
 	注意:win10系统以管理员权限运行
@@ -21,7 +22,10 @@
 	例：
 	{
 		"Server": {
-			"Port": "8001"
+			"Port": "8001",
+			"Compress":"deflate",  //压缩类型 none,gzip,deflate
+			"HTTPQueueLength":1000,
+			"ChildThreadCount":10
 		},
 		"MYSQL": {
 			"DriverID": "MySQL",

@@ -68,49 +68,31 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
         <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
-        <VerInfo_Locale>2052</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
-        <DCC_BplOutput>..\..\Publish\Package\</DCC_BplOutput>
+        <DCC_BplOutput>..\..\Publish\Package\User\V2</DCC_BplOutput>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_DcuOutput>..\..\temp</DCC_DcuOutput>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_DebugInformation>0</DCC_DebugInformation>
-        <VerInfo_Locale>2052</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <DCC_BplOutput>..\..\Publish\Package\</DCC_BplOutput>
+        <DCC_BplOutput>..\..\Publish\Package\User\V2</DCC_BplOutput>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <DCC_DcuOutput>..\..\temp</DCC_DcuOutput>
+        <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="rtl.dcp"/>
-        <DCCReference Include="vcl.dcp"/>
-        <DCCReference Include="dbrtl.dcp"/>
-        <DCCReference Include="inet.dcp"/>
-        <DCCReference Include="FireDAC.dcp"/>
-        <DCCReference Include="FireDACCommonDriver.dcp"/>
-        <DCCReference Include="FireDACCommon.dcp"/>
-        <DCCReference Include="..\..\Module\Common\DBBase.pas"/>
-        <DCCReference Include="..\..\Module\Common\DBMSSQL.pas"/>
-        <DCCReference Include="..\..\Module\Common\DBMSSQL12.pas"/>
-        <DCCReference Include="..\..\Module\Common\DBMySql.pas"/>
-        <DCCReference Include="..\..\Module\Common\DBOracle.pas"/>
-        <DCCReference Include="..\..\Module\Common\DBSQLite.pas"/>
-        <DCCReference Include="..\..\Module\Common\DES.pas"/>
-        <DCCReference Include="..\..\Module\Common\superobject.pas"/>
-        <DCCReference Include="..\..\Module\Common\LogUnit.pas"/>
-        <DCCReference Include="..\..\Config\uConfig.pas"/>
-        <DCCReference Include="..\..\Config\uTableMap.pas"/>
+        <DCCReference Include="share.dcp"/>
         <DCCReference Include="UserPackage.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -158,7 +140,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\..\Publish\Package\UserPackage.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\..\Publish\Package\User\V2\UserPackage.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>UserPackage.bpl</RemoteName>
                         <Overwrite>true</Overwrite>

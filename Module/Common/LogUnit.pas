@@ -1,18 +1,33 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit LogUnit;
 
 interface
 
 uses
-  System.SysUtils, System.Rtti, System.Classes, Web.HTTPApp, uConfig,
-  System.DateUtils,Vcl.StdCtrls;
+  System.SysUtils, System.Rtti, System.Classes, Web.HTTPApp, uConfig, System.DateUtils,
+  Vcl.StdCtrls;
 
 procedure log(msg: string);
 
-function readlog(var str: TMemo;var msg:string): boolean;
+function readlog(var str: TMemo; var msg: string): boolean;
+
+type
+  TLogTh = class(TThread)
+  public
+    mesg: string;
+  protected
+    procedure Execute; override;
+  end;
 
 implementation
 
-function readlog(var str: TMemo;var msg:string): boolean;
+function readlog(var str: TMemo; var msg: string): boolean;
 var
   logfile: string;
 begin
@@ -25,29 +40,42 @@ begin
   logfile := logfile + 'log_' + FormatDateTime('yyyyMMdd', Now) + '.txt';
   if FileExists(logfile) then
   begin
-    try
-      str.Lines.LoadFromFile(logfile);
-      Result := true;
-    except
-      msg:=logfile+'未找到日期文件';
-      Result := false;
-    end;
-
+    str.Lines.LoadFromFile(logfile);
+    Result := true;
+  end
+  else
+  begin
+    msg := logfile + '未找到日志文件';
+    Result := false;
   end;
 end;
 
 procedure log(msg: string);
+begin
+  if open_log then
+  begin
+    with TLogTh.Create(True) do
+    begin
+      mesg := msg;
+      Start;
+    end;
+  end;
+end;
+
+{ TLogTh }
+
+procedure TLogTh.Execute;
 var
   log: string;
   logfile: string;
   tf: TextFile;
   fi: THandle;
 begin
-  if open_log then
+  FreeOnTerminate := true;
   begin
-  //  CoInitialize(nil);
+
     try
-      log := FormatDateTime('yyyy-MM-dd hh:mm:ss', Now) + #13#10 + msg;
+      log := FormatDateTime('yyyy-MM-dd hh:mm:ss', Now) + '  ' + mesg;
       logfile := WebApplicationDirectory + 'log\';
       if not DirectoryExists(logfile) then
       begin
@@ -72,6 +100,7 @@ begin
     finally
    //   CoUnInitialize;
     end;
+
   end;
 end;
 

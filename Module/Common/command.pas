@@ -1,11 +1,18 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit Command;
 
 interface
 
 uses
   System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes, Web.HTTPApp,
-  uConfig, System.DateUtils, SessionList, MSScriptControl_TLB, superobject,
-  uInterceptor, uRouleMap, PackageManager;
+  uConfig, System.DateUtils, SessionList, superobject, uInterceptor, uRouleMap,
+  PackageManager;
 
 var
   RouleMap: TRouleMap = nil;
@@ -26,10 +33,20 @@ procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
 
 function DateTimeToGMT(const ADate: TDateTime): string;
 
+function StartServer: string;
+
+procedure CloseServer;
+
+procedure setDataBase(jo: ISuperObject);
+
 implementation
 
 uses
-  wnMain, DES, LogUnit;
+  wnMain, DES, LogUnit, wnDM, ThSessionClear, FreeMemory;
+
+var
+  sessionclear: TThSessionClear;
+  FreeMemory: TFreeMemory;
 
 procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
 var
@@ -237,6 +254,86 @@ begin
   sWeek := WEEK[wWeek];
   sMonth := MonthDig[wMonth];
   Result := Format('%s, %.2d %s %d %.2d:%.2d:%.2d GMT', [sWeek, wDay, sMonth, wYear, wHour, wMin, wSec]);
+end;
+
+function StartServer: string;
+var
+  LURL: string;
+  FPort: string;
+  jo: ISuperObject;
+begin
+  jo := OpenConfigFile();
+  if jo <> nil then
+  begin
+    //服务启动在SynWebApp查询
+    if auto_free_memory then
+      FreeMemory := TFreeMemory.Create(False);
+    if open_package then
+      _PackageManager := TPackageManager.Create;
+    SessionName := '__guid_session';
+    FPort := jo.O['Server'].S['Port'];
+    RouleMap := TRouleMap.Create;
+    SessionListMap := TSessionList.Create;
+    sessionclear := TThSessionClear.Create(false);
+    _Interceptor := TInterceptor.Create;
+    setDataBase(jo);
+    log('服务启动');
+    Result := FPort;
+  end;
+
+end;
+
+procedure CloseServer;
+begin
+  if SessionListMap <> nil then
+  begin
+    if open_package then
+    begin
+      _PackageManager.isstop := true;
+      FreeAndNil(_PackageManager);
+    end;
+    FreeAndNil(_Interceptor);
+    FreeAndNil(SessionListMap);
+    FreeAndNil(RouleMap);
+    FreeAndNil(DM);
+    sessionclear.Terminate;
+    FreeAndNil(sessionclear);
+    if auto_free_memory then
+    begin
+      FreeMemory.Terminate;
+      FreeAndNil(FreeMemory);
+    end;
+
+  end;
+end;
+
+procedure setDataBase(jo: ISuperObject);
+var
+  oParams: TStrings;
+  jo1: ISuperObject;
+  item: TSuperAvlEntry;
+  value: string;
+begin
+
+  oParams := TStringList.Create;
+  try
+    jo1 := jo.O[db_type];
+    for item in jo1.AsObject do
+    begin
+      value := item.Name + '=' + item.Value.AsString;
+      oParams.Add(value);
+    end;
+    DM := TDM.Create(nil);
+    DM.DBManager.Active := false;
+    DM.DBManager.DriverDefFileName := db_type;
+    DM.DBManager.AddConnectionDef(db_type, db_type, oParams);
+    DM.DBManager.Active := true;
+  finally
+    oParams.Free;
+  end;
+  //这里可以连接多个其他数据源 比如同时连接 mysql 再连接 sqlserver
+ // DM.DBManagerSQLServer.AddConnectionDef(db_type2, db_type2, oParams);
+  //DM.DBManagerSQLServer.Active := true;
 end;
 
 end.

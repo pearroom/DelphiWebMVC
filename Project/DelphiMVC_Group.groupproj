@@ -9,6 +9,12 @@
         <Projects Include="..\Package\UserPackage\UserPackage.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="..\Package\LoginPackage\LoginPackage.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\Package\Share\Share.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +41,32 @@
     <Target Name="UserPackage:Make">
         <MSBuild Projects="..\Package\UserPackage\UserPackage.dproj" Targets="Make"/>
     </Target>
+    <Target Name="LoginPackage">
+        <MSBuild Projects="..\Package\LoginPackage\LoginPackage.dproj"/>
+    </Target>
+    <Target Name="LoginPackage:Clean">
+        <MSBuild Projects="..\Package\LoginPackage\LoginPackage.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="LoginPackage:Make">
+        <MSBuild Projects="..\Package\LoginPackage\LoginPackage.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Share">
+        <MSBuild Projects="..\Package\Share\Share.dproj"/>
+    </Target>
+    <Target Name="Share:Clean">
+        <MSBuild Projects="..\Package\Share\Share.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Share:Make">
+        <MSBuild Projects="..\Package\Share\Share.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="DelphiMVC;UserPackage"/>
+        <CallTarget Targets="DelphiMVC;UserPackage;LoginPackage;Share"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="DelphiMVC:Clean;UserPackage:Clean"/>
+        <CallTarget Targets="DelphiMVC:Clean;UserPackage:Clean;LoginPackage:Clean;Share:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="DelphiMVC:Make;UserPackage:Make"/>
+        <CallTarget Targets="DelphiMVC:Make;UserPackage:Make;LoginPackage:Make;Share:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

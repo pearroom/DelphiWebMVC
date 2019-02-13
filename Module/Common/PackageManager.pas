@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{       DelphiWebMVC                                    }
+{                                                       }
+{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{                                                       }
+{*******************************************************}
 unit PackageManager;
 
 interface
@@ -6,17 +13,40 @@ uses
   System.SysUtils, System.Classes, Generics.Collections, superobject, uConfig;
 
 type
-  TPackageMethod = function(Db: TDB; map: ISuperObject): ISuperObject of object;
+  TPackageMethod = function(map: ISuperObject): ISuperObject of object;
+
+  TSetDBMethod = function(Db: TDB): Boolean of object;
+
+type
+  TPack = class
+  private
+    FPackHander: HModule;
+    FPackName: string;
+    FVer: string;
+    FisStop: Boolean;
+    procedure SetPackHander(const Value: HModule);
+    procedure SetPackName(const Value: string);
+    procedure SetVer(const Value: string);
+    procedure SetisStop(const Value: Boolean);
+  published
+    property PackName: string read FPackName write SetPackName;
+    property PackHander: HModule read FPackHander write SetPackHander;
+    property Ver: string read FVer write SetVer;
+    property isStop: Boolean read FisStop write SetisStop;
+  end;
 
 type
   TPackageManager = class
   private
-    json_config: ISuperObject;
-    PackageList: TList<HModule>;
+    isok: Boolean;
+    PackageList: TList<TPack>;
     procedure init();
     procedure reload;
+    function findpk(packanme, ver: string): TPack;
+    procedure removepk;
   public
-    function exec(package: string; classname: string; method: string; Db: TDB; map: ISuperObject): ISuperObject;
+    isstop: boolean;
+    json_config: ISuperObject;
     constructor Create();
     destructor Destroy; override;
   end;
@@ -30,59 +60,37 @@ uses
 
 constructor TPackageManager.Create();
 begin
+
   init();
 end;
 
 destructor TPackageManager.Destroy;
-var
-  I: Integer;
 begin
-  for I := 0 to PackageList.Count - 1 do
+  while PackageList.Count > 0 do
   begin
-    UnloadPackage(PackageList[I]);
+    UnloadPackage(PackageList[0].PackHander);
+    PackageList[0].Free;
+    PackageList.Delete(0);
   end;
-  PackageList.Clear;
   PackageList.Free;
   inherited;
 end;
 
-function TPackageManager.exec(package, classname, method: string; Db: TDB; map: ISuperObject): ISuperObject;
+function TPackageManager.findpk(packanme, ver: string): TPack;
 var
-  m: string;
-  me: TMethod;
-  fun: TPackageMethod;
-  ret: ISuperObject;
-  tmpclass: TPersistent;
+  i: Integer;
+  pk: TPack;
 begin
-  try
-    m := json_config.O[package].O[classname].s[method];
-    tmpclass := GetClass(classname).Create as TPersistent;
-    try
-      try
-        me.Code := tmpclass.MethodAddress(m);
-        me.Data := Pointer(tmpclass);
-        fun := TPackageMethod(me);
-        ret := fun(Db, map);
-      except
-        on e: Exception do
-        begin
-          log(e.Message);
-          Result := nil;
-        end;
-
-      end;
-      Result := ret;
-    finally
-      tmpclass.Free;
-    end;
-  except
-    on e: Exception do
+  Result := nil;
+  for i := 0 to PackageList.Count - 1 do
+  begin
+    pk := PackageList[i];
+    if (pk.PackName = packanme) and (pk.ver = ver) then
     begin
-      log(e.Message);
-      Result := nil;
+      Result := pk;
+      break;
     end;
   end;
-
 end;
 
 procedure TPackageManager.init;
@@ -91,8 +99,9 @@ var
   jo: ISuperObject;
   s: string;
   PackageModule: HModule;
+  pk: TPack;
 begin
-  PackageList := TList<HModule>.Create;
+  PackageList := TList<TPack>.Create;
   json_config := OpenPackageConfigFile();
   for item in json_config.AsObject do
   begin
@@ -100,8 +109,12 @@ begin
     s := jo.S['package'];
 
     try
+      pk := TPack.Create;
+      pk.Ver := jo.S['ver'];
       PackageModule := LoadPackage(s);
-      PackageList.Add(PackageModule);
+      pk.PackName := s;
+      pk.PackHander := PackageModule;
+      PackageList.Add(pk);
     except
       on e: Exception do
       begin
@@ -111,34 +124,159 @@ begin
 
     end;
   end;
+  TThread.CreateAnonymousThread(
+    procedure
+    var
+      k: integer;
+    begin
+      isok := true;
+      k := 0;
+      while not isstop do
+      begin
+        sleep(100);
+        inc(k);
+        if k > bpl_Reload_timer * 10 then
+        begin
+          k := 0;
+          if isok then
+          begin
+            TThread.Synchronize(TThread.CurrentThread,
+              procedure
+              begin
+                reload();
+              end);
+
+          end;
+        end;
+      end;
+    end).start();
 end;
+
 procedure TPackageManager.reload;
 var
   item: TSuperAvlEntry;
   jo: ISuperObject;
   s: string;
   PackageModule: HModule;
-  json:ISuperObject;
+  json: ISuperObject;
+  pk, tmppk: TPack;
+  findstop: Boolean;
+  ver_old, ver_new: string;
 begin
-  PackageList := TList<HModule>.Create;
-  json := OpenPackageConfigFile();
-  for item in json.AsObject do
-  begin
-    jo := SO(item.Value.AsString);
-    s := jo.S['package'];
+  findstop := false;
 
-    try
-      PackageModule := LoadPackage(s);
-      PackageList.Add(PackageModule);
-    except
-      on e: Exception do
+  json := OpenPackageConfigFile();
+  for item in json_config.AsObject do
+  begin
+
+    jo := SO(item.Value.AsString);
+    ver_new := json.O[item.Name].s['ver'];
+    ver_old := jo.S['ver'];
+    if ver_old <> ver_new then
+    begin
+      s := json.O[item.Name].s['package'];
+      tmppk := findpk(s, ver_old);
+      if tmppk <> nil then
       begin
-        log(e.Message);
-        break;
+        tmppk.isStop := true;
+        findstop := true;
       end;
 
+      try
+        pk := TPack.Create;
+        pk.Ver := jo.S['ver'];
+        PackageModule := LoadPackage(s);
+        pk.PackName := s;
+        pk.PackHander := PackageModule;
+        PackageList.Add(pk);
+
+      except
+        on e: Exception do
+        begin
+          log(e.Message);
+          break;
+        end;
+
+      end;
+    end;
+  end;
+
+  if findstop then
+  begin
+    json_config := OpenPackageConfigFile();
+    isok := False;
+    TThread.CreateAnonymousThread(
+
+      procedure
+      var
+        k: integer;
+      begin
+        k := 0;
+        while not isstop do
+        begin
+          sleep(100);
+          inc(k);
+          if k >= bpl_unload_timer * 10 then
+          begin
+            TThread.Synchronize(TThread.CurrentThread,
+              procedure
+              begin
+                removepk;
+                isok := true;
+              end);
+            break;
+          end;
+        end;
+
+      end).Start;
+  end;
+end;
+
+procedure TPackageManager.removepk;
+var
+  i, n: Integer;
+  loop: boolean;
+begin
+
+  loop := true;
+  while loop do
+  begin
+    loop := False;
+    for i := 0 to PackageList.Count - 1 do
+    begin
+      if PackageList[i].isStop then
+      begin
+        loop := True;
+        UnloadPackage(PackageList[i].PackHander);
+        PackageList[i].Free;
+        PackageList.Delete(i);
+        Break;
+      end;
     end;
   end;
 end;
+
+{ TPack }
+
+procedure TPack.SetisStop(const Value: Boolean);
+begin
+  FisStop := Value;
+end;
+
+procedure TPack.SetPackHander(const Value: HModule);
+begin
+  FPackHander := Value;
+end;
+
+procedure TPack.SetPackName(const Value: string);
+begin
+  FPackName := Value;
+end;
+
+procedure TPack.SetVer(const Value: string);
+begin
+  FVer := Value;
+end;
+
 end.
 
