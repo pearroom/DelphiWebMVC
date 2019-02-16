@@ -18,7 +18,7 @@ type
   private
     list: TObjectList<TRouleItem>;
   public
-    procedure SetRoule(name: string; ACtion: TClass; path: string = '');
+    procedure SetRoule(name: string; ACtion: TClass; path: string = '';isInterceptor:Boolean=True);
     function GetRoule(url: string; var roule: string; var method: string): TRouleItem;
     function GetItem(roule: string): TRouleItem;
     constructor Create(); virtual;
@@ -122,12 +122,13 @@ begin
 
 end;
 
-procedure TRoule.SetRoule(name: string; ACtion: TClass; path: string);
+procedure TRoule.SetRoule(name: string; ACtion: TClass; path: string;isInterceptor:Boolean);
 var
   item: TRouleItem;
 begin
   item := TRouleItem.Create;
   item.name := name;
+  item.Interceptor:=isInterceptor;
   item.ACtion := ACtion;
   item.path := path;
   list.Add(item);

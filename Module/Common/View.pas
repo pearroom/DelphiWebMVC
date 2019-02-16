@@ -292,7 +292,7 @@ begin
       Name := SessionName;
       value := sessionid;
     end;
-    log('创建Session:' + sessionid);
+
   end;
 
 end;
@@ -358,6 +358,7 @@ begin
 
   SessionListMap.setValueByKey(sessionid, '{}');
   SessionListMap.setTimeroutByKey(sessionid, DateTimeToStr(timerout));
+  log('创建Session:' + sessionid);
 end;
 
 function TView.Q(str: string): string;

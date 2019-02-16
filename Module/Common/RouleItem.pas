@@ -14,10 +14,13 @@ type
     FPath: string;
     FName: string;
     FAction: TClass;
+    FInterceptor: Boolean;
     procedure SetAction(const Value: TClass);
     procedure SetName(const Value: string);
     procedure SetPath(const Value: string);
+    procedure SetInterceptor(const Value: Boolean);
   public
+    property Interceptor:Boolean read FInterceptor write SetInterceptor;
     property Name: string read FName write SetName;
     property ACtion: TClass read FAction write SetAction;
     property path: string read FPath write SetPath;
@@ -29,6 +32,11 @@ implementation
 procedure TRouleItem.SetAction(const Value: TClass);
 begin
   FAction := Value;
+end;
+
+procedure TRouleItem.SetInterceptor(const Value: Boolean);
+begin
+  FInterceptor := Value;
 end;
 
 procedure TRouleItem.SetName(const Value: string);

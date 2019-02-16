@@ -77,7 +77,8 @@ begin
       ActoinClass := RTTIContext.GetType(item.Action);
       ActionMethod := ActoinClass.GetMethod(methodname);
       CreateView := ActoinClass.GetMethod('CreateView');
-      Interceptor := ActoinClass.GetMethod('Interceptor');
+      if item.Interceptor then
+        Interceptor := ActoinClass.GetMethod('Interceptor');
       Request := ActoinClass.GetProperty('Request');
       Response := ActoinClass.GetProperty('Response');
       ActionPath := ActoinClass.GetProperty('ActionPath');
@@ -89,11 +90,18 @@ begin
             Request.SetValue(Action, web.Request);
             Response.SetValue(Action, web.Response);
             ActionPath.SetValue(Action, item.path);
-            CreateView.Invoke(Action, []); // 执行 Action CreateView 方法
-            ret := Interceptor.Invoke(Action, []);
-            if (not ret.AsBoolean) then
+            CreateView.Invoke(Action, []);
+            if item.Interceptor then
             begin
-              ActionMethod.Invoke(Action, []); // 执行 Action ActionMethod 方法
+              ret := Interceptor.Invoke(Action, []);
+              if (not ret.AsBoolean) then
+              begin
+                ActionMethod.Invoke(Action, []);
+              end;
+            end
+            else
+            begin
+              ActionMethod.Invoke(Action, []);
             end;
           finally
             FreeAndNil(Action);

@@ -32,20 +32,28 @@ var
   logfile: string;
 begin
   Result := false;
-  logfile := WebApplicationDirectory + 'log\';
-  if not DirectoryExists(logfile) then
+  if open_log then
   begin
-    CreateDir(logfile);
-  end;
-  logfile := logfile + 'log_' + FormatDateTime('yyyyMMdd', Now) + '.txt';
-  if FileExists(logfile) then
-  begin
-    str.Lines.LoadFromFile(logfile);
-    Result := true;
+    logfile := WebApplicationDirectory + 'log\';
+    if not DirectoryExists(logfile) then
+    begin
+      CreateDir(logfile);
+    end;
+    logfile := logfile + 'log_' + FormatDateTime('yyyyMMdd', Now) + '.txt';
+    if FileExists(logfile) then
+    begin
+      str.Lines.LoadFromFile(logfile);
+      Result := true;
+    end
+    else
+    begin
+      msg := logfile + '未找到日志文件';
+      Result := false;
+    end;
   end
   else
   begin
-    msg := logfile + '未找到日志文件';
+    msg := '日志功能未开启';
     Result := false;
   end;
 end;
@@ -97,6 +105,7 @@ begin
       Writeln(tf, log);
       Flush(tf);
       CloseFile(tf);
+
     finally
    //   CoUnInitialize;
     end;
