@@ -15,6 +15,9 @@ type
 
 implementation
 
+uses
+  uConfig;
+
 { TInterceptor }
 
 constructor TInterceptor.Create;
@@ -22,32 +25,33 @@ begin
   urls := TStringList.Create;
   //拦截器默认关闭状态uConfig文件修改
   //不需要拦截的地址添加到下面
-  urls.Add('/');
-  urls.Add('/check');
-  urls.Add('/getAlldata');
-  urls.Add('/checknum');
-  urls.Add('/getxml');
+
+//  urls.Add(AppPath);
+//  urls.Add(AppPath + '/check');
+//  urls.Add(AppPath + '/getAlldata');
+//  urls.Add(AppPath + '/checknum');
+//  urls.Add(AppPath + '/getxml');
 end;
 
 function TInterceptor.execute(View: TView; error: Boolean): Boolean;
 var
   url: string;
+var
+  AppPath: string;
 begin
   Result := false;
   with View do
   begin
-    if (error) then
-    begin
-      Result := true;
-      exit;
-    end;
-    url := LowerCase(Request.PathInfo);
-    if urls.IndexOf(url) < 0 then
+    if __APP__.Trim <> '' then
+      AppPath := '/' + __APP__;
+ //   url := LowerCase(Request.PathInfo);
+//    if urls.IndexOf(url) < 0 then
     begin
       if (SessionGet('username') = '') then
       begin
         Result := true;
-        Response.Content := '<script>window.location.href=''/'';</script>';
+        Response.Content := '<script>window.location.href=''' + AppPath + '/'';</script>';
+     //   Response.SendRedirect('/');
         Response.SendResponse;
       end;
     end;

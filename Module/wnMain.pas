@@ -50,7 +50,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Winapi.Windows, Winapi.ShellApi, command, LogUnit;
+  Winapi.Windows, Winapi.ShellApi, command, LogUnit, uConfig;
 
 procedure TMain.WMSysCommand(var Msg: TWMSysCommand);
 begin
@@ -90,8 +90,10 @@ procedure TMain.ButtonOpenBrowserClick(Sender: TObject);
 var
   LURL: string;
 begin
-
-  LURL := Format('http://localhost:%s', [edtport.Text]);
+  if __APP__.Trim <> '' then
+    LURL := Format('http://localhost:%s%s', [edtport.Text, '/' + __APP__ + '/'])
+  else
+    LURL := Format('http://localhost:%s', [edtport.Text]);
   ShellExecute(0, nil, PChar(LURL), nil, nil, SW_SHOWNOACTIVATE);
 end;
 

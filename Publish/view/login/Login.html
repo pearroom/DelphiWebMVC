@@ -15,7 +15,7 @@
 	<div class="panel-heading">登录</div>
 	<div class="panel-body">	
    	
-    <form id='loginform' action="/Check" method="post">
+    <form id='loginform' action="__APP__/Check" method="post">
 
         <table style="width:100%;">
  
@@ -42,7 +42,7 @@
                 <td>验证码</td>
                 <td>
                     <div class="col-md-12" style="margin: 4px;height:40px;">
-					<img src="/checknum">
+					<img src="__APP__/checknum">
                     </div>
                 </td>
             </tr>			
@@ -67,6 +67,6 @@
     </div>
     </div>
 			<div style="text-align:center;">测试帐户  username:admin pwd:admin</div>
-	<script type="text/javascript" src='/js/login/login.js'></script>
+	<script type="text/javascript" src='__APP__/js/login/login.js'></script>
 </body>
 </html>

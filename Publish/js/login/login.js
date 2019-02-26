@@ -28,7 +28,7 @@ function formcheck(){
 		var bv = $form.data('formValidation');
 		$.post($form.attr('action'), $form.serialize(), function(result) {	
 			if(result['code']==0){
-               $(window).attr('location','/Main/');
+               $(window).attr('location','Main/');
             }else{
                MyAlert(result['message']);
                }

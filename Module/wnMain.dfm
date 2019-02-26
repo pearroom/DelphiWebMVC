@@ -5,7 +5,7 @@ object Main: TMain
   BorderStyle = bsSingle
   Caption = 'Main'
   ClientHeight = 373
-  ClientWidth = 467
+  ClientWidth = 459
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -22,24 +22,22 @@ object Main: TMain
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 467
+    Width = 459
     Height = 33
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 407
     object ButtonOpenBrowser: TButton
       Left = 76
       Top = 1
-      Width = 317
+      Width = 309
       Height = 31
       Align = alClient
       Caption = 'Open Browser'
       TabOrder = 0
       OnClick = ButtonOpenBrowserClick
-      ExplicitWidth = 257
     end
     object btnClose: TButton
-      Left = 393
+      Left = 385
       Top = 1
       Width = 73
       Height = 31
@@ -47,7 +45,6 @@ object Main: TMain
       Caption = 'Close'
       TabOrder = 1
       OnClick = btnCloseClick
-      ExplicitLeft = 333
     end
     object edtport: TEdit
       AlignWithMargins = True
@@ -71,35 +68,31 @@ object Main: TMain
   object pgc1: TPageControl
     Left = 0
     Top = 33
-    Width = 467
+    Width = 459
     Height = 321
     ActivePage = ts3
     Align = alClient
     MultiLine = True
     Style = tsFlatButtons
     TabOrder = 1
-    ExplicitWidth = 407
     object ts3: TTabSheet
       Caption = #26085#24535
       ImageIndex = 2
-      ExplicitWidth = 399
       object pnl2: TPanel
         Left = 0
         Top = 0
-        Width = 459
+        Width = 451
         Height = 27
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 399
         object lbllog: TLabel
-          Left = 456
+          Left = 448
           Top = 0
           Width = 3
           Height = 27
           Align = alRight
           Layout = tlCenter
-          ExplicitLeft = 396
           ExplicitHeight = 13
         end
         object btnlogget: TButton
@@ -116,25 +109,20 @@ object Main: TMain
       object mmolog: TMemo
         Left = 0
         Top = 27
-        Width = 459
+        Width = 451
         Height = 263
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 1
-        ExplicitWidth = 399
       end
     end
     object ts1: TTabSheet
       Caption = #20851#20110
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pnl1: TPanel
         Left = 0
         Top = 0
-        Width = 399
+        Width = 451
         Height = 290
         Align = alClient
         Caption = 'pnl1'
@@ -145,7 +133,7 @@ object Main: TMain
           AlignWithMargins = True
           Left = 4
           Top = 4
-          Width = 391
+          Width = 443
           Height = 282
           Align = alClient
           Center = True
@@ -260,7 +248,7 @@ object Main: TMain
   object stat1: TStatusBar
     Left = 0
     Top = 354
-    Width = 467
+    Width = 459
     Height = 19
     Cursor = crHandPoint
     Panels = <
@@ -269,7 +257,6 @@ object Main: TMain
         Width = 300
       end>
     OnClick = stat1Click
-    ExplicitWidth = 407
   end
   object TrayIcon1: TTrayIcon
     OnClick = TrayIcon1Click

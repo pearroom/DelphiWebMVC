@@ -22,12 +22,12 @@ begin
   inherited;
   //路径,控制器,视图目录,是否拦截
   //SetRoule(name: string; ACtion: TClass; path: string = '';isInterceptor:Boolean=True);
-  SetRoule('/', TLoginController, 'login');
-  SetRoule('/Main', TMainController, 'main');
-  SetRoule('/Users', TUsersController, 'users');
-  SetRoule('/kucun', TKuCunController, 'kucun');
-  SetRoule('/caiwu', TCaiWuController, 'caiwu');
-  SetRoule('/xiaoshou', TXiaoShouController, 'xiaoshou');
+  SetRoule('', TLoginController, 'login',False);
+  SetRoule('Main', TMainController, 'main');
+  SetRoule('Users', TUsersController, 'users');
+  SetRoule('kucun', TKuCunController, 'kucun');
+  SetRoule('caiwu', TCaiWuController, 'caiwu');
+  SetRoule('xiaoshou', TXiaoShouController, 'xiaoshou');
 
 end;
 

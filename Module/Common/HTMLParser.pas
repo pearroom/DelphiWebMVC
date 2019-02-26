@@ -18,6 +18,7 @@ type
   THTMLParser = class
   private
     Db: TDB;
+    procedure foreachother(var text: string);
     procedure foreachinclude(var text: string; param: TStringList; url: string);
     procedure foreachclear(var text: string);
     function foreachvalue(text: string; key: string; value: string; var isok: Boolean): string;
@@ -33,7 +34,6 @@ type
   public
     procedure Parser(var text: string; param: TStringList; url: string);
     constructor Create(_Db: TDB);
-
   end;
 
 implementation
@@ -64,9 +64,12 @@ end;
 
 procedure THTMLParser.Parser(var text: string; param: TStringList; url: string);
 begin
+
   foreachinclude(text, param, url);
   text := foreach(text, param);
   foreachclear(text);
+  foreachother(text);
+
 end;
 
 function THTMLParser.checkifwhere(where: string): boolean;
@@ -97,7 +100,6 @@ constructor THTMLParser.Create(_Db: TDB);
 begin
   self.Db := _Db;
 end;
-
 
 function THTMLParser.foreach(text: string; param: TStringList): string;
 var
@@ -314,6 +316,7 @@ begin
   for match in matchs do
   begin
     s := match.Value;
+    s:=s.Replace('__APP__','');
     begin
       htmlfile := Trim(TRegEx.Match(s, 'file=.*?>').value);
       htmlfile := Copy(htmlfile, Pos('=', htmlfile) + 1, Pos('>', htmlfile) - Pos('=', htmlfile) - 1);
@@ -436,6 +439,24 @@ begin
   finally
     strls.Clear;
     strls.Free;
+  end;
+
+end;
+
+procedure THTMLParser.foreachother(var text: string);
+var
+  matchs: TMatchCollection;
+  match: TMatch;
+begin
+
+  matchs := TRegEx.Matches(text, '__APP__');
+  for match in matchs do
+  begin
+    if __APP__.Trim = '' then
+      text := TRegEx.Replace(text, match.Value, '')
+    else
+      text := TRegEx.Replace(text, match.Value, '/' + __APP__)
+
   end;
 
 end;

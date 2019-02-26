@@ -4714,7 +4714,7 @@ begin
   if aSize <= FBufRemain
   then begin
     Move(FBufPtr^, aBuf, aSize);
-    Inc(Integer(FBufPtr), aSize);
+    Inc(PAnsiChar(FBufPtr), aSize);
     Dec(FRemainSize, aSize);
     Dec(FBufRemain, aSize);
   end
@@ -4756,7 +4756,7 @@ begin
   if aSize > FRemain then
     raise Exception.Create(SSimpleXmlError23);
   Move(FPtr^, aBuf, aSize);
-  Inc(Integer(FPtr), aSize);
+  Inc(PAnsiChar(FPtr), aSize);
   Dec(FRemain, aSize);
 end;
 
@@ -4941,14 +4941,14 @@ begin
   if aSize <= FRemain then
   begin
     Move(aBuf, FBufPtr^, aSize);
-    Inc(Integer(FBufPtr), aSize);
+    Inc(PAnsiChar(FBufPtr), aSize);
     Dec(FRemain, aSize);
   end
   else
   begin
     SetLength(FData, Length(FData) + FBufSize + aSize);
     Move(aBuf, FBufPtr^, aSize);
-    Inc(Integer(FBufPtr), aSize);
+    Inc(PAnsiChar(FBufPtr), aSize);
     FRemain := FBufSize;
   end
 end;

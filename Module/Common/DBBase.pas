@@ -46,7 +46,7 @@ type
     function FindPage(var count: Integer; tablename, order: string; pageindex, pagesize: Integer): ISuperObject; overload;
     function FindPage(var count: Integer; tablename, where, order: string; pageindex, pagesize: Integer): ISuperObject; overload;
     function FindPage(var count: Integer; tablename: string; JSONWhere: ISuperObject; order: string; pageindex, pagesize: Integer): ISuperObject; overload;
-    function CDSToJSONArray(cds: TFDQuery): ISuperObject;
+    function CDSToJSONArray(cds: TFDQuery; isfirst: Boolean = false): ISuperObject;
     function CDSToJSONObject(cds: TFDQuery): ISuperObject;
     function Query(sql: string; var cds: TFDQuery): Boolean; overload;
     function Query(sql: string): ISuperObject; overload;
@@ -70,6 +70,8 @@ uses
   uConfig, LogUnit;
 
 function TDBBase.AddData(tablename: string): TFDQuery;
+var
+  sql: string;
 begin
   Result := nil;
   if not TryConnDB then
@@ -77,9 +79,9 @@ begin
   if (Trim(tablename) = '') then
     Exit;
   try
-    TMP_CDS.Close();
-    TMP_CDS.sql.Text := 'select * from ' + tablename + ' where 1=2';
-    TMP_CDS.Open();
+    sql := 'select * from ' + tablename + ' where 1=2';
+    sql := filterSQL(sql);
+    TMP_CDS.Open(sql);
     Fields := '';
     TMP_CDS.Append;
     Result := TMP_CDS;
@@ -111,7 +113,7 @@ begin
 
 end;
 
-function TDBBase.CDSToJSONArray(cds: TFDQuery): ISuperObject;
+function TDBBase.CDSToJSONArray(cds: TFDQuery; isfirst: Boolean = false): ISuperObject;
 var
   ja, jo: ISuperObject;
   i: Integer;
@@ -141,7 +143,10 @@ begin
         end;
       end;
       ja.AsArray.Add(jo);
-      Next;
+      if isfirst then
+        break
+      else
+        Next;
     end;
   end;
   Result := ja;
@@ -151,7 +156,7 @@ function TDBBase.CDSToJSONObject(cds: TFDQuery): ISuperObject;
 var
   jo: ISuperObject;
 begin
-  jo := CDSToJSONArray(cds);
+  jo := CDSToJSONArray(cds, true);
   if jo.AsArray.Length > 0 then
     Result := jo.AsArray.O[0]
   else
@@ -275,6 +280,8 @@ begin
       condb.Connected := False;
     end;
   finally
+    TMP_CDS.SQL.Clear;
+    TMP_CDS.Close;
     FreeAndNil(TMP_CDS);
     FreeAndNil(condb);
   end;
@@ -295,9 +302,7 @@ begin
   try
     sql := 'select * from ' + tablename + ' where ' + key + ' = ' + value;
     sql := filterSQL(sql);
-    TMP_CDS.Close();
-    TMP_CDS.sql.Text := sql;
-    TMP_CDS.Open();
+    TMP_CDS.Open(sql);
     Fields := '';
     if (not TMP_CDS.IsEmpty) then
     begin
@@ -360,6 +365,7 @@ begin
       TMP_CDS.Open(sql);
       Fields := '';
       ja := CDSToJSONArray(TMP_CDS);
+      TMP_CDS.Close();
       Result := ja;
     except
       on e: Exception do
@@ -409,6 +415,7 @@ begin
       TMP_CDS.Open(sql);
       Fields := '';
       result := CDSToJSONObject(TMP_CDS);
+      TMP_CDS.Close();
     except
       on e: Exception do
       begin

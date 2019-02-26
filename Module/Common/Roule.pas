@@ -18,7 +18,7 @@ type
   private
     list: TObjectList<TRouleItem>;
   public
-    procedure SetRoule(name: string; ACtion: TClass; path: string = '';isInterceptor:Boolean=True);
+    procedure SetRoule(name: string; ACtion: TClass; path: string = ''; isInterceptor: Boolean = True);
     function GetRoule(url: string; var roule: string; var method: string): TRouleItem;
     function GetItem(roule: string): TRouleItem;
     constructor Create(); virtual;
@@ -26,6 +26,9 @@ type
   end;
 
 implementation
+
+uses
+  uConfig;
 
 { TRoule }
 
@@ -64,6 +67,7 @@ var
   item: TRouleItem;
   url1, url2: string;
   tmp: TStringList;
+  tmp1: string;
 begin
   Result := nil;
   url1 := '';
@@ -74,9 +78,8 @@ begin
     url := Trim(url);
     if url[url.Length] = '/' then
     begin
-      url := LeftStr(url, url.Length - 1);
+      tmp1 := '/';
     end;
-
     tmp.Delimiter := '/';
     tmp.DelimitedText := url;
 
@@ -94,6 +97,8 @@ begin
         end;
       end;
     end;
+    url1 := url1 + tmp1;
+    url2 := url2 + '/';
     if url1 = '' then
       url1 := '/';
     if url2 = '' then
@@ -122,13 +127,22 @@ begin
 
 end;
 
-procedure TRoule.SetRoule(name: string; ACtion: TClass; path: string;isInterceptor:Boolean);
+procedure TRoule.SetRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
 var
   item: TRouleItem;
 begin
+  if name.Trim <> '' then
+    name := '/' + name + '/'
+  else
+    name := '/';
+  if __APP__.Trim <> '' then
+  begin
+    name := '/' + __APP__ + name;
+  end;
+
   item := TRouleItem.Create;
   item.name := name;
-  item.Interceptor:=isInterceptor;
+  item.Interceptor := isInterceptor;
   item.ACtion := ACtion;
   item.path := path;
   list.Add(item);

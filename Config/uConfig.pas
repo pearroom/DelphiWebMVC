@@ -12,6 +12,7 @@ type
 const
   db_type = 'MYSQL';                       // MYSQL,SQLite,MSSQL,ORACLE
  // db_type2 = 'MSSQL';                       // MYSQL,SQLite,MSSQL,ORACLE
+  __APP__='Admin';            // 应用名称 ,可当做虚拟目录使用
   template = 'view';                        // 模板根目录
   template_type = '.html';                  // 模板文件类型
   session_start = true;                     // 启用session

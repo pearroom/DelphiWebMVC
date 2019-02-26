@@ -354,8 +354,7 @@ begin
   if (session_timer <> 0) then
     timerout := Now + (1 / 24 / 60) * session_timer
   else
-    timerout := Now + (1 / 24 / 60) * 60; //1小时过期
-
+    timerout := Now + (1 / 24 / 60) * 60 * 24; //24小时过期
   SessionListMap.setValueByKey(sessionid, '{}');
   SessionListMap.setTimeroutByKey(sessionid, DateTimeToStr(timerout));
   log('创建Session:' + sessionid);
@@ -392,13 +391,11 @@ begin
   if (s = '') then
   begin
     makeSession;
-   // checksession;
     s := '{}';
   end;
   jo := SO(s);
   jo.S[key] := value;
   SessionListMap.setValueByKey(sessionid, jo.AsString);
- // SessionListMap.get(sessionid).jo.Values[key] := value;
 end;
 
 function TView.SessionGet(key: string): string;

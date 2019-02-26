@@ -19,9 +19,7 @@ type
 implementation
 
 uses
-  uTableMap, UsersService, UsersInterface, SimpleXML;
-
-
+  uTableMap, UsersService, UsersInterface, SimpleXML, uConfig;
 
 procedure TLoginController.check();
 var
@@ -89,11 +87,11 @@ end;
 procedure TLoginController.getxml;
 var
   XmlDocument: IXmlDocument;
-  node:IXmlNode;
+  node: IXmlNode;
 begin
-  XmlDocument:=CreateXmlDocument('data','1.0','utf-8');
-  node:=XmlDocument.DocumentElement.CloneNode();
-  node.SetChildText('name','admin');
+  XmlDocument := CreateXmlDocument('data', '1.0', 'utf-8');
+  node := XmlDocument.DocumentElement.CloneNode();
+  node.SetChildText('name', 'admin');
   XmlDocument.DocumentElement.AppendChild(node);
   view.ShowXML(XmlDocument);
 end;
@@ -103,7 +101,7 @@ var
   users_service: IUsersInterface;
   ret: boolean;
   jo: ISuperObject;
-  s:string;
+  s: string;
 begin
 
   if isGET then

@@ -3,7 +3,7 @@ var oldelement = null;
 $("#add").click(function(){
     BootstrapDialog.show({
 		title : "增加",
-		message : $('<div></div>').load('/users/add'),
+		message : $('<div></div>').load('../users/add'),
 		closable : true,
 		cssClass : 'dialog400',
 
@@ -32,7 +32,7 @@ $("#edit").click(function(){
     }
     BootstrapDialog.show({
 		title : "修改",
-		message : $('<div></div>').load('/users/edit?id='+ID),
+		message : $('<div></div>').load('../users/edit?id='+ID),
 		closable : true,
 		cssClass : 'dialog400',
 
@@ -71,7 +71,7 @@ function initTable() {
                 
         showHeader : true,
         method : "get",  
-        url : "/Users/getList",   
+        url : "../Users/getList",   
         pagination : true, 
         sidePagination : 'server',
         idField : "id",
@@ -112,7 +112,7 @@ $(function(){
 })
 function search(){
 	ID="";
-    var param = {url:'/Users/getList','pageindex':1};
+    var param = {url:'../Users/getList','pageindex':1};
     $('#usertable1').bootstrapTable('refresh', param);
     
 }

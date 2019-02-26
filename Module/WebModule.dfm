@@ -81,7 +81,7 @@ object WM: TWM
         DirectoryMask = '\templates\*'
       end>
     RootDirectory = '.'
-    VirtualPath = '/'
+    VirtualPath = '/admin'
     Left = 112
     Top = 76
   end

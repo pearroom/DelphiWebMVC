@@ -18,7 +18,7 @@ var
 implementation
 
 uses
-  command, superobject, LogUnit;
+  command, superobject, LogUnit, uConfig;
 
 {$R *.dfm}
 
@@ -44,7 +44,14 @@ var
   ja: TSuperArray;
   I: Integer;
 begin
-
+  if __APP__.Trim <> '' then
+  begin
+    WebFile.VirtualPath := __APP__;
+  end
+  else
+  begin
+    WebFile.VirtualPath := '/';
+  end;
   WebFile.WebFileExtensions.Clear;
   json := OpenMIMEFile;
   if json <> nil then
