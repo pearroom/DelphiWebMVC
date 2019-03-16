@@ -1,5 +1,5 @@
 # DelphiWebMVC使用说明:
-	版本:2.0
+	版本:1.0
 	运行时使用管理员权限。
 	项目用到mORMot代码库,主页下载。
 	项目主页：http://www.delphiwebmvc.com
@@ -97,10 +97,6 @@
 	  session_timer = 0;                        // session过期时间分钟  0 不过期
 	  config = 'resources/config.json';         // 配置文件地址
 	  mime = 'resources/mime.json';             // mime配置文件地址
-	  package_config = 'resources/package.json';  // bpl包配置文件
-	  bpl_Reload_timer = 5;                       // bpl包检测时间间隔 默认5秒
-	  bpl_unload_timer = 10;                      // bpl包卸载时间间隔 默认10秒，加载新包后等待10秒卸载旧包
-	  open_package = true;                        // 使用 bpl包开发模式
 	  open_log = true;                          // 开启日志;open_debug=true并开启日志将在UI显示
 	  open_cache = true;                        // 开启缓存模式open_debug=false时有效
 	  open_interceptor = true;                  // 开启拦截器
