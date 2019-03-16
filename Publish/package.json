@@ -1,9 +1,0 @@
-{
-	"userpackage": {
-		"package": "./Package/UserPackage.bpl",
-		"ver": "0.1",
-		"TUserPackage": {
-			"getdata": "getdata"
-		}
-	}
-}
