@@ -54,6 +54,7 @@ begin
     try
       CDS.Connection := condb;
       sql := 'select count(1) as N from ' + from;
+      sql:=filterSQL(sql);
       CDS.Open(sql);
       count := CDS.FieldByName('N').AsInteger;
       CDS.Close;

@@ -116,12 +116,9 @@
         <DCCReference Include="..\Config\uConfig.pas"/>
         <DCCReference Include="..\Config\uRouleMap.pas"/>
         <DCCReference Include="..\Config\uTableMap.pas"/>
-        <DCCReference Include="..\Controller\IndexController.pas"/>
         <DCCReference Include="..\Config\uInterceptor.pas"/>
-        <DCCReference Include="..\Service\Interface\UsersInterface.pas"/>
-        <DCCReference Include="..\Service\UsersService.pas"/>
         <DCCReference Include="..\Module\Common\BaseController.pas"/>
-        <DCCReference Include="..\Module\Common\command.pas"/>
+        <DCCReference Include="..\Module\Common\Command.pas"/>
         <DCCReference Include="..\Module\Common\DBBase.pas"/>
         <DCCReference Include="..\Module\Common\DBMSSQL.pas"/>
         <DCCReference Include="..\Module\Common\DBMSSQL12.pas"/>
@@ -135,16 +132,28 @@
         <DCCReference Include="..\Module\Common\RouleItem.pas"/>
         <DCCReference Include="..\Module\Common\SessionList.pas"/>
         <DCCReference Include="..\Module\Common\superobject.pas"/>
+        <DCCReference Include="..\Module\Common\SimpleXML.pas"/>
         <DCCReference Include="..\Module\Common\ThSessionClear.pas"/>
         <DCCReference Include="..\Module\Common\View.pas"/>
-        <DCCReference Include="..\Module\Syn\SynHTTPWebBrokerBridge.pas"/>
         <DCCReference Include="..\Module\Syn\SynWebApp.pas"/>
         <DCCReference Include="..\Module\Syn\SynWebEnv.pas"/>
         <DCCReference Include="..\Module\Syn\SynWebReqRes.pas"/>
         <DCCReference Include="..\Module\Syn\SynWebServer.pas"/>
         <DCCReference Include="..\Module\Syn\SynWebUtils.pas"/>
         <DCCReference Include="..\Module\Common\BaseService.pas"/>
+        <DCCReference Include="..\Module\Common\FreeMemory.pas"/>
         <DCCReference Include="..\Module\Common\LogUnit.pas"/>
+        <DCCReference Include="..\Controller\IndexController.pas"/>
+        <DCCReference Include="..\Controller\MainController.pas"/>
+        <DCCReference Include="..\Controller\RoleController.pas"/>
+        <DCCReference Include="..\Controller\UserController.pas"/>
+        <DCCReference Include="..\Service\RoleService.pas"/>
+        <DCCReference Include="..\Service\UsersService.pas"/>
+        <DCCReference Include="..\Service\Interface\RoleInterface.pas"/>
+        <DCCReference Include="..\Service\Interface\UsersInterface.pas"/>
+        <DCCReference Include="..\Module\Common\RedisM.pas"/>
+        <DCCReference Include="..\Module\Common\RedisList.pas"/>
+        <DCCReference Include="..\Module\Common\RedisClear.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

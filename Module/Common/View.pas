@@ -12,8 +12,7 @@ interface
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, Web.HTTPProd, System.StrUtils,
   FireDAC.Comp.Client, Page, superobject, uConfig, Web.ReqMulti, Vcl.Imaging.jpeg,
-  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser, SimpleXML,
-  Winapi.ActiveX;
+  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser, SimpleXML;
 
 type
   TView = class
@@ -33,7 +32,9 @@ type
     Request: TWebRequest;
     function Q(str: string): string;
     procedure SessionSet(key, value: string);   // session控制 value传入json字符串作为对象存储
+    procedure SessionSetJSON(key: string; json: ISuperObject);
     function SessionGet(key: string): string;   // session 值获取
+    function SessionGetJSON(key: string): ISuperObject;   // session 值获取
     function SessionRemove(key: string): Boolean;
     function Cookies(): TCookie;                // cookies 操作
     function CookiesValue(key: string): string; // cookies 操作
@@ -42,6 +43,7 @@ type
     function InputInt(param: string): Integer;      // 返回参数值，get post
     function CDSToJSON(cds: TFDQuery): string;
     procedure setAttr(key, value: string);      // 设置视图标记显示内容 ，如果 value是 json 数组可以在 table 标记中显示
+    procedure setAttrJSON(key: string; json: ISuperObject);
     procedure ShowHTML(html: string);           // 显示模板
     procedure ShowDSJSON(cds: TFDQuery);        // 数据集转换为json显示
     procedure ShowText(text: string);           // 显示文本，json格式需转换后显示
@@ -49,7 +51,7 @@ type
     procedure ShowXML(xml: IXmlDocument);        // 显示 xml 数据
     procedure ShowPage(count: Integer; data: ISuperObject);   //渲染分页数据
     procedure Redirect(action: string; path: string = '');        // 跳转 action 路由,path 路径
-    procedure ShowCheckIMG(num: string; width, height: Integer);  // 显示验证码
+    procedure ShowVerifyCode(num: string);  // 显示验证码
     procedure Success(code: Integer = 0; msg: string = '');
     procedure Fail(code: Integer = -1; msg: string = '');
     constructor Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath: string);
@@ -96,17 +98,23 @@ begin
   params.Values[key] := value;
 end;
 
+procedure TView.setAttrJSON(key: string; json: ISuperObject);
+begin
+  if json <> nil then
+    setAttr(key, json.AsString);
+end;
+
 procedure TView.ShowText(text: string);
 begin
 
-  Response.ContentType := 'text/html; charset=' + default_charset;
+  Response.ContentType := 'text/html; charset=' + document_charset;
   Response.Content := text;
   Response.SendResponse;
 end;
 
 procedure TView.ShowXML(xml: IXmlDocument);
 begin
-  Response.ContentType := 'application/xml; charset=' + default_charset;
+  Response.ContentType := 'application/xml; charset=' + document_charset;
   Response.Content := xml.XML;
   Response.SendResponse;
 end;
@@ -133,7 +141,7 @@ var
 begin
   p := '';
   Response.Content := '';
-  Response.ContentType := 'text/html; charset=' + default_charset;
+  Response.ContentType := 'text/html; charset=' + document_charset;
   if (Trim(html) <> '') then
   begin
     S := url + html + template_type;
@@ -161,7 +169,7 @@ end;
 
 procedure TView.ShowJSON(jo: ISuperObject);
 begin
-  Response.ContentType := 'application/json; charset=' + default_charset;
+  Response.ContentType := 'application/json; charset=' + document_charset;
   Response.Content := jo.AsJSon();
   Response.SendResponse;
 end;
@@ -179,52 +187,52 @@ begin
 
 end;
 
-procedure TView.ShowCheckIMG(num: string; width, height: Integer);
+procedure TView.ShowVerifyCode(num: string);
 var
   bmp_t: TBitmap;
   jp: TJPEGImage;
   m: TMemoryStream;
+  i: integer;
+  s: string;
 begin
 
   jp := TJPEGImage.Create;
   bmp_t := TBitmap.Create;
+  m := TMemoryStream.Create;
   try
-    bmp_t.SetSize(width, height);
+    bmp_t.SetSize(90, 35);
     bmp_t.Transparent := True;
-    bmp_t.Canvas.Font.Color := clGreen; // 新建个水印字体颜色
-    bmp_t.Canvas.Pen.Style := psClear;
 
-    bmp_t.Canvas.Brush.Style := bsClear;
+    for i := 1 to length(num) do
+    begin
+      s := num[i];
+      bmp_t.Canvas.Rectangle(0, 0, 90, 35);
+      bmp_t.Canvas.Pen.Style := psClear;
+      bmp_t.Canvas.Brush.Style := bsClear;
 
-    bmp_t.Canvas.Font.Size := 16;
-    bmp_t.Canvas.Font.Style := [fsBold];
-    bmp_t.Canvas.Font.Name := 'Verdana';
-    bmp_t.Canvas.TextOut(0, 5, num); // 加入文字
-    // for I := 0 to 1 do
-    // begin
-    //
-    // bmp_t.Canvas.Pen.Color:=clGreen;
-    // bmp_t.Canvas.Pen.Width:=2;
-    // bmp_t.Canvas.MoveTo(0,13+i*8);
-    // bmp_t.Canvas.LineTo(width,13+i*8);
-    //
-    // end;
+      bmp_t.Canvas.Font.Color := Random(256) and $C0; // 新建个水印字体颜色
+      bmp_t.Canvas.Font.Size := Random(6) + 11;
+      bmp_t.Canvas.Font.Style := [fsBold];
+      bmp_t.Canvas.Font.Name := 'Verdana';
+
+      bmp_t.Canvas.TextOut(i * 15, 5, s); // 加入文字
+
+    end;
     jp.Assign(bmp_t);
-    // jp.CompressionQuality := 25;
-
-    // jp.Compress;
+    jp.CompressionQuality := 100;
+    jp.Compress;
    // jp.SaveToFile('img.jpg');
-    m := TMemoryStream.Create;
 
     jp.SaveToStream(m);
     m.Position := 0;
-    self.Response.ContentType := 'image/jpeg';
+    Response.ContentType := 'application/binary;';
     self.Response.ContentStream := m;
-    //Response.SendResponse;
+    Response.SendResponse;
   finally
-    bmp_t.Free;
-    jp.Free;
+    FreeAndNil(bmp_t);
+    FreeAndNil(jp);
   end;
+
 end;
 
 procedure TView.ShowDSJSON(cds: TFDQuery);
@@ -262,7 +270,7 @@ end;
 
 constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath: string);
 begin
-  Db := TDB.Create();
+  Db := TDB.Create(db_type);
   params := TStringList.Create;
   htmlpars := THTMLParser.Create(Db);
   self.ActionP := ActionPath;
@@ -398,6 +406,12 @@ begin
   SessionListMap.setValueByKey(sessionid, jo.AsString);
 end;
 
+procedure TView.SessionSetJSON(key: string; json: ISuperObject);
+begin
+  if json <> nil then
+    SessionSet(key, json.AsString);
+end;
+
 function TView.SessionGet(key: string): string;
 var
   s: string;
@@ -416,6 +430,11 @@ begin
     Result := jo.S[key];
   end;
  // result := SessionListMap.get(sessionid).jo.Values[key];
+end;
+
+function TView.SessionGetJSON(key: string): ISuperObject;
+begin
+  Result := SO(SessionGet(key));
 end;
 
 function TView.SessionRemove(key: string): Boolean;

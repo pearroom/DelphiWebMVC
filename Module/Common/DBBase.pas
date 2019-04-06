@@ -22,7 +22,7 @@ type
     FPageKey: string;
     function getJSONWhere(JSONwhere: ISuperObject): string;
     procedure SetFields(const Value: string);
-    function filterSQL(sql: string): string;
+
     procedure SetPageKey(const Value: string);
 
     { Private declarations }
@@ -33,6 +33,7 @@ type
     property Fields: string read FFields write SetFields; // 用来设置查询时显示那些字段
     property PageKey: string read FPageKey write SetPageKey; //分页ID设置 mssql2000 使用
     { Public declarations }
+    function filterSQL(sql: string): string;
     procedure DBlog(msg: string);
     procedure StartTransaction(); //启动事务
     procedure Commit;        //事务提交
@@ -60,7 +61,7 @@ type
     function Delete(tablename: string; where: string): Boolean; overload;
     function TryConnDB(): Boolean;
     function closeDB(): Boolean;
-    constructor Create();
+    constructor Create(dbtype:string);
     destructor Destroy; override;
   end;
 
@@ -201,11 +202,11 @@ begin
 
 end;
 
-constructor TDBBase.Create();
+constructor TDBBase.Create(dbtype:string);
 begin
 
   condb := TFDConnection.Create(nil);
-  condb.ConnectionDefName := db_type;
+  condb.ConnectionDefName := dbtype;
   TMP_CDS := TFDQuery.Create(nil);
   TMP_CDS.Connection := condb;
 
@@ -346,6 +347,8 @@ end;
 
 function TDBBase.filterSQL(sql: string): string;
 begin
+  if show_sql then
+    log(sql);
   Result := sql.Replace(';', '').Replace('-', '');
 end;
 

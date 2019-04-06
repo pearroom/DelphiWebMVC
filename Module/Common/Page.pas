@@ -33,15 +33,15 @@ constructor TPage.Create(htmlfile: string; params: TStringList; _url: string);
 begin
   Page := TStringList.Create;
   plist := params;
-  if UpperCase(default_charset) = 'UTF-8' then
+  if UpperCase(document_charset) = 'UTF-8' then
   begin
     Page.LoadFromFile(htmlfile, TEncoding.UTF8);
   end
-  else if UpperCase(default_charset) = 'UTF-7' then
+  else if UpperCase(document_charset) = 'UTF-7' then
   begin
     Page.LoadFromFile(htmlfile, TEncoding.UTF7);
   end
-  else if UpperCase(default_charset) = 'UNICODE' then
+  else if UpperCase(document_charset) = 'UNICODE' then
   begin
     Page.LoadFromFile(htmlfile, TEncoding.Unicode);
   end

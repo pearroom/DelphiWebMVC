@@ -13,11 +13,14 @@ interface
 
 uses
   System.Classes, System.SysUtils, Web.HTTPApp, View, IdCustomHTTPServer, System.Net.URLClient,
-  System.Net.HttpClient, System.Net.HttpClientComponent;
+  System.Net.HttpClient, System.Net.HttpClientComponent, IdURI, IdGlobal, RedisM,
+  RedisList;
 
 type
   TBaseController = class
   private
+    RedisM: TRedisM;
+    RedisItem: TRedisItem;
     FRequest: TWebRequest;
     FResponse: TWebResponse;
     FActionPath: string;
@@ -37,6 +40,11 @@ type
     function isPatch: Boolean;
     function isNil(text: string): Boolean;
     function isNotNil(text: string): Boolean;
+    procedure RedisSetKey(key: string; value: string; timerout: Integer = 0);
+    procedure RedisSetExpire(key: string; timerout: Integer);
+    function RedisGetKey(key: string): string;
+    function URLDecode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
+    function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function Interceptor: boolean;
     procedure CreateView();
     function HttpGet(url: string; encode: TEncoding): string;
@@ -115,6 +123,36 @@ begin
   Result := Request.MethodType = mtPut;
 end;
 
+function TBaseController.RedisGetKey(key: string): string;
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    Result := RedisM.getKey(key)
+  else
+    Result := '';
+end;
+
+procedure TBaseController.RedisSetExpire(key: string; timerout: Integer);
+begin
+  if (_RedisList <> nil) then
+    RedisM.setExpire(key, timerout);
+end;
+
+procedure TBaseController.RedisSetKey(key, value: string; timerout: Integer = 0);
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    RedisM.setKey(key, value, timerout);
+end;
+
 procedure TBaseController.SetActionPath(const Value: string);
 begin
   FActionPath := Value;
@@ -130,6 +168,22 @@ begin
   FResponse := Value;
 end;
 
+function TBaseController.URLDecode(Asrc: string; AByteEncoding: IIdtextEncoding): string;
+begin
+  if AByteEncoding <> nil then
+    Result := TIdURI.URLDecode(Asrc, AByteEncoding)
+  else
+    Result := TIdURI.URLDecode(Asrc);
+end;
+
+function TBaseController.URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding): string;
+begin
+  if AByteEncoding <> nil then
+    Result := TIdURI.URLEncode(Asrc, AByteEncoding)
+  else
+    Result := TIdURI.URLEncode(Asrc);
+end;
+
 function TBaseController.AppPath: string;
 begin
   Result := WebApplicationDirectory;
@@ -139,13 +193,15 @@ constructor TBaseController.Create();
 begin
   View := nil;
   ActionPath := '';
-
+  RedisItem := nil;
+  RedisM := nil;
 end;
 
 procedure TBaseController.CreateView;
 begin
   try
     View := TView.Create(Response, Request, ActionPath);
+    RedisItem := nil;
   except
     on e: Exception do
     begin
@@ -157,6 +213,10 @@ end;
 
 destructor TBaseController.Destroy;
 begin
+  if (Redisitem <> nil) and (_RedisList <> nil) then
+  begin
+    _RedisList.CloseRedis(Redisitem.guid);
+  end;
   FreeAndNil(View);
   inherited;
 end;

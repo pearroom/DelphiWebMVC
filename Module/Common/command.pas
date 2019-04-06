@@ -11,7 +11,8 @@ interface
 
 uses
   System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes, Web.HTTPApp,
-  uConfig, System.DateUtils, SessionList, superobject, uInterceptor, uRouleMap;
+  uConfig, System.DateUtils, SessionList, superobject, uInterceptor, uRouleMap,
+  RedisList;
 
 var
   RouleMap: TRouleMap = nil;
@@ -20,6 +21,7 @@ var
   rooturl: string;
   RTTIContext: TRttiContext;
   _Interceptor: TInterceptor;
+  _RedisList: TRedisList;
 
 function OpenConfigFile(): ISuperObject;
 
@@ -38,7 +40,7 @@ procedure setDataBase(jo: ISuperObject);
 implementation
 
 uses
-  wnMain, DES, LogUnit, wnDM, ThSessionClear, FreeMemory;
+  wnMain, DES, LogUnit, wnDM, ThSessionClear, FreeMemory, RedisM;
 
 var
   sessionclear: TThSessionClear;
@@ -60,7 +62,7 @@ var
   typ: string;
 begin
 
-  web.Response.ContentEncoding := default_charset;
+  web.Response.ContentEncoding := document_charset;
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
   url := LowerCase(web.Request.PathInfo);
@@ -106,7 +108,7 @@ begin
         end
         else
         begin
-          web.Response.ContentType := 'text/html; charset=' + default_charset;
+          web.Response.ContentType := 'text/html; charset=' + document_charset;
           web.Response.Content := url + '  地址不存在';
           web.Response.SendResponse;
         end;
@@ -116,7 +118,7 @@ begin
     end
     else
     begin
-      web.Response.ContentType := 'text/html; charset=' + default_charset;
+      web.Response.ContentType := 'text/html; charset=' + document_charset;
       web.Response.Content := url + '  地址不存在';
       web.Response.SendResponse;
     end;
@@ -237,10 +239,20 @@ begin
   if jo <> nil then
   begin
     //服务启动在SynWebApp查询
-    if auto_free_memory then
-      FreeMemory := TFreeMemory.Create(False);
     SessionName := '__guid_session';
     FPort := jo.O['Server'].S['Port'];
+    _RedisList := nil;
+    Redis_IP := jo.O['Redis'].S['Host'];
+    Redis_Port := jo.O['Redis'].I['Port'];
+    Redis_PassWord := jo.O['Redis'].S['PassWord'];
+    Redis_InitSize := jo.O['Redis'].I['InitSize'];
+    Redis_TimerOut := jo.O['Redis'].I['TimerOut'];
+    if redis_ip <> '' then
+    begin
+      _RedisList := TRedisList.Create(Redis_InitSize);
+    end;
+    if auto_free_memory then
+      FreeMemory := TFreeMemory.Create(False);
     RouleMap := TRouleMap.Create;
     SessionListMap := TSessionList.Create;
     sessionclear := TThSessionClear.Create(false);
@@ -267,7 +279,8 @@ begin
       FreeMemory.Terminate;
       FreeAndNil(FreeMemory);
     end;
-
+    if _RedisList <> nil then
+      FreeAndNil(_RedisList);
   end;
 end;
 
@@ -292,12 +305,14 @@ begin
     DM.DBManager.DriverDefFileName := db_type;
     DM.DBManager.AddConnectionDef(db_type, db_type, oParams);
     DM.DBManager.Active := true;
+    //这里可以连接多个其他数据源 比如同时连接 mysql 再连接 sqlserver
+    //DM.DBManagerSQLServer.DriverDefFileName := db_type2;
+    //DM.DBManagerSQLServer.AddConnectionDef(db_type2, db_type2, oParams);
+    //DM.DBManagerSQLServer.Active := true;
   finally
     oParams.Free;
   end;
-  //这里可以连接多个其他数据源 比如同时连接 mysql 再连接 sqlserver
- // DM.DBManagerSQLServer.AddConnectionDef(db_type2, db_type2, oParams);
-  //DM.DBManagerSQLServer.Active := true;
+
 end;
 
 end.

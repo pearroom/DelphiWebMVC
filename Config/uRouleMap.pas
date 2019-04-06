@@ -14,13 +14,16 @@ type
 implementation
 
 uses
-  IndexController;
+  IndexController, MainController, RoleController, UserController;
 
 constructor TRouleMap.Create;
 begin
   inherited;
   //路径,控制器,视图目录
-  SetRoule('', TIndexController, 'index');
+  SetRoule('', TIndexController, '', False);
+  SetRoule('Main', TMainController, '');
+  SetRoule('User', TUserController, 'User');
+  SetRoule('Role', TRoleController, 'Role');
 
 end;
 

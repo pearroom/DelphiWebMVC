@@ -5,6 +5,13 @@
 		"HTTPQueueLength":1000,
 		"ChildThreadCount":10
 	},
+	"Redis":{
+		"Host":"",
+		"Port":6379,
+		"PassWord":"admin",
+		"InitSize":5,
+		"TimerOut":60
+	},
 	"MYSQL": {
 		"DriverID": "MySQL",
 		"Server": "127.0.0.1",

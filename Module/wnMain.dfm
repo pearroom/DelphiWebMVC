@@ -1,11 +1,9 @@
 object Main: TMain
   Left = 271
   Top = 114
-  BorderIcons = [biSystemMenu, biMinimize]
-  BorderStyle = bsSingle
   Caption = 'Main'
-  ClientHeight = 373
-  ClientWidth = 459
+  ClientHeight = 363
+  ClientWidth = 449
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -22,22 +20,24 @@ object Main: TMain
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 459
+    Width = 449
     Height = 33
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 459
     object ButtonOpenBrowser: TButton
       Left = 76
       Top = 1
-      Width = 309
+      Width = 299
       Height = 31
       Align = alClient
       Caption = 'Open Browser'
       TabOrder = 0
       OnClick = ButtonOpenBrowserClick
+      ExplicitWidth = 309
     end
     object btnClose: TButton
-      Left = 385
+      Left = 375
       Top = 1
       Width = 73
       Height = 31
@@ -45,6 +45,7 @@ object Main: TMain
       Caption = 'Close'
       TabOrder = 1
       OnClick = btnCloseClick
+      ExplicitLeft = 385
     end
     object edtport: TEdit
       AlignWithMargins = True
@@ -68,31 +69,37 @@ object Main: TMain
   object pgc1: TPageControl
     Left = 0
     Top = 33
-    Width = 459
-    Height = 321
+    Width = 449
+    Height = 311
     ActivePage = ts3
     Align = alClient
     MultiLine = True
     Style = tsFlatButtons
     TabOrder = 1
+    ExplicitWidth = 459
+    ExplicitHeight = 321
     object ts3: TTabSheet
       Caption = #26085#24535
       ImageIndex = 2
+      ExplicitWidth = 451
+      ExplicitHeight = 290
       object pnl2: TPanel
         Left = 0
         Top = 0
-        Width = 451
+        Width = 441
         Height = 27
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitWidth = 451
         object lbllog: TLabel
-          Left = 448
+          Left = 438
           Top = 0
           Width = 3
           Height = 27
           Align = alRight
           Layout = tlCenter
+          ExplicitLeft = 448
           ExplicitHeight = 13
         end
         object btnlogget: TButton
@@ -109,16 +116,22 @@ object Main: TMain
       object mmolog: TMemo
         Left = 0
         Top = 27
-        Width = 451
-        Height = 263
+        Width = 441
+        Height = 253
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 1
+        ExplicitWidth = 451
+        ExplicitHeight = 263
       end
     end
     object ts1: TTabSheet
       Caption = #20851#20110
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pnl1: TPanel
         Left = 0
         Top = 0
@@ -247,8 +260,8 @@ object Main: TMain
   end
   object stat1: TStatusBar
     Left = 0
-    Top = 354
-    Width = 459
+    Top = 344
+    Width = 449
     Height = 19
     Cursor = crHandPoint
     Panels = <
@@ -257,6 +270,8 @@ object Main: TMain
         Width = 300
       end>
     OnClick = stat1Click
+    ExplicitTop = 354
+    ExplicitWidth = 459
   end
   object TrayIcon1: TTrayIcon
     OnClick = TrayIcon1Click
