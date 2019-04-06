@@ -22,10 +22,17 @@
 	例：
 	{
 		"Server": {
-			"Port": "8001",
-			"Compress":"deflate",  //压缩类型 none,gzip,deflate
+			"Port": "8004",
+			"Compress":"deflate",
 			"HTTPQueueLength":1000,
 			"ChildThreadCount":10
+		},
+		"Redis":{
+			"Host":"",
+			"Port":6379,
+			"PassWord":"admin",
+			"InitSize":5,
+			"TimerOut":60
 		},
 		"MYSQL": {
 			"DriverID": "MySQL",
@@ -138,12 +145,9 @@
 	  inherited;
 	//路径,控制器,视图目录,是否拦截
 	//SetRoule(name: string; ACtion: TClass; path: string = '';isInterceptor:Boolean=True);
-	  SetRoule('/', TLoginController, 'login');
-	  SetRoule('/Main', TMainController, 'main');
-	  SetRoule('/Users', TUsersController, 'users');
-	  SetRoule('/kucun', TKuCunController, 'kucun');
-	  SetRoule('/caiwu', TCaiWuController, 'caiwu');
-	  SetRoule('/xiaoshou', TXiaoShouController, 'xiaoshou');
+	  SetRoule('', TLoginController, 'login');
+	  SetRoule('Main', TMainController, 'main');
+	  SetRoule('Users', TUsersController, 'users');
 	end;
 
 	end.
