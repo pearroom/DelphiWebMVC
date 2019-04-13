@@ -24,7 +24,6 @@ object Main: TMain
     Height = 33
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 459
     object ButtonOpenBrowser: TButton
       Left = 76
       Top = 1
@@ -34,7 +33,6 @@ object Main: TMain
       Caption = 'Open Browser'
       TabOrder = 0
       OnClick = ButtonOpenBrowserClick
-      ExplicitWidth = 309
     end
     object btnClose: TButton
       Left = 375
@@ -45,7 +43,6 @@ object Main: TMain
       Caption = 'Close'
       TabOrder = 1
       OnClick = btnCloseClick
-      ExplicitLeft = 385
     end
     object edtport: TEdit
       AlignWithMargins = True
@@ -76,13 +73,9 @@ object Main: TMain
     MultiLine = True
     Style = tsFlatButtons
     TabOrder = 1
-    ExplicitWidth = 459
-    ExplicitHeight = 321
     object ts3: TTabSheet
       Caption = #26085#24535
       ImageIndex = 2
-      ExplicitWidth = 451
-      ExplicitHeight = 290
       object pnl2: TPanel
         Left = 0
         Top = 0
@@ -91,7 +84,6 @@ object Main: TMain
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 451
         object lbllog: TLabel
           Left = 438
           Top = 0
@@ -99,7 +91,6 @@ object Main: TMain
           Height = 27
           Align = alRight
           Layout = tlCenter
-          ExplicitLeft = 448
           ExplicitHeight = 13
         end
         object btnlogget: TButton
@@ -121,8 +112,6 @@ object Main: TMain
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 1
-        ExplicitWidth = 451
-        ExplicitHeight = 263
       end
     end
     object ts1: TTabSheet
@@ -270,8 +259,6 @@ object Main: TMain
         Width = 300
       end>
     OnClick = stat1Click
-    ExplicitTop = 354
-    ExplicitWidth = 459
   end
   object TrayIcon1: TTrayIcon
     OnClick = TrayIcon1Click

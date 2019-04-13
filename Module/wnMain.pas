@@ -63,6 +63,7 @@ begin
 end;
 
 procedure TMain.btnCloseClick(Sender: TObject);
+
 begin
   Close;
 end;
@@ -121,7 +122,7 @@ end;
 
 procedure TMain.FormShow(Sender: TObject);
 begin
-  btnlogget.Click;
+  //btnlogget.Click;
 end;
 
 procedure TMain.TrayIcon1Click(Sender: TObject);

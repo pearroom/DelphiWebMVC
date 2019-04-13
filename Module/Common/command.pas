@@ -12,7 +12,7 @@ interface
 uses
   System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes, Web.HTTPApp,
   uConfig, System.DateUtils, SessionList, superobject, uInterceptor, uRouleMap,
-  RedisList;
+  RedisList, LogUnit;
 
 var
   RouleMap: TRouleMap = nil;
@@ -22,6 +22,8 @@ var
   RTTIContext: TRttiContext;
   _Interceptor: TInterceptor;
   _RedisList: TRedisList;
+  _LogList: TStringList = nil;
+  _logThread: TLogTh = nil;
 
 function OpenConfigFile(): ISuperObject;
 
@@ -40,7 +42,7 @@ procedure setDataBase(jo: ISuperObject);
 implementation
 
 uses
-  wnMain, DES, LogUnit, wnDM, ThSessionClear, FreeMemory, RedisM;
+  wnMain, DES, wnDM, ThSessionClear, FreeMemory, RedisM;
 
 var
   sessionclear: TThSessionClear;
@@ -239,6 +241,8 @@ begin
   if jo <> nil then
   begin
     //服务启动在SynWebApp查询
+    _LogList := TStringList.Create;
+    _logThread := TLogTh.Create(false);
     SessionName := '__guid_session';
     FPort := jo.O['Server'].S['Port'];
     _RedisList := nil;
@@ -268,6 +272,10 @@ procedure CloseServer;
 begin
   if SessionListMap <> nil then
   begin
+    _LogList.Clear;
+    FreeAndNil(_LogList);
+    _logThread.Terminate;
+    FreeAndNil(_logThread);
     FreeAndNil(_Interceptor);
     FreeAndNil(SessionListMap);
     FreeAndNil(RouleMap);
