@@ -12,12 +12,12 @@ interface
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, Web.HTTPProd, System.StrUtils,
   FireDAC.Comp.Client, Page, superobject, uConfig, Web.ReqMulti, System.RegularExpressions,
-  Winapi.ActiveX;
+  Winapi.ActiveX,uDBConfig;
 
 type
   THTMLParser = class
   private
-    Db: TDB;
+    Db: TDBConfig;
     procedure foreachother(var text: string);
     procedure foreachinclude(var text: string; param: TStringList; url: string);
     procedure foreachclear(var text: string);
@@ -33,7 +33,7 @@ type
     function checkifwhere(where: string): boolean;
   public
     procedure Parser(var text: string; param: TStringList; url: string);
-    constructor Create(_Db: TDB);
+    constructor Create(_Db: TDBConfig);
   end;
 
 implementation
@@ -87,8 +87,8 @@ begin
   where := where.Replace('lt', ' < ');
   where := where.Replace('==', ' = ');
   try
-    Db.TMP_CDS.Open('select ' + where + ' as sn');
-    sn := Db.TMP_CDS.FieldByName('sn').AsInteger;
+    Db.Default.TMP_CDS.Open('select ' + where + ' as sn');
+    sn := Db.Default.TMP_CDS.FieldByName('sn').AsInteger;
     Result := sn = 1;
   except
     Result := false;
@@ -96,7 +96,7 @@ begin
 
 end;
 
-constructor THTMLParser.Create(_Db: TDB);
+constructor THTMLParser.Create(_Db: TDBConfig);
 begin
   self.Db := _Db;
 end;

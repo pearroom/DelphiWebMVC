@@ -47,7 +47,7 @@ begin
           begin
             if SessionListMap.deleteSession(key) then
             begin
-              log('清理Session-' + key);
+            //  log('清理Session-' + key);
               break;
             end;
 

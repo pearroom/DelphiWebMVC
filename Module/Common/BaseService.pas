@@ -10,21 +10,21 @@ unit BaseService;
 interface
 
 uses
-  uConfig;
+  uConfig,uDBConfig;
 
 type
   TBaseService = class(TInterfacedObject)
   public
-    Db: TDB;
+    Db: TDBConfig;
     function Q(str: string): string;
-    constructor Create(_Db: TDB);
+    constructor Create(_Db: TDBConfig);
   end;
 
 implementation
 
 { TBaseService }
 
-constructor TBaseService.Create(_Db: TDB);
+constructor TBaseService.Create(_Db: TDBConfig);
 begin
   Db := _Db;
 end;

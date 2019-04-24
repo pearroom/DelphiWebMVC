@@ -3,7 +3,7 @@ unit UsersService;
 interface
 
 uses
-  UsersInterface, uConfig, superobject, uTableMap, BaseService;
+  UsersInterface, superobject, uTableMap, BaseService;
 
 type
   TUsersService = class(TBaseService, IUsersInterface)
@@ -22,12 +22,12 @@ implementation
 
 function TUsersService.checkuser(map: ISuperObject): ISuperObject;
 begin
-  Result := Db.FindFirst(tb_users, map);
+  Result := Db.Default.FindFirst(tb_users, map);
 end;
 
 function TUsersService.delById(id: string): Boolean;
 begin
-  Result := Db.DeleteByKey(tb_users, 'id', id);
+  Result := Db.Default.DeleteByKey(tb_users, 'id', id);
 end;
 
 function TUsersService.getdata(var con: Integer; map: ISuperObject): ISuperObject;
@@ -38,7 +38,7 @@ begin
   if map.S['roleid'] <> '' then
     sql := 'and roleid= ' + Q(map.S['roleid']);
 
-  list := Db.FindPage(con, tb_users, sql, 'id', map.I['page'] - 1, map.I['limit']);
+  list := Db.Default.FindPage(con, tb_users, sql, 'id', map.I['page'] - 1, map.I['limit']);
   Result := list;
 end;
 
@@ -53,10 +53,10 @@ begin
   if id = '' then
   begin
     map.Delete('id');
-    ret := Db.FindFirst(tb_users, map);
+    ret := Db.Default.FindFirst(tb_users, map);
     if ret = nil then
     begin
-      with Db.AddData(tb_users) do
+      with Db.Default.AddData(tb_users) do
       begin
         FieldByName('username').AsString := map.S['username'];
         FieldByName('realname').AsString := map.S['realname'];
@@ -73,10 +73,10 @@ begin
   end
   else
   begin
-    ret := Db.FindFirst(tb_users, 'and id<>' + id + ' and username=' + Q(map.S['username']));
+    ret := Db.Default.FindFirst(tb_users, 'and id<>' + id + ' and username=' + Q(map.S['username']));
     if ret = nil then
     begin
-      with db.EditData(tb_users, 'id', id) do
+      with db.Default.EditData(tb_users, 'id', id) do
       begin
         FieldByName('username').AsString := map.S['username'];
         FieldByName('realname').AsString := map.S['realname'];

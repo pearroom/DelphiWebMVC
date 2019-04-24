@@ -22,8 +22,7 @@ var
   RTTIContext: TRttiContext;
   _Interceptor: TInterceptor;
   _RedisList: TRedisList;
-  _LogList: TStringList = nil;
-  _logThread: TLogTh = nil;
+
 
 function OpenConfigFile(): ISuperObject;
 
@@ -246,14 +245,17 @@ begin
     SessionName := '__guid_session';
     FPort := jo.O['Server'].S['Port'];
     _RedisList := nil;
-    Redis_IP := jo.O['Redis'].S['Host'];
-    Redis_Port := jo.O['Redis'].I['Port'];
-    Redis_PassWord := jo.O['Redis'].S['PassWord'];
-    Redis_InitSize := jo.O['Redis'].I['InitSize'];
-    Redis_TimerOut := jo.O['Redis'].I['TimerOut'];
-    if redis_ip <> '' then
+    if jo.O['Redis'] <> nil then
     begin
-      _RedisList := TRedisList.Create(Redis_InitSize);
+      Redis_IP := jo.O['Redis'].S['Host'];
+      Redis_Port := jo.O['Redis'].I['Port'];
+      Redis_PassWord := jo.O['Redis'].S['PassWord'];
+      Redis_InitSize := jo.O['Redis'].I['InitSize'];
+      Redis_TimerOut := jo.O['Redis'].I['TimerOut'];
+      if redis_ip <> '' then
+      begin
+        _RedisList := TRedisList.Create(Redis_InitSize);
+      end;
     end;
     if auto_free_memory then
       FreeMemory := TFreeMemory.Create(False);
@@ -295,30 +297,34 @@ end;
 procedure setDataBase(jo: ISuperObject);
 var
   oParams: TStrings;
-  jo1: ISuperObject;
-  item: TSuperAvlEntry;
+  dbjo, jo1: ISuperObject;
+  dbitem, item: TSuperAvlEntry;
   value: string;
 begin
+  DM := TDM.Create(nil);
+  DM.DBManager.Active := false;
 
-  oParams := TStringList.Create;
   try
-    jo1 := jo.O[db_type];
-    for item in jo1.AsObject do
+    dbjo := jo.O['DBConfig'];
+    if dbjo <> nil then
     begin
-      value := item.Name + '=' + item.Value.AsString;
-      oParams.Add(value);
+
+      for dbitem in dbjo.AsObject do
+      begin
+        oParams := TStringList.Create;
+        jo1 := dbjo.O[dbitem.Name];
+        for item in jo1.AsObject do
+        begin
+          value := item.Name + '=' + item.Value.AsString;
+          oParams.Add(value);
+        end;
+        DM.DBManager.AddConnectionDef(dbitem.Name, dbitem.Name, oParams);
+        oParams.Free;
+      end;
     end;
-    DM := TDM.Create(nil);
-    DM.DBManager.Active := false;
-    DM.DBManager.DriverDefFileName := db_type;
-    DM.DBManager.AddConnectionDef(db_type, db_type, oParams);
-    DM.DBManager.Active := true;
-    //这里可以连接多个其他数据源 比如同时连接 mysql 再连接 sqlserver
-    //DM.DBManagerSQLServer.DriverDefFileName := db_type2;
-    //DM.DBManagerSQLServer.AddConnectionDef(db_type2, db_type2, oParams);
-    //DM.DBManagerSQLServer.Active := true;
   finally
-    oParams.Free;
+    DM.DBManager.Active := true;
+
   end;
 
 end;

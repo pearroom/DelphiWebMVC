@@ -25,6 +25,10 @@ type
     procedure Execute; override;
   end;
 
+var
+  _LogList: TStringList = nil;
+  _logThread: TLogTh = nil;
+
 implementation
 
 uses

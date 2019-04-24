@@ -1,5 +1,13 @@
-//框架要求delphi启动需要使用管理员权限
-//部署exe启动也需要管理员权限
+{*******************************************************}
+{                                                       }
+{       苏兴迎                                         }
+{                                                       }
+{       管理权限启动delphi ，部署exe管理员启动          }
+{                                                       }
+{*******************************************************}
+
+
+
 program DelphiWebMVC_LayUI;
 {$APPTYPE GUI}
 
@@ -7,7 +15,6 @@ uses
   Vcl.Forms,
   Web.WebReq,
   Winapi.Windows,
-  IdHTTPWebBrokerBridge,
   wnMain in '..\Module\wnMain.pas' {Main},
   WebModule in '..\Module\WebModule.pas' {WM: TWebModule},
   wnDM in '..\Module\wnDM.pas' {DM: TDataModule},
@@ -16,7 +23,7 @@ uses
   uTableMap in '..\Config\uTableMap.pas',
   uInterceptor in '..\Config\uInterceptor.pas',
   BaseController in '..\Module\Common\BaseController.pas',
-  Command in '..\Module\Common\Command.pas',
+  command in '..\Module\Common\Command.pas',
   DBBase in '..\Module\Common\DBBase.pas',
   DBMSSQL in '..\Module\Common\DBMSSQL.pas',
   DBMSSQL12 in '..\Module\Common\DBMSSQL12.pas',
@@ -51,7 +58,8 @@ uses
   UsersInterface in '..\Service\Interface\UsersInterface.pas',
   RedisM in '..\Module\Common\RedisM.pas',
   RedisList in '..\Module\Common\RedisList.pas',
-  RedisClear in '..\Module\Common\RedisClear.pas';
+  RedisClear in '..\Module\Common\RedisClear.pas',
+  uDBConfig in '..\Config\uDBConfig.pas';
 
 {$R *.res}
 var

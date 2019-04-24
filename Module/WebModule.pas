@@ -23,19 +23,27 @@ uses
 {$R *.dfm}
 
 procedure TWM.WebModuleBeforeDispatch(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  s: string;
+  error: string;
+
 begin
   try
     OpenRoule(Self, RouleMap, Handled);
   except
     on e: Exception do
     begin
-      log(e.ToString);
-      Response.Content := e.ToString;
+      error := e.ToString;
+      log(error);
+      Response.StatusCode := 500;
+      s := '<html><body><div style="text-align: center;">';
+      s := s + '<div><h1> Error 500 </h1></div>';
+      s := s + '<div>' + error + '</div></div></body></html>';
+      Response.Content := s;
       Response.SendResponse;
     end;
 
   end;
-
 end;
 
 procedure TWM.WebModuleCreate(Sender: TObject);

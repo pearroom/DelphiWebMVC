@@ -3,7 +3,7 @@ unit UserController;
 interface
 
 uses
-  System.SysUtils, System.Classes, FireDAC.Stan.Intf, Data.DB, superobject, View,
+  System.SysUtils, System.Classes, superobject, View,
   BaseController;
 
 type
@@ -20,7 +20,7 @@ type
 implementation
 
 uses
-  uTableMap, UsersService, RoleService, UsersInterface, RoleInterface;
+  UsersService, RoleService, UsersInterface, RoleInterface;
 
 { TUserController }
 

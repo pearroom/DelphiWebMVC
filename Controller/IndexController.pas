@@ -3,8 +3,7 @@ unit IndexController;
 interface
 
 uses
-  System.SysUtils, System.Classes, FireDAC.Stan.Intf, Data.DB, superobject, View,
-  BaseController;
+  System.SysUtils, System.Classes, superobject, View, BaseController;
 
 type
   TIndexController = class(TBaseController)
@@ -33,6 +32,8 @@ begin
   user_service := TUsersService.Create(View.Db);
   with view do
   begin
+//    ret := Db.MYSQL.FindFirst('tb_users');  //mysql สนำร
+//    s := ret.AsString;
     map := SO();
     map.S['username'] := Input('username');
     map.S['pwd'] := Input('pwd');

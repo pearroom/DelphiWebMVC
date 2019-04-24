@@ -3,7 +3,7 @@ unit RoleService;
 interface
 
 uses
-  RoleInterface, uConfig, superobject, uTableMap, BaseService, System.SysUtils;
+  RoleInterface, superobject, uTableMap, BaseService, System.SysUtils;
 
 type
   TRoleService = class(TBaseService, IRoleInterface)
@@ -30,9 +30,9 @@ var
 begin
 
   try
-    ret := db.FindFirst(dict_role, 'and id=' + roleid);
+    ret := db.Default.FindFirst(dict_role, 'and id=' + roleid);
     menus := ret.S['menus'] + menuid;
-    with db.EditData(dict_role, 'id', ret.S['id']) do
+    with db.Default.EditData(dict_role, 'id', ret.S['id']) do
     begin
       FieldByName('menus').AsString := menus;
       Post;
@@ -45,7 +45,7 @@ end;
 
 function TRoleService.del(id: string): Boolean;
 begin
-  Result := Db.DeleteByKey(dict_role, 'id', id);
+  Result := Db.Default.DeleteByKey(dict_role, 'id', id);
 end;
 
 function TRoleService.delmenu(roleid, menuid: string): boolean;
@@ -56,10 +56,10 @@ begin
 
   try
 
-    ret := db.FindFirst(dict_role, 'and id=' + roleid);
+    ret := db.Default.FindFirst(dict_role, 'and id=' + roleid);
     menus := ret.S['menus'];
     menus := menus.replace(menuid + ',', '');
-    with db.EditData(dict_role, 'id', ret.S['id']) do
+    with db.Default.EditData(dict_role, 'id', ret.S['id']) do
     begin
       FieldByName('menus').AsString := menus;
       Post;
@@ -72,7 +72,7 @@ end;
 
 function TRoleService.getAlldata(map: ISuperObject): ISuperObject;
 begin
-  Result := Db.Find(dict_role, '');
+  Result := Db.Default.Find(dict_role, '');
 end;
 
 function TRoleService.getMenu(var con: integer; map: ISuperObject): ISuperObject;
@@ -83,7 +83,7 @@ var
   menus: string;
 begin
   roleid := map.S['roleid'];
-  rolejo := Db.FindFirst(dict_role, 'and id=' + roleid);
+  rolejo := Db.Default.FindFirst(dict_role, 'and id=' + roleid);
   menus := rolejo.S['menus'];
   if menus <> '' then
   begin
@@ -94,7 +94,7 @@ begin
     menus := '0';
   end;
   sql := ' dict_menu where id in (' + menus + ')';
-  list := Db.QueryPage(con, '*', sql, 'id', map.I['page'] - 1, map.I['limit']);
+  list := Db.Default.QueryPage(con, '*', sql, 'id', map.I['page'] - 1, map.I['limit']);
   Result := list;
 end;
 
@@ -106,7 +106,7 @@ var
   menus: string;
 begin
   roleid := map.S['roleid'];
-  rolejo := Db.FindFirst(dict_role, 'and id=' + roleid);
+  rolejo := Db.Default.FindFirst(dict_role, 'and id=' + roleid);
   menus := rolejo.S['menus'];
   if menus <> '' then
   begin
@@ -117,7 +117,7 @@ begin
     menus := '0';
   end;
   sql := ' dict_menu where id not in (' + menus + ')';
-  list := Db.QueryPage(con, '*', sql, 'id', map.I['page'] - 1, map.I['limit']);
+  list := Db.Default.QueryPage(con, '*', sql, 'id', map.I['page'] - 1, map.I['limit']);
   Result := list;
 end;
 
@@ -125,7 +125,7 @@ function TRoleService.getdata(var con: integer; map: ISuperObject): ISuperObject
 var
   list: ISuperObject;
 begin
-  list := Db.FindPage(con, dict_role, 'id', map.I['page'] - 1, map.I['limit']);
+  list := Db.Default.FindPage(con, dict_role, 'id', map.I['page'] - 1, map.I['limit']);
   Result := list;
 end;
 
@@ -138,10 +138,10 @@ begin
   if id = '' then
   begin
     map.Delete('id');
-    ret := Db.FindFirst(dict_role, map);
+    ret := Db.Default.FindFirst(dict_role, map);
     if ret = nil then
     begin
-      with Db.AddData(dict_role) do
+      with Db.Default.AddData(dict_role) do
       begin
         FieldByName('rolename').AsString := map.S['rolename'];
         Post;
@@ -155,10 +155,10 @@ begin
   end
   else
   begin
-    ret := Db.FindFirst(dict_role, 'and id<>' + id + ' and rolename=' + Q(map.S['rolename']));
+    ret := Db.Default.FindFirst(dict_role, 'and id<>' + id + ' and rolename=' + Q(map.S['rolename']));
     if ret = nil then
     begin
-      with db.EditData(dict_role, 'id', id) do
+      with db.Default.EditData(dict_role, 'id', id) do
       begin
         FieldByName('rolename').AsString := map.S['rolename'];
         Post;

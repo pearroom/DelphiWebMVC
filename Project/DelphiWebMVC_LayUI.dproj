@@ -154,6 +154,7 @@
         <DCCReference Include="..\Module\Common\RedisM.pas"/>
         <DCCReference Include="..\Module\Common\RedisList.pas"/>
         <DCCReference Include="..\Module\Common\RedisClear.pas"/>
+        <DCCReference Include="..\Config\uDBConfig.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -181,17 +182,17 @@
             </Delphi.Personality>
             <Deployment Version="3">
                 <DeployFile LocalName="\DelphiMVC.exe" Configuration="Release" Class="ProjectOutput"/>
-                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Login.htm" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Check.htm" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Login.css" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="..\Publish\DelphiWebMVC_LayUI.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>DelphiWebMVC_LayUI.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="View\Login\Login.htm" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="View\Login\Check.htm" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="View\Login\Login.css" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>

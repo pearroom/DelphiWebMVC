@@ -12,7 +12,7 @@ interface
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, Web.HTTPProd, System.StrUtils,
   FireDAC.Comp.Client, Page, superobject, uConfig, Web.ReqMulti, Vcl.Imaging.jpeg,
-  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser, SimpleXML;
+  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser, SimpleXML,uDBConfig;
 
 type
   TView = class
@@ -25,7 +25,7 @@ type
     procedure CreateSession(); // 创建获取session
     procedure makeSession;
   public
-    Db: TDB;
+    Db: TDBConfig;
    // Db2: TDB2; //第2个数据源
     ActionP: string;
     Response: TWebResponse;
@@ -45,7 +45,6 @@ type
     procedure setAttr(key, value: string);      // 设置视图标记显示内容 ，如果 value是 json 数组可以在 table 标记中显示
     procedure setAttrJSON(key: string; json: ISuperObject);
     procedure ShowHTML(html: string);           // 显示模板
-    procedure ShowDSJSON(cds: TFDQuery);        // 数据集转换为json显示
     procedure ShowText(text: string);           // 显示文本，json格式需转换后显示
     procedure ShowJSON(jo: ISuperObject);       // 显示 json
     procedure ShowXML(xml: IXmlDocument);        // 显示 xml 数据
@@ -235,23 +234,6 @@ begin
 
 end;
 
-procedure TView.ShowDSJSON(cds: TFDQuery);
-var
-  ret: string;
-begin
-  try
-    if not cds.Active then
-      cds.OpenOrExecute;
-    ret := Db.CDSToJSONArray(cds).AsString;
-
-  except
-    on E: Exception do
-      ret := e.ToString;
-  end;
-
-  Response.Content := ret;
-  Response.SendResponse;
-end;
 
 function TView.Cookies: TCookie;
 begin
@@ -270,7 +252,7 @@ end;
 
 constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath: string);
 begin
-  Db := TDB.Create(db_type);
+  Db := TDBConfig.Create();
   params := TStringList.Create;
   htmlpars := THTMLParser.Create(Db);
   self.ActionP := ActionPath;
@@ -365,7 +347,7 @@ begin
     timerout := Now + (1 / 24 / 60) * 60 * 24; //24小时过期
   SessionListMap.setValueByKey(sessionid, '{}');
   SessionListMap.setTimeroutByKey(sessionid, DateTimeToStr(timerout));
-  log('创建Session:' + sessionid);
+ // log('创建Session:' + sessionid);
 end;
 
 function TView.Q(str: string): string;
