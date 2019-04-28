@@ -12,6 +12,7 @@ const
   mime = 'resources\mime.json';             // mime配置文件地址
   open_log = true;                          // 开启日志;open_debug=true并开启日志将在UI显示
   open_cache = true;                        // 开启缓存模式open_debug=false时有效
+  cache_max_age='315360000';                // 缓存超期时长秒
   open_interceptor = true;                 // 开启拦截器
   document_charset = 'utf-8';               // 字符集
   password_key = '';                        // 配置文件秘钥设置,为空时不启用秘钥,结合加密工具使用.

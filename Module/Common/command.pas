@@ -59,7 +59,7 @@ var
   k: integer;
   ret: TValue;
   s: string;
-  typ: string;
+  sessionid: string;
 begin
 
   web.Response.ContentEncoding := document_charset;
@@ -133,7 +133,7 @@ begin
   begin
     if (not open_debug) and open_cache then
     begin
-      web.Response.SetCustomHeader('Cache-Control', 'publish');
+      web.Response.SetCustomHeader('Cache-Control', 'max-age='+cache_max_age);
       web.Response.SetCustomHeader('Pragma', 'Pragma');
       tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(now()));
       web.Response.SetCustomHeader('Last-Modified', tmp);
@@ -265,22 +265,25 @@ begin
   if SessionListMap <> nil then
   begin
     _LogList.Clear;
-    FreeAndNil(_LogList);
+    _LogList.Free;
     _logThread.Terminate;
-    FreeAndNil(_logThread);
-    FreeAndNil(_Interceptor);
-    FreeAndNil(SessionListMap);
-    FreeAndNil(RouleMap);
-    FreeAndNil(DM);
+    Sleep(100);
+    _logThread.Free;
+    _Interceptor.Free;
+    SessionListMap.Free;
+    RouleMap.Free;
+    DM.Free;
     sessionclear.Terminate;
-    FreeAndNil(sessionclear);
+    Sleep(100);
+    sessionclear.Free;
     if auto_free_memory then
     begin
       FreeMemory.Terminate;
-      FreeAndNil(FreeMemory);
+      Sleep(100);
+      FreeMemory.Free;
     end;
     if _RedisList <> nil then
-      FreeAndNil(_RedisList);
+      _RedisList.Free;
   end;
 end;
 
@@ -309,6 +312,7 @@ begin
           oParams.Add(value);
         end;
         DM.DBManager.AddConnectionDef(dbitem.Name, dbitem.Name, oParams);
+        log(' ˝æ›ø‚≈‰÷√:'+oParams.Text);
         oParams.Free;
       end;
     end;
