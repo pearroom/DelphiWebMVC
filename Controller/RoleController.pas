@@ -3,8 +3,7 @@ unit RoleController;
 interface
 
 uses
-  System.SysUtils, System.Classes, superobject, View,
-  BaseController;
+  System.SysUtils, System.Classes, superobject, View, BaseController;
 
 type
   TRoleController = class(TBaseController)

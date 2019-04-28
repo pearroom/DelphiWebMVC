@@ -17,7 +17,7 @@ const
   password_key = '';                        // 配置文件秘钥设置,为空时不启用秘钥,结合加密工具使用.
   auto_free_memory = false;                 //自动释放内存
   auto_free_memory_timer = 10;              //默认10分钟释放内存
-  show_sql = true;                            //日志打印sql
+  show_sql = false;                            //日志打印sql
   open_debug = false;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
 
 implementation

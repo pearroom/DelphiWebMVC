@@ -3,8 +3,7 @@ unit MainController;
 interface
 
 uses
-  System.SysUtils, System.Classes, superobject, View,
-  BaseController;
+  System.SysUtils, System.Classes, superobject, View, BaseController;
 
 type
   TMainController = class(TBaseController)
@@ -15,10 +14,9 @@ type
 implementation
 
 uses
-   RoleService, RoleInterface;
+  RoleService, RoleInterface;
 
 { TMainController }
-
 
 procedure TMainController.Index;
 var
@@ -26,14 +24,14 @@ var
   con: Integer;
   map: ISuperObject;
   ret: ISuperObject;
-    role_service: IRoleInterface;
-  s:string;
+  role_service: IRoleInterface;
+  s: string;
 begin
   role_service := Troleservice.Create(view.Db);
   with view do
   begin
     user := SO(SessionGet('user'));
-    s:=user.AsString;
+    s := user.AsString;
     setAttr('realname', user.S['realname']);
     map := SO();
     map.S['roleid'] := user.S['roleid'];

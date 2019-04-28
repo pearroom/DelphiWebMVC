@@ -3,8 +3,7 @@ unit UserController;
 interface
 
 uses
-  System.SysUtils, System.Classes, superobject, View,
-  BaseController;
+  System.SysUtils, System.Classes, superobject, View, BaseController;
 
 type
   TUserController = class(TBaseController)
@@ -27,12 +26,12 @@ uses
 procedure TUserController.Add;
 var
   role: ISuperObject;
-    role_service: IRoleInterface;
+  role_service: IRoleInterface;
 begin
   with view do
   begin
-    Role_Service := TRoleService.Create(Db);
-    role := Role_Service.getAlldata();
+    role_service := TRoleService.Create(Db);
+    role := role_service.getAlldata();
     setAttrJSON('role', role);
     ShowHTML('add');
   end;
@@ -60,13 +59,13 @@ end;
 procedure TUserController.Edit;
 var
   role: ISuperObject;
-    role_service: IRoleInterface;
+  role_service: IRoleInterface;
 begin
 
   with view do
   begin
-    Role_Service := TRoleService.Create(Db);
-    role := Role_Service.getAlldata();
+    role_service := TRoleService.Create(Db);
+    role := role_service.getAlldata();
     setAttrJSON('role', role);
     ShowHTML('edit');
   end;
@@ -95,12 +94,12 @@ end;
 procedure TUserController.Index;
 var
   role: ISuperObject;
-    role_service: IRoleInterface;
+  role_service: IRoleInterface;
 begin
   with view do
   begin
-    Role_Service := TRoleService.Create(Db);
-    role := Role_Service.getAlldata();
+    role_service := TRoleService.Create(Db);
+    role := role_service.getAlldata();
     setAttrJSON('role', role);
     ShowHTML('index');
   end;

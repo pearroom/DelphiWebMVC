@@ -26,7 +26,6 @@ procedure TWM.WebModuleBeforeDispatch(Sender: TObject; Request: TWebRequest; Res
 var
   s: string;
   error: string;
-
 begin
   try
     OpenRoule(Self, RouleMap, Handled);
@@ -36,9 +35,9 @@ begin
       error := e.ToString;
       log(error);
       Response.StatusCode := 500;
-      s := '<html><body><div style="text-align: center;">';
+      s := '<html><body><div style="text-align: left;">';
       s := s + '<div><h1> Error 500 </h1></div>';
-      s := s + '<div>' + error + '</div></div></body></html>';
+      s := s + '<hr><div>' + error + '</div></div></body></html>';
       Response.Content := s;
       Response.SendResponse;
     end;
@@ -71,7 +70,7 @@ begin
       begin
         try
           Extensions := ja[I]['Extensions'].AsString;
-          MimeType := ja[I]['MimeType'].AsString;
+          MimeType := ja[I]['MimeType'].AsString + '; charset=' + document_charset;
         except
           log('MIME配置文件错误,服务启动失败');
           break;

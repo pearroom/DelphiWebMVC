@@ -101,20 +101,7 @@
 			var img = document.getElementById("imgid");
 			img.src = "verifycode?d=" + randomnum;
 		}
-		schoolList=[{"name":"joman"},{"name":"joman2"}];
-		$(document).ready(function () {
-			$.ajax({
-				type:"POST",
-				url:"setdata",
-				contentType: "application/json", //必须这样写
-				dataType:"json",
-				data:JSON.stringify(schoolList),//schoolList是你要提交是json字符串
-				success:function (data) {
-
-				}
-
-			})
-		})		
+	
 	</script>
 </body>
 

@@ -23,7 +23,6 @@ var
   _Interceptor: TInterceptor;
   _RedisList: TRedisList;
 
-
 function OpenConfigFile(): ISuperObject;
 
 function OpenMIMEFile(): ISuperObject;
@@ -59,7 +58,7 @@ var
   methodname: string;
   k: integer;
   ret: TValue;
-  cExt: string;
+  s: string;
   typ: string;
 begin
 
@@ -110,7 +109,10 @@ begin
         else
         begin
           web.Response.ContentType := 'text/html; charset=' + document_charset;
-          web.Response.Content := url + '  地址不存在';
+          s := '<html><body><div style="text-align: left;">';
+          s := s + '<div><h1>Error 404</h1></div>';
+          s := s + '<hr><div>[ ' + url + ' ] Not Find Page' + '</div></div></body></html>';
+          web.Response.Content := s;
           web.Response.SendResponse;
         end;
       finally
@@ -120,7 +122,10 @@ begin
     else
     begin
       web.Response.ContentType := 'text/html; charset=' + document_charset;
-      web.Response.Content := url + '  地址不存在';
+      s := '<html><body><div style="text-align: left;">';
+      s := s + '<div><h1>Error 404</h1></div>';
+      s := s + '<hr><div>[ ' + url + ' ] Not Find Page' + '</div></div></body></html>';
+      web.Response.Content := s;
       web.Response.SendResponse;
     end;
   end
@@ -128,7 +133,7 @@ begin
   begin
     if (not open_debug) and open_cache then
     begin
-      web.Response.SetCustomHeader('Cache-Control', 'public');
+      web.Response.SetCustomHeader('Cache-Control', 'publish');
       web.Response.SetCustomHeader('Pragma', 'Pragma');
       tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(now()));
       web.Response.SetCustomHeader('Last-Modified', tmp);
@@ -137,23 +142,8 @@ begin
     end
     else
     begin
-      web.Response.SetCustomHeader('Cache-Control', 'no-cache');
+      web.Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
     end;
-    cExt := UpperCase(ExtractFileExt(url));
-    if cExt = '.JPG' then
-      typ := 'image/jpeg'
-    else if cExt = '.PNG' then
-      typ := 'image/png'
-    else if cExt = '.GIF' then
-      typ := 'image/gif'
-    else if cExt = '.ICO' then
-      typ := 'image/x-icon'
-    else if cExt = '.JS' then
-      typ := 'application/x-javascript'
-    else if cExt = '.CSS' then
-      typ := 'text/css';
-    if (typ <> '') then
-      web.Response.ContentType := typ + ';';
   end;
 
 end;
@@ -180,7 +170,7 @@ begin
         txt := DeCryptStr(txt, key);
       end;
       jo := SO(txt);
-      jo.O['Server'].S['Port'];
+      jo.O['Server'].s['Port'];
     except
       log(config + '配置文件错误,服务启动失败');
       jo := nil;
@@ -243,13 +233,13 @@ begin
     _LogList := TStringList.Create;
     _logThread := TLogTh.Create(false);
     SessionName := '__guid_session';
-    FPort := jo.O['Server'].S['Port'];
+    FPort := jo.O['Server'].s['Port'];
     _RedisList := nil;
     if jo.O['Redis'] <> nil then
     begin
-      Redis_IP := jo.O['Redis'].S['Host'];
+      Redis_IP := jo.O['Redis'].s['Host'];
       Redis_Port := jo.O['Redis'].I['Port'];
-      Redis_PassWord := jo.O['Redis'].S['PassWord'];
+      Redis_PassWord := jo.O['Redis'].s['PassWord'];
       Redis_InitSize := jo.O['Redis'].I['InitSize'];
       Redis_TimerOut := jo.O['Redis'].I['TimerOut'];
       if redis_ip <> '' then

@@ -12,7 +12,8 @@ interface
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, Web.HTTPProd, System.StrUtils,
   FireDAC.Comp.Client, Page, superobject, uConfig, Web.ReqMulti, Vcl.Imaging.jpeg,
-  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser, SimpleXML,uDBConfig;
+  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser, SimpleXML,
+  uDBConfig;
 
 type
   TView = class
@@ -145,7 +146,13 @@ begin
   begin
     S := url + html + template_type;
     if (not FileExists(S)) then
-      Response.Content := html + template_type + ' 模板文件未找到'
+    begin
+      S := '<html><body><div style="text-align: left;">';
+      S := S + '<div><h1>Error 404</h1></div>';
+      S := S + '<hr><div>[ ' + html + template_type + ' ] Not Find Template';
+      S := S + '</div></div></body></html>';
+      Response.Content := S;
+    end
     else
     begin
       try
@@ -233,7 +240,6 @@ begin
   end;
 
 end;
-
 
 function TView.Cookies: TCookie;
 begin
