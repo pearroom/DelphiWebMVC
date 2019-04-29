@@ -20,7 +20,8 @@ var
   Redis_Port: Integer;
   Redis_PassWord: string;
   Redis_InitSize: integer;
-  Redis_TimerOut: integer;
+  Redis_TimeOut: integer;
+  Redis_ReadTimeOut: integer;
 
 type
   TRedisM = class
@@ -142,7 +143,7 @@ begin
     if timerout > 0 then
       setExpire(key, timerout * 60)
     else
-      setExpire(key, Redis_TimerOut * 60)
+      setExpire(key, Redis_TimeOut * 60)
   except
     on e: Exception do
     begin
@@ -208,7 +209,7 @@ begin
     try
       tcpclient.Host := Redis_IP;
       tcpclient.Port := Redis_Port;
-      TcpClient.ReadTimeout := 30000;
+      TcpClient.ReadTimeout := Redis_ReadTimeOut * 1000;
       tcpclient.Connect;
       TcpClient.Socket.RecvBufferSize := 100 * 1024;
       TcpClient.Socket.SendBufferSize := 100 * 1024;

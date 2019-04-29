@@ -241,7 +241,8 @@ begin
       Redis_Port := jo.O['Redis'].I['Port'];
       Redis_PassWord := jo.O['Redis'].s['PassWord'];
       Redis_InitSize := jo.O['Redis'].I['InitSize'];
-      Redis_TimerOut := jo.O['Redis'].I['TimerOut'];
+      Redis_TimeOut := jo.O['Redis'].I['TimeOut'];
+      Redis_ReadTimeOut:=jo.O['Redis'].I['ReadTimeOut'];
       if redis_ip <> '' then
       begin
         _RedisList := TRedisList.Create(Redis_InitSize);
