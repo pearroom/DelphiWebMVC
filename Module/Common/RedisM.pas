@@ -12,7 +12,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, IdBaseComponent, Winapi.ActiveX,
-  IdComponent, IdTCPConnection, IdTCPClient, IdGlobal, System.Win.ScktComp;
+  IdComponent, IdTCPConnection, IdTCPClient, IdGlobal, System.Win.ScktComp,
+  superobject;
 
 var
   Redis_IP: string;
@@ -26,10 +27,14 @@ type
   private
     TcpClient: TIdTCPClient;
     isConn: Boolean;
+    function HexToStr(S: string): string;
+    function StrToHex(S: string): string;
   public
-    procedure setKey(key: string; value: string; timerout: Integer = 0);
+    procedure setKeyText(key: string; value: string; timerout: Integer = 0);
+    procedure setKeyJSON(key: string; value: ISuperObject; timerout: Integer = 0);
+    function getKeyText(key: string): string;
+    function getKeyJSON(key: string): ISuperObject;
     procedure delKey(key: string);
-    function getKey(key: string): string;
     function tryconn(): Boolean;
     procedure freetcp;
     procedure setExpire(key: string; timerout: Integer);
@@ -50,16 +55,61 @@ begin
   tryconn();
 end;
 
+function TRedisM.HexToStr(S: string): string;
+var
+  Stream: TMemoryStream;
+  Value: TStringStream;
+  Pos: Integer;
+begin
+  Result := '';
+  if Length(S) > 0 then
+  begin
+    Stream := TMemoryStream.Create;
+    Value := TStringStream.Create('');
+    try
+      Pos := Stream.Position;
+      Stream.SetSize(Stream.Size + Length(S) div 2);
+      HexToBin(PChar(S), PChar(Integer(Stream.Memory) + Stream.Position), Length(S) div 2);
+      Stream.Position := Pos;
+      Value.CopyFrom(Stream, Length(S) div 2);
+      Result := Value.DataString;
+    finally
+      Stream.Free;
+      Value.Free;
+    end;
+  end;
+end;
+
+function TRedisM.StrToHex(S: string): string;
+var
+  Stream: TMemoryStream;
+  Value: TStringStream;
+begin
+  if Length(S) > 0 then
+  begin
+    Value := TStringStream.Create(S);
+    try
+      SetLength(Result, (Value.Size - Value.Position) * 2);
+      if Length(Result) > 0 then
+      begin
+        Stream := TMemoryStream.Create;
+        try
+          Stream.CopyFrom(Value, Value.Size - Value.Position);
+          Stream.Position := 0;
+          BinToHex(PChar(Integer(Stream.Memory) + Stream.Position), PChar(Result), Stream.Size - Stream.Position);
+        finally
+          Stream.Free;
+        end;
+      end;
+    finally
+      Value.Free;
+    end;
+  end;
+end;
+
 procedure TRedisM.delKey(key: string);
 begin
-  if not isConn then
-    if not tryconn then
-      exit;
-  with TcpClient do
-  begin
-    Socket.WriteLn('Del ' + key, IndyTextEncoding(IdTextEncodingType.encUTF8));
-    Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
-  end;
+
 end;
 
 destructor TRedisM.Destroy;
@@ -77,7 +127,50 @@ begin
   end;
 end;
 
-function TRedisM.getKey(key: string): string;
+procedure TRedisM.setKeyText(key, value: string; timerout: Integer = 0);
+var
+  s: string;
+begin
+  if not isConn then
+    if not tryconn then
+      exit;
+
+  try
+
+    tcpclient.Socket.WriteLn('set ' + key + ' ' + value, IndyTextEncoding(IdTextEncodingType.encUTF8));
+    s := tcpclient.Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
+    if timerout > 0 then
+      setExpire(key, timerout * 60)
+    else
+      setExpire(key, Redis_TimerOut * 60)
+  except
+    on e: Exception do
+    begin
+      log(e.Message);
+    end;
+
+  end;
+
+end;
+
+procedure TRedisM.setKeyJSON(key: string; value: ISuperObject; timerout: Integer);
+begin
+  if value <> nil then
+  begin
+    setKeyText(key, StrToHex(value.AsString), timerout);
+  end;
+end;
+
+function TRedisM.getKeyJSON(key: string): ISuperObject;
+begin
+  Result := nil;
+  if key.Trim <> '' then
+  begin
+    Result := SO(HexToStr(getKeyText(key)));
+  end;
+end;
+
+function TRedisM.getKeyText(key: string): string;
 var
   s: string;
 begin
@@ -92,7 +185,8 @@ begin
 
       Socket.WriteLn('get ' + key, IndyTextEncoding(IdTextEncodingType.encUTF8));
       s := Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
-      Result := Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
+      s := Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
+      Result := s;
     end;
   except
     on e: Exception do
@@ -181,31 +275,6 @@ begin
     end;
 
   end;
-end;
-
-procedure TRedisM.setKey(key, value: string; timerout: Integer = 0);
-var
-  s: string;
-begin
-  if not isConn then
-    if not tryconn then
-      exit;
-
-  try
-    tcpclient.Socket.WriteLn('set ' + key + ' ' + value, IndyTextEncoding(IdTextEncodingType.encUTF8));
-    s := tcpclient.Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
-    if timerout > 0 then
-      setExpire(key, timerout * 60)
-    else
-      setExpire(key, Redis_TimerOut * 60)
-  except
-    on e: Exception do
-    begin
-      log(e.Message);
-    end;
-
-  end;
-
 end;
 
 end.

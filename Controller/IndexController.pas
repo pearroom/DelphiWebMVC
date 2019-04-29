@@ -62,13 +62,18 @@ end;
 procedure TIndexController.Index;
 var
   s: string;
+  jo: ISuperObject;
 begin
   with View do
   begin
 
     SessionRemove('user');
-    RedisSetKey('name', 'joman');
-    s := RedisGetKey('name');
+//    jo := SO();
+//    jo.S['msg'] := 'ÄãºÃÑ½';
+//    RedisSetKeyJSON('name', jo);
+//    s := RedisGetKeyJSON('name').AsString;
+//    RedisSetKeyText('sex', 'ÄÐ');
+//    s := RedisGetKeyText('sex');
     ShowHTML('login');
   end;
 end;

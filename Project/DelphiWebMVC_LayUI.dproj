@@ -156,6 +156,7 @@
         <DCCReference Include="..\Module\Common\RedisList.pas"/>
         <DCCReference Include="..\Module\Common\RedisClear.pas"/>
         <DCCReference Include="..\Config\uDBConfig.pas"/>
+        <DCCReference Include="..\Module\Common\DBMSSQL08.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

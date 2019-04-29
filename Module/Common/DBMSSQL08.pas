@@ -5,7 +5,7 @@
 {       版权所有 (C) 2019 苏兴迎(PRSoft)                }
 {                                                       }
 {*******************************************************}
-unit DBMSSQL;
+unit DBMSSQL08;
 
 interface
 
@@ -45,11 +45,7 @@ begin
   Result := nil;
   if (not TryConnDB) or (Trim(select) = '') or (Trim(from) = '') then
     Exit;
-  if PageKey.Trim = '' then
-  begin
-    DBlog('PageKey-分页主键设置MSSQL数据库特有属性');
-    exit;
-  end;
+
   if Trim(order) <> '' then
     order := 'order by ' + Trim(order);
   CDS := TFDQuery.Create(nil);
@@ -61,16 +57,10 @@ begin
       CDS.Open(sql);
       count := CDS.FieldByName('N').AsInteger;
       CDS.Close;
-      if Pos('where', from) > 0 then
-        tmp := ' and '
-      else
-        tmp := ' where ';
-      sql := ' select top ' + inttostr(pagesize) + ' ' + Trim(select) + ' from ' + Trim(from);
-      if pageindex > 0 then
-      begin
-        sql := sql + tmp + PageKey + ' not in(select top ' + IntToStr(pagesize * pageindex) + ' ' + PageKey + ' from ' + Trim(from) + ')';
-      end;
-      sql := sql + ' ' + Trim(order);
+      if select.Trim = '' then
+        select := '*';
+      sql := 'select ' + select + ' ' + ',ROW_NUMBER() OVER(ORDER BY ' + order + ') AS RowNo from ' + from;
+      sql := 'select * from ' + sql + ' where RowNo between ' + IntToStr(pageindex * pagesize) + ' and ' + IntToStr(pageindex * pagesize + pagesize);
       Result := Query(sql);
       PageKey := '';
     except

@@ -23,7 +23,7 @@ uses
   uTableMap in '..\Config\uTableMap.pas',
   uInterceptor in '..\Config\uInterceptor.pas',
   BaseController in '..\Module\Common\BaseController.pas',
-  command in '..\Module\Common\Command.pas',
+  Command in '..\Module\Common\Command.pas',
   DBBase in '..\Module\Common\DBBase.pas',
   DBMSSQL in '..\Module\Common\DBMSSQL.pas',
   DBMSSQL12 in '..\Module\Common\DBMSSQL12.pas',
@@ -59,7 +59,8 @@ uses
   RedisM in '..\Module\Common\RedisM.pas',
   RedisList in '..\Module\Common\RedisList.pas',
   RedisClear in '..\Module\Common\RedisClear.pas',
-  uDBConfig in '..\Config\uDBConfig.pas';
+  uDBConfig in '..\Config\uDBConfig.pas',
+  DBMSSQL08 in '..\Module\Common\DBMSSQL08.pas';
 
 {$R *.res}
 var

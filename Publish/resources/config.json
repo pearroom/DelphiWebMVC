@@ -53,7 +53,7 @@
 		"ORACLE": {
 			"DriverID": "Ora",
 			"CharacterSet": "UTF8",
-			"Database": "192.168.178.102:1521/orcl",
+			"Database": "192.168.178.102:1521\\orcl",
 			"User_Name": "",
 			"Password": "",
 			"Pooled": "True",

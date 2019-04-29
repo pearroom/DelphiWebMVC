@@ -19,7 +19,7 @@ const
   auto_free_memory = false;                 //自动释放内存
   auto_free_memory_timer = 10;              //默认10分钟释放内存
   show_sql = false;                            //日志打印sql
-  open_debug = false;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
+  open_debug = true;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
 
 implementation
 

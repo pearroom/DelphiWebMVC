@@ -133,7 +133,7 @@ begin
   begin
     if (not open_debug) and open_cache then
     begin
-      web.Response.SetCustomHeader('Cache-Control', 'max-age='+cache_max_age);
+      web.Response.SetCustomHeader('Cache-Control', 'max-age=' + cache_max_age);
       web.Response.SetCustomHeader('Pragma', 'Pragma');
       tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(now()));
       web.Response.SetCustomHeader('Last-Modified', tmp);
@@ -312,7 +312,8 @@ begin
           oParams.Add(value);
         end;
         DM.DBManager.AddConnectionDef(dbitem.Name, dbitem.Name, oParams);
-        log('数据库配置:'+oParams.Text);
+        if open_debug then
+          log('数据库配置:' + oParams.Text);
         oParams.Free;
       end;
     end;

@@ -14,7 +14,7 @@ interface
 uses
   System.Classes, System.SysUtils, Web.HTTPApp, View, IdCustomHTTPServer, System.Net.URLClient,
   System.Net.HttpClient, System.Net.HttpClientComponent, IdURI, IdGlobal, RedisM,
-  RedisList;
+  RedisList, superobject;
 
 type
   TBaseController = class
@@ -40,9 +40,11 @@ type
     function isPatch: Boolean;
     function isNil(text: string): Boolean;
     function isNotNil(text: string): Boolean;
-    procedure RedisSetKey(key: string; value: string; timerout: Integer = 0);
+    procedure RedisSetKeyText(key: string; value: string; timerout: Integer = 0);
+    function RedisGetKeyText(key: string): string;
+    procedure RedisSetKeyJSON(key: string; value: ISuperObject; timerout: Integer = 0);
+    function RedisGetKeyJSON(key: string): ISuperObject;
     procedure RedisSetExpire(key: string; timerout: Integer);
-    function RedisGetKey(key: string): string;
     function URLDecode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function Interceptor: boolean;
@@ -123,7 +125,7 @@ begin
   Result := Request.MethodType = mtPut;
 end;
 
-function TBaseController.RedisGetKey(key: string): string;
+function TBaseController.RedisGetKeyJSON(key: string): ISuperObject;
 begin
   if (_RedisList <> nil) and (RedisItem = nil) then
   begin
@@ -131,7 +133,20 @@ begin
     RedisM := RedisItem.item;
   end;
   if (_RedisList <> nil) then
-    Result := RedisM.getKey(key)
+    Result := RedisM.getKeyJSON(key)
+  else
+    Result := nil;
+end;
+
+function TBaseController.RedisGetKeyText(key: string): string;
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    Result := RedisM.getKeyText(key)
   else
     Result := '';
 end;
@@ -142,7 +157,7 @@ begin
     RedisM.setExpire(key, timerout);
 end;
 
-procedure TBaseController.RedisSetKey(key, value: string; timerout: Integer = 0);
+procedure TBaseController.RedisSetKeyJSON(key: string; value: ISuperObject; timerout: Integer);
 begin
   if (_RedisList <> nil) and (RedisItem = nil) then
   begin
@@ -150,7 +165,18 @@ begin
     RedisM := RedisItem.item;
   end;
   if (_RedisList <> nil) then
-    RedisM.setKey(key, value, timerout);
+    RedisM.setKeyJSON(key, value, timerout);
+end;
+
+procedure TBaseController.RedisSetKeyText(key, value: string; timerout: Integer);
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    RedisM.setKeyText(key, value, timerout);
 end;
 
 procedure TBaseController.SetActionPath(const Value: string);
