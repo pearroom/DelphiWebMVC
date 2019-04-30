@@ -40,6 +40,7 @@ type
     function isPatch: Boolean;
     function isNil(text: string): Boolean;
     function isNotNil(text: string): Boolean;
+    function RedisRemove(key: string): Boolean;
     procedure RedisSetKeyText(key: string; value: string; timerout: Integer = 0);
     function RedisGetKeyText(key: string): string;
     procedure RedisSetKeyJSON(key: string; value: ISuperObject; timerout: Integer = 0);
@@ -151,8 +152,25 @@ begin
     Result := '';
 end;
 
+function TBaseController.RedisRemove(key: string): Boolean;
+begin
+  Result := false;
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    Result := RedisM.delKey(key);
+end;
+
 procedure TBaseController.RedisSetExpire(key: string; timerout: Integer);
 begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
   if (_RedisList <> nil) then
     RedisM.setExpire(key, timerout);
 end;

@@ -71,6 +71,7 @@ begin
 //    jo := SO();
 //    jo.S['msg'] := 'ÄãºÃÑ½';
 //    RedisSetKeyJSON('name', jo);
+//    RedisRemove('name');
 //    s := RedisGetKeyJSON('name').AsString;
 //    RedisSetKeyText('sex', 'ÄÐ');
 //    s := RedisGetKeyText('sex');

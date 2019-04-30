@@ -10,7 +10,8 @@
 		"Port":6379,
 		"PassWord":"admin",
 		"InitSize":5,
-		"TimerOut":60
+		"TimeOut":60,
+		"ReadTimeOut":10
 	},
 	"DBConfig":{
 		"MYSQL": {

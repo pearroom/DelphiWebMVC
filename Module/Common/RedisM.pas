@@ -31,11 +31,11 @@ type
     function HexToStr(S: string): string;
     function StrToHex(S: string): string;
   public
-    procedure setKeyText(key: string; value: string; timerout: Integer = 0);
-    procedure setKeyJSON(key: string; value: ISuperObject; timerout: Integer = 0);
+    function setKeyText(key: string; value: string; timerout: Integer = 0): Boolean;
+    function setKeyJSON(key: string; value: ISuperObject; timerout: Integer = 0): Boolean;
     function getKeyText(key: string): string;
     function getKeyJSON(key: string): ISuperObject;
-    procedure delKey(key: string);
+    function delKey(key: string): Boolean;
     function tryconn(): Boolean;
     procedure freetcp;
     procedure setExpire(key: string; timerout: Integer);
@@ -108,8 +108,30 @@ begin
   end;
 end;
 
-procedure TRedisM.delKey(key: string);
+function TRedisM.delKey(key: string): Boolean;
+var
+  s: string;
 begin
+  Result := True;
+  if not isConn then
+    if not tryconn then
+    begin
+      Result := false;
+      exit;
+    end;
+
+  try
+
+    tcpclient.Socket.WriteLn('del ' + key, IndyTextEncoding(IdTextEncodingType.encUTF8));
+    s := tcpclient.Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
+  except
+    on e: Exception do
+    begin
+      Result := False;
+      log(e.Message);
+    end;
+
+  end;
 
 end;
 
@@ -128,13 +150,17 @@ begin
   end;
 end;
 
-procedure TRedisM.setKeyText(key, value: string; timerout: Integer = 0);
+function TRedisM.setKeyText(key, value: string; timerout: Integer = 0): Boolean;
 var
   s: string;
 begin
+  Result := true;
   if not isConn then
     if not tryconn then
+    begin
+      Result := false;
       exit;
+    end;
 
   try
 
@@ -147,6 +173,7 @@ begin
   except
     on e: Exception do
     begin
+      Result := false;
       log(e.Message);
     end;
 
@@ -154,20 +181,28 @@ begin
 
 end;
 
-procedure TRedisM.setKeyJSON(key: string; value: ISuperObject; timerout: Integer);
+function TRedisM.setKeyJSON(key: string; value: ISuperObject; timerout: Integer): Boolean;
 begin
   if value <> nil then
   begin
-    setKeyText(key, StrToHex(value.AsString), timerout);
+    Result := setKeyText(key, StrToHex(value.AsString), timerout);
   end;
 end;
 
 function TRedisM.getKeyJSON(key: string): ISuperObject;
+var
+  txt: string;
 begin
   Result := nil;
   if key.Trim <> '' then
   begin
-    Result := SO(HexToStr(getKeyText(key)));
+    txt := getKeyText(key);
+    if txt.Trim <> '' then
+    begin
+      Result := SO(HexToStr(txt));
+    end
+    else
+      Result := so('{}');
   end;
 end;
 
@@ -178,7 +213,10 @@ begin
   Result := '';
   if not isConn then
     if not tryconn then
+    begin
+      Result := '';
       exit;
+    end;
 
   try
     with TcpClient do
@@ -186,7 +224,16 @@ begin
 
       Socket.WriteLn('get ' + key, IndyTextEncoding(IdTextEncodingType.encUTF8));
       s := Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
-      s := Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
+      s := s.Replace('$', '');
+      if StrToInt(s) > 0 then
+      begin
+        s := Socket.ReadLn(IndyTextEncoding(IdTextEncodingType.encUTF8));
+      end
+      else
+      begin
+        s := '';
+      end;
+
       Result := s;
     end;
   except
