@@ -8,7 +8,7 @@ uses
 type
   TIndexController = class(TBaseController)
   public
-    procedure Index;
+    procedure Index(num: Double);
     procedure check;
     procedure verifycode;
     procedure setdata;
@@ -59,14 +59,13 @@ begin
   end;
 end;
 
-procedure TIndexController.Index;
+procedure TIndexController.Index(num: Double);
 var
   s: string;
   jo: ISuperObject;
 begin
   with View do
   begin
-
     SessionRemove('user');
 //    jo := SO();
 //    jo.S['msg'] := 'ÄãºÃÑ½';

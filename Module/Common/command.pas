@@ -10,9 +10,9 @@ unit Command;
 interface
 
 uses
-  System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes, Web.HTTPApp,
-  uConfig, System.DateUtils, SessionList, superobject, uInterceptor, uRouleMap,
-  RedisList, LogUnit;
+  System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes,
+  Web.HTTPApp, uConfig, System.DateUtils, SessionList, superobject, uInterceptor,
+  uRouleMap, RedisList, LogUnit;
 
 var
   RouleMap: TRouleMap = nil;
@@ -37,6 +37,8 @@ procedure CloseServer;
 
 procedure setDataBase(jo: ISuperObject);
 
+function StrToParamTypeValue(AValue: string; AParamType: TTypeKind): TValue;
+
 implementation
 
 uses
@@ -60,6 +62,14 @@ var
   ret: TValue;
   s: string;
   sessionid: string;
+  //--------大量提供begin------------
+  i: integer;
+  ActionMethonValue: TRttiParameter;
+  ActionMethonValues: TArray<TRttiParameter>;
+  aValueArray: TArray<TValue>;
+  sParameters: string;
+  sValue: string;
+  //-------大量提供end--------------
 begin
 
   web.Response.ContentEncoding := document_charset;
@@ -89,22 +99,35 @@ begin
             Response.SetValue(Action, web.Response);
             ActionPath.SetValue(Action, item.path);
             CreateView.Invoke(Action, []);
+            //--------------大量提供begin----------------------
+            ActionMethonValues := ActionMethod.GetParameters;
+            SetLength(aValueArray, Length(ActionMethonValues));
+            for i := Low(ActionMethonValues) to High(ActionMethonValues) do
+            begin
+              ActionMethonValue := ActionMethonValues[i];
+              sParameters := ActionMethonValue.Name;   //参数名
+              if web.Request.MethodType = mtGet then  //从web.GET中提取值
+                sValue := web.Request.QueryFields.Values[sParameters]
+              else
+                sValue := web.Request.ContentFields.Values[sParameters]; //从web.POST中提取值
+              aValueArray[i] := StrToParamTypeValue(sValue, ActionMethonValue.ParamType.TypeKind); //根据参数数据类型，转换值，只传常量
+            end;
+            //-----------------大量提供end------------------------
             if item.Interceptor then
             begin
               ret := Interceptor.Invoke(Action, []);
               if (not ret.AsBoolean) then
               begin
-                ActionMethod.Invoke(Action, []);
+                ActionMethod.Invoke(Action, aValueArray);
               end;
             end
             else
             begin
-              ActionMethod.Invoke(Action, []);
+              ActionMethod.Invoke(Action, aValueArray);
             end;
           finally
             FreeAndNil(Action);
           end;
-
         end
         else
         begin
@@ -145,7 +168,55 @@ begin
       web.Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
     end;
   end;
+end;
 
+function StrToParamTypeValue(AValue: string; AParamType: TTypeKind): TValue;
+begin
+
+  case AParamType of
+    tkInteger, tkInt64:
+      begin
+        try
+          if AValue.Trim = '' then
+            AValue := '0';
+          Result := StrToInt(AValue);
+        except
+          Result := 0;
+        end;
+      end;
+    tkFloat:
+      begin
+        try
+          if AValue.Trim = '' then
+            AValue := '0';
+          Result := StrToFloat(AValue);
+        except
+          Result := 0;
+        end;
+      end;
+    tkString, tkChar, tkWChar, tkLString, tkWString, tkUString, tkVariant:
+      begin
+        Result := AValue;
+      end;
+  else
+    begin
+      Result := AValue;
+      //其他类型暂时用不到，先不考虑转换
+    end;
+//    tkUnknown:;
+//    tkEnumeration:;
+//    tkSet:;
+//    tkClass:;
+//    tkMethod:;
+//    tkArray:;
+//    tkRecord:;
+//    tkInterface:;
+//    tkDynArray:;
+//    tkClassRef:;
+//    tkPointer:;
+//    tkProcedure:;
+//    tkMRecord:;
+  end;
 end;
 
 function OpenConfigFile(): ISuperObject;
@@ -238,11 +309,11 @@ begin
     if jo.O['Redis'] <> nil then
     begin
       Redis_IP := jo.O['Redis'].s['Host'];
-      Redis_Port := jo.O['Redis'].I['Port'];
+      Redis_Port := jo.O['Redis'].i['Port'];
       Redis_PassWord := jo.O['Redis'].s['PassWord'];
-      Redis_InitSize := jo.O['Redis'].I['InitSize'];
-      Redis_TimeOut := jo.O['Redis'].I['TimeOut'];
-      Redis_ReadTimeOut:=jo.O['Redis'].I['ReadTimeOut'];
+      Redis_InitSize := jo.O['Redis'].i['InitSize'];
+      Redis_TimeOut := jo.O['Redis'].i['TimeOut'];
+      Redis_ReadTimeOut := jo.O['Redis'].i['ReadTimeOut'];
       if redis_ip <> '' then
       begin
         _RedisList := TRedisList.Create(Redis_InitSize);
@@ -258,7 +329,6 @@ begin
     log('服务启动');
     Result := FPort;
   end;
-
 end;
 
 procedure CloseServer;
@@ -320,9 +390,7 @@ begin
     end;
   finally
     DM.DBManager.Active := true;
-
   end;
-
 end;
 
 end.

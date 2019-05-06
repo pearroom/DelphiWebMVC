@@ -6,8 +6,6 @@
 {                                                       }
 {*******************************************************}
 
-
-
 program DelphiWebMVC_LayUI;
 {$APPTYPE GUI}
 
@@ -75,7 +73,8 @@ begin
 
     if GetLastError = Error_Already_Exists then
     begin
-      Application.MessageBox(PChar(Application.Title + '已经启动'), '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
+      Application.MessageBox(PChar(Application.Title + '已经启动'),
+        '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
       Exit;
     end;
   finally
