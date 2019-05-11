@@ -21,23 +21,25 @@
 	Publish/config.json文件
 	例：
 	{
-		"Server": {
-			"Port": "8004",
-			"Compress":"deflate",
-			"HTTPQueueLength":1000,
-			"ChildThreadCount":10
-		},
-		"Redis":{
-			"Host":"",
-			"Port":6379,
-			"PassWord":"admin",
-			"InitSize":5,
-			"TimerOut":60
-		},
+	"Server": {
+		"Port": "8004",
+		"Compress":"deflate",
+		"HTTPQueueLength":1000,
+		"ChildThreadCount":10
+	},
+	"Redis":{
+		"Host":"",
+		"Port":6379,
+		"PassWord":"admin",
+		"InitSize":5,
+		"TimeOut":60,
+		"ReadTimeOut":10
+	},
+	"DBConfig":{
 		"MYSQL": {
 			"DriverID": "MySQL",
 			"Server": "127.0.0.1",
-			"Port": "3307",
+			"Port": "3306",
 			"Database": "test",
 			"User_Name": "root",
 			"Password": "root",
@@ -74,7 +76,7 @@
 		"ORACLE": {
 			"DriverID": "Ora",
 			"CharacterSet": "UTF8",
-			"Database": "192.168.178.102:1521/orcl",
+			"Database": "192.168.178.102:1521\\orcl",
 			"User_Name": "",
 			"Password": "",
 			"Pooled": "True",
@@ -83,6 +85,7 @@
 			"POOL_MaximumItems": "50"
 		}
 	}
+}
 
 	框架各项参数设置：
 	unit uConfig;

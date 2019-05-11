@@ -58,7 +58,8 @@ uses
   RedisList in '..\Module\Common\RedisList.pas',
   RedisClear in '..\Module\Common\RedisClear.pas',
   uDBConfig in '..\Config\uDBConfig.pas',
-  DBMSSQL08 in '..\Module\Common\DBMSSQL08.pas';
+  DBMSSQL08 in '..\Module\Common\DBMSSQL08.pas',
+  uGlobal in '..\Config\uGlobal.pas';
 
 {$R *.res}
 var

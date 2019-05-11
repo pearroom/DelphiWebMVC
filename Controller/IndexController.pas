@@ -17,7 +17,7 @@ type
 implementation
 
 uses
-  UsersService, UsersInterface;
+  UsersService, UsersInterface, uGlobal;
 
 
 { TIndexController }
@@ -66,6 +66,7 @@ var
 begin
   with View do
   begin
+    Global.test:='ok'; //全局变量使用
     SessionRemove('user');
 //    jo := SO();
 //    jo.S['msg'] := '你好呀';

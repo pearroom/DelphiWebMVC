@@ -12,7 +12,7 @@ interface
 uses
   System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes,
   Web.HTTPApp, uConfig, System.DateUtils, SessionList, superobject, uInterceptor,
-  uRouleMap, RedisList, LogUnit;
+  uRouleMap, RedisList, LogUnit, uGlobal;
 
 var
   RouleMap: TRouleMap = nil;
@@ -321,6 +321,7 @@ begin
     end;
     if auto_free_memory then
       FreeMemory := TFreeMemory.Create(False);
+    Global := TGlobal.Create;
     RouleMap := TRouleMap.Create;
     SessionListMap := TSessionList.Create;
     sessionclear := TThSessionClear.Create(false);
@@ -355,6 +356,7 @@ begin
     end;
     if _RedisList <> nil then
       _RedisList.Free;
+    Global.Free;
   end;
 end;
 

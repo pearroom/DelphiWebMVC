@@ -10,21 +10,22 @@ unit DBSQLite;
 interface
 
 uses
-  System.SysUtils, FireDAC.Comp.Client, superobject, DBBase;
+  System.SysUtils, FireDAC.Comp.Client, superobject, DBBase, Data.DB;
 
 type
   TDBSQLite = class(TDBBase)
   private
   public
-    function FindFirst(tablename: string; where: string=''): ISuperObject; overload; override;
+    function FindFirst(tablename: string; where: string = ''): ISuperObject; overload; override;
     function QueryPage(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): ISuperObject; override;
+    procedure StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant); overload;
   end;
 
 implementation
 
 
 { TDBSQLite }
-function TDBSQLite.FindFirst(tablename: string; where: string=''): ISuperObject;
+function TDBSQLite.FindFirst(tablename: string; where: string = ''): ISuperObject;
 var
   sql: string;
 begin
@@ -52,7 +53,7 @@ begin
     try
       CDS.Connection := condb;
       sql := 'select count(1) as N from ' + from;
-      sql:=filterSQL(sql);
+      sql := filterSQL(sql);
       CDS.Open(sql);
       count := CDS.FieldByName('N').AsInteger;
       CDS.Close;
@@ -70,6 +71,18 @@ begin
     FreeAndNil(CDS);
   end;
 
+end;
+
+procedure TDBSQLite.StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant);
+begin
+  with StoredProc.Params.Add do
+  begin
+    DisplayName := DisplayName_;
+    Name := DisplayName_;
+    DataType := DataType_;
+    Value := Value_;
+    ParamType := ParamType_;
+  end;
 end;
 
 end.

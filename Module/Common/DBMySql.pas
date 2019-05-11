@@ -10,7 +10,8 @@ unit DBMySql;
 interface
 
 uses
-  System.SysUtils, FireDAC.Comp.Client, superobject, DBBase;
+  System.SysUtils, FireDAC.Comp.Client, superobject, DBBase, FireDAC.Stan.Param,
+  Data.DB;
 
 type
   TDBMySql = class(TDBBase)
@@ -18,6 +19,7 @@ type
   public
     function FindFirst(tablename: string; where: string = ''): ISuperObject; overload; override;
     function QueryPage(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): ISuperObject; override;
+    procedure StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant); overload;
   end;
 
 implementation
@@ -53,7 +55,7 @@ begin
     try
       CDS.Connection := condb;
       sql := 'select count(1) as N from ' + from;
-      sql:=filterSQL(sql);
+      sql := filterSQL(sql);
       CDS.Open(sql);
       count := CDS.FieldByName('N').AsInteger;
       CDS.Close;
@@ -65,12 +67,22 @@ begin
         DBlog(e.ToString);
         Result := nil;
       end;
-
     end;
   finally
     FreeAndNil(CDS);
   end;
+end;
 
+procedure TDBMySql.StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant);
+begin
+  with StoredProc.Params.Add do
+  begin
+    DisplayName := DisplayName_;
+    Name := DisplayName_;
+    DataType := DataType_;
+    Value := Value_;
+    ParamType := ParamType_;
+  end;
 end;
 
 end.

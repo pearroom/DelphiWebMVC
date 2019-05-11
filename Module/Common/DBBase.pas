@@ -22,12 +22,13 @@ type
     FPageKey: string;
     function getJSONWhere(JSONwhere: ISuperObject): string;
     procedure SetFields(const Value: string);
-
     procedure SetPageKey(const Value: string);
 
     { Private declarations }
-  public
+  protected
     condb: TFDConnection;
+    StoredProc: TFDStoredProc;
+  public
     TMP_CDS: TFDQuery;
     dataset: TFDQuery;
     property Fields: string read FFields write SetFields; // 用来设置查询时显示那些字段
@@ -38,6 +39,9 @@ type
     procedure StartTransaction(); //启动事务
     procedure Commit;        //事务提交
     procedure Rollback;      //事务回滚
+    procedure StoredProcSetName(StoredProcName: string);
+    function StoredProcOpen(var json: ISuperObject): Boolean;
+    procedure StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant); overload; virtual;
     function FindByKey(tablename: string; key: string; value: Integer): ISuperObject; overload;
     function FindByKey(tablename: string; key: string; value: string): ISuperObject; overload;
     function Find(tablename: string; where: string): ISuperObject; overload;
@@ -48,6 +52,7 @@ type
     function FindPage(var count: Integer; tablename, where, order: string; pageindex, pagesize: Integer): ISuperObject; overload;
     function FindPage(var count: Integer; tablename: string; JSONWhere: ISuperObject; order: string; pageindex, pagesize: Integer): ISuperObject; overload;
     function CDSToJSONArray(cds: TFDQuery; isfirst: Boolean = false): ISuperObject;
+    function StoredProcToJSON(StoredProc: TFDStoredProc): ISuperObject;
     function CDSToJSONObject(cds: TFDQuery): ISuperObject;
     function Query(sql: string; var cds: TFDQuery): Boolean; overload;
     function Query(sql: string): ISuperObject; overload;
@@ -61,7 +66,7 @@ type
     function Delete(tablename: string; where: string): Boolean; overload;
     function TryConnDB(): Boolean;
     function closeDB(): Boolean;
-    constructor Create(dbtype:string);
+    constructor Create(dbtype: string);
     destructor Destroy; override;
   end;
 
@@ -92,7 +97,6 @@ begin
       Result := nil;
       log(e.ToString);
     end;
-
   end;
 end;
 
@@ -111,7 +115,60 @@ begin
   if not TryConnDB then
     Exit;
   condb.StartTransaction;
+end;
 
+procedure TDBBase.StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant);
+begin
+
+end;
+
+function TDBBase.StoredProcOpen(var json: ISuperObject): Boolean;
+begin
+  Result := StoredProc.OpenOrExecute;
+  json := StoredProcToJSON(StoredProc);
+  StoredProc.Close;
+  StoredProc.Params.ClearAndResetID;
+end;
+
+procedure TDBBase.StoredProcSetName(StoredProcName: string);
+begin
+  StoredProc.StoredProcName := StoredProcName;
+end;
+
+function TDBBase.StoredProcToJSON(StoredProc: TFDStoredProc): ISuperObject;
+var
+  ja, jo: ISuperObject;
+  i: Integer;
+  ret: string;
+  ftype: TFieldType;
+begin
+  ja := SA([]);
+  ret := '';
+  with StoredProc do
+  begin
+    First;
+    while not Eof do
+    begin
+      jo := SO();
+      for i := 0 to Fields.Count - 1 do
+      begin
+        ftype := Fields[i].DataType;
+        if (ftype = ftAutoInc) then
+          jo.I[Fields[i].DisplayLabel] := Fields[i].AsInteger
+        else if (ftype = ftInteger) then
+          jo.I[Fields[i].DisplayLabel] := Fields[i].AsInteger
+        else if (ftype = ftBoolean) then
+          jo.B[Fields[i].DisplayLabel] := Fields[i].AsBoolean
+        else
+        begin
+          jo.S[Fields[i].DisplayLabel] := Fields[i].AsString;
+        end;
+      end;
+      ja.AsArray.Add(jo);
+      Next;
+    end;
+  end;
+  Result := ja;
 end;
 
 function TDBBase.CDSToJSONArray(cds: TFDQuery; isfirst: Boolean = false): ISuperObject;
@@ -179,7 +236,6 @@ begin
   finally
     Result := condb.Connected;
   end;
-
 end;
 
 function TDBBase.TryConnDB: Boolean;
@@ -199,17 +255,17 @@ begin
   finally
     Result := condb.Connected;
   end;
-
 end;
 
-constructor TDBBase.Create(dbtype:string);
+constructor TDBBase.Create(dbtype: string);
 begin
 
   condb := TFDConnection.Create(nil);
   condb.ConnectionDefName := dbtype;
   TMP_CDS := TFDQuery.Create(nil);
   TMP_CDS.Connection := condb;
-
+  StoredProc := TFDStoredProc.Create(nil);
+  StoredProc.Connection := condb;
 end;
 
 function TDBBase.Delete(tablename: string; JSONwhere: ISuperObject): Boolean;
@@ -223,7 +279,6 @@ begin
     sql := 'delete from ' + tablename + ' where 1=1 ' + sql;
     Result := ExecSQL(sql);
   end;
-
 end;
 
 procedure TDBBase.DBlog(msg: string);
@@ -241,7 +296,6 @@ begin
     sql := 'delete from ' + tablename + ' where 1=1 ' + where;
     Result := ExecSQL(sql);
   end;
-
 end;
 
 function TDBBase.DeleteByKey(tablename, key: string; value: string): Boolean;
@@ -267,7 +321,6 @@ begin
       Result := False;
     end;
   end;
-
 end;
 
 destructor TDBBase.Destroy;
@@ -283,6 +336,7 @@ begin
   finally
     TMP_CDS.SQL.Clear;
     TMP_CDS.Close;
+    StoredProc.Free;
     FreeAndNil(TMP_CDS);
     FreeAndNil(condb);
   end;
@@ -313,7 +367,6 @@ begin
     end
     else
       Result := nil;
-
   except
     Result := nil;
   end;
@@ -338,7 +391,6 @@ begin
         log(e.ToString);
         Result := False;
       end;
-
     end;
   finally
 
@@ -379,7 +431,6 @@ begin
   finally
    // FreeAndNil(CDS1);
   end;
-
 end;
 
 function TDBBase.Query(sql: string; var cds: TFDQuery): Boolean;
@@ -400,7 +451,6 @@ begin
       log(e.ToString);
     end;
   end;
-
 end;
 
 function TDBBase.QueryFirst(sql: string): ISuperObject;
@@ -425,11 +475,9 @@ begin
         log(e.ToString);
       end;
     end;
-
   finally
    // FreeAndNil(CDS);
   end;
-
 end;
 
 function TDBBase.QueryPage(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): ISuperObject;
@@ -471,7 +519,6 @@ begin
   begin
     Result := Find(tablename, sql);
   end;
-
 end;
 
 function TDBBase.FindByKey(tablename, key: string; value: Integer): ISuperObject;
@@ -499,7 +546,6 @@ begin
   begin
     Result := FindFirst(tablename, sql);
   end;
-
 end;
 
 function TDBBase.FindPage(var count: Integer; tablename: string; JSONWhere: ISuperObject; order: string; pageindex, pagesize: Integer): ISuperObject;
