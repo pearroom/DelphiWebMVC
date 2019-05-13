@@ -12,6 +12,7 @@ type
     procedure check;
     procedure verifycode;
     procedure setdata;
+    procedure home(value1, value2, value3, value4, value5: string);
   end;
 
 implementation
@@ -56,6 +57,22 @@ begin
     begin
       Fail(-1, '验证码错误');
     end;
+  end;
+end;
+
+procedure TIndexController.home(value1, value2, value3, value4, value5: string);
+var
+  s: string;
+begin
+//http://localhost:8004/home/ddd/12/32/eee/333.html
+//http://localhost:8004/home/ddd/12/32/eee/333
+//http://localhost:8004/home/ddd/12/32/eee/333?name=admin
+ //伪静态及Rest风格
+  with view do
+  begin
+    s := InputByIndex(2);
+    s := Input('name');
+    ShowText(s + ' ' + value1 + ' ' + value2 + ' ' + value3 + ' ' + value4 + ' ' + value5);
   end;
 end;
 

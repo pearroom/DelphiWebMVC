@@ -24,9 +24,11 @@ type
     FRequest: TWebRequest;
     FResponse: TWebResponse;
     FActionPath: string;
+    FActionRoule: string;
     procedure SetRequest(const Value: TWebRequest);
     procedure SetResponse(const Value: TWebResponse);
     procedure SetActionPath(const Value: string);
+    procedure SetActionRoule(const Value: string);
   protected
   public
     View: TView;
@@ -57,6 +59,7 @@ type
     property Request: TWebRequest read FRequest write SetRequest;
     property Response: TWebResponse read FResponse write SetResponse;
     property ActionPath: string read FActionPath write SetActionPath;
+    property ActionRoule:string read FActionRoule write SetActionRoule;
   end;
 
 implementation
@@ -202,6 +205,11 @@ begin
   FActionPath := Value;
 end;
 
+procedure TBaseController.SetActionRoule(const Value: string);
+begin
+  FActionRoule := Value;
+end;
+
 procedure TBaseController.SetRequest(const Value: TWebRequest);
 begin
   FRequest := Value;
@@ -244,7 +252,7 @@ end;
 procedure TBaseController.CreateView;
 begin
   try
-    View := TView.Create(Response, Request, ActionPath);
+    View := TView.Create(Response, Request, ActionPath,ActionRoule);
     RedisItem := nil;
   except
     on e: Exception do

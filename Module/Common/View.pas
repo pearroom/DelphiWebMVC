@@ -29,6 +29,7 @@ type
     Db: TDBConfig;
    // Db2: TDB2; //第2个数据源
     ActionP: string;
+    ActionR: string;
     Response: TWebResponse;
     Request: TWebRequest;
     function Q(str: string): string;
@@ -42,6 +43,7 @@ type
     procedure CookiesSet(key, value: string);   // cookies 操作
     function Input(param: string): string;      // 返回参数值，get post
     function InputInt(param: string): Integer;      // 返回参数值，get post
+    function InputByIndex(index: Integer): string;
     function CDSToJSON(cds: TFDQuery): string;
     procedure setAttr(key, value: string);      // 设置视图标记显示内容 ，如果 value是 json 数组可以在 table 标记中显示
     procedure setAttrJSON(key: string; json: ISuperObject);
@@ -54,7 +56,7 @@ type
     procedure ShowVerifyCode(num: string);  // 显示验证码
     procedure Success(code: Integer = 0; msg: string = '');
     procedure Fail(code: Integer = -1; msg: string = '');
-    constructor Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath: string);
+    constructor Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
     destructor Destroy; override;
   end;
 
@@ -256,17 +258,18 @@ begin
   result := Request.CookieFields.Values[key];
 end;
 
-constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath: string);
+constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
 begin
   Db := TDBConfig.Create();
   params := TStringList.Create;
   htmlpars := THTMLParser.Create(Db);
   self.ActionP := ActionPath;
+  self.ActionR := ActionRoule;
   if (Trim(self.ActionP) <> '') then
   begin
-    self.ActionP := self.ActionP + '\';
+    self.ActionP := self.ActionP + '/';
   end;
-  url := WebApplicationDirectory + template + '\' + self.ActionP;
+  url := WebApplicationDirectory + template + '/' + self.ActionP;
   self.Response := Response_;
   self.Request := Request_;
 
@@ -334,6 +337,33 @@ begin
   else if (Request.MethodType = mtGet) then
   begin
     result := Request.QueryFields.Values[param];
+  end;
+
+end;
+
+function TView.InputByIndex(index: Integer): string;
+var
+  s, s1: string;
+  params: TStringList;
+begin
+  try
+    s1 := ActionR;
+    s := Request.PathInfo;
+    s := Copy(s, Length(s1) + 1, Length(s) - Length(s1));
+    params := TStringList.Create;
+    params.Delimiter := '/';
+    params.DelimitedText := s;
+    if (index < params.Count) and (index > -1) then
+    begin
+      s := params.Strings[index];
+    end
+    else
+    begin
+      s := '';
+    end;
+    Result := s;
+  finally
+    params.Free;
   end;
 
 end;

@@ -17,6 +17,7 @@ type
   TRoule = class
   private
     list: TObjectList<TRouleItem>;
+    function GetItem2(roule: string): TRouleItem;
   public
     procedure SetRoule(name: string; ACtion: TClass; path: string = ''; isInterceptor: Boolean = True);
     function GetRoule(url: string; var roule: string; var method: string): TRouleItem;
@@ -43,22 +44,47 @@ begin
   list.Free;
 end;
 
-function TRoule.GetItem(roule: string): TRouleItem;
+function TRoule.GetItem2(roule: string): TRouleItem;
 var
   I: Integer;
-  item: TRouleItem;
+  item, defitem: TRouleItem;
 begin
   Result := nil;
   for I := 0 to list.Count - 1 do
   begin
     item := list.Items[I];
+
+    if (UpperCase(item.Name) = LeftStr(UpperCase(roule), Length(item.Name))) and (Length(item.Name) > 1) then
+    begin
+      Result := item;
+      break;
+    end
+    else if item.Name = '/' then
+    begin
+      defitem := item;
+    end;
+
+  end;
+  if Result = nil then
+    Result := defitem;
+end;
+
+function TRoule.GetItem(roule: string): TRouleItem;
+var
+  I: Integer;
+  item, defitem: TRouleItem;
+begin
+  Result := nil;
+  for I := 0 to list.Count - 1 do
+  begin
+    item := list.Items[I];
+
     if UpperCase(item.Name) = UpperCase(roule) then
     begin
       Result := item;
       break;
-    end;
+    end
   end;
-
 end;
 
 function TRoule.GetRoule(url: string; var roule: string; var method: string): TRouleItem;
@@ -68,6 +94,7 @@ var
   url1, url2: string;
   tmp: TStringList;
   tmp1: string;
+  tmp2: string;
 begin
   Result := nil;
   url1 := '';
@@ -112,11 +139,18 @@ begin
     end
     else
     begin
-      item := GetItem(url2);
+      item := GetItem2(url1);
       if item <> nil then
       begin
-        roule := url2;
-        method := tmp.Strings[tmp.Count - 1];
+        roule := url1;
+        tmp2 := Copy(roule, Length(item.Name) + 1, Length(roule) - Length(item.Name));
+        method := Copy(tmp2, 1, Pos('/', tmp2) - 1);
+        if method = '' then
+        begin
+          method := tmp2;
+        end;
+
+      //  method := tmp.Strings[tmp.Count - 1];
       end;
     end;
     Result := item;

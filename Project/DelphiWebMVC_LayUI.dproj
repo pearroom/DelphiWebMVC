@@ -119,7 +119,7 @@
         <DCCReference Include="..\Config\uTableMap.pas"/>
         <DCCReference Include="..\Config\uInterceptor.pas"/>
         <DCCReference Include="..\Module\Common\BaseController.pas"/>
-        <DCCReference Include="..\Module\Common\command.pas"/>
+        <DCCReference Include="..\Module\Common\Command.pas"/>
         <DCCReference Include="..\Module\Common\DBBase.pas"/>
         <DCCReference Include="..\Module\Common\DBMSSQL.pas"/>
         <DCCReference Include="..\Module\Common\DBMSSQL12.pas"/>

@@ -66,7 +66,7 @@ var
   hMutex: THandle;
 
 begin
-  ReportMemoryLeaksOnShutdown := DebugHook <> 0;
+  ReportMemoryLeaksOnShutdown := True;
   Application.Initialize;
   Application.Title := 'DelphiWebMVC_LayUI';
   hMutex := CreateMutex(nil, false, PChar(Application.Title));

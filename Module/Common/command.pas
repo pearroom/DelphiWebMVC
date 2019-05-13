@@ -10,9 +10,11 @@ unit Command;
 interface
 
 uses
+
   System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes,
   Web.HTTPApp, uConfig, System.DateUtils, SessionList, superobject, uInterceptor,
-  uRouleMap, RedisList, LogUnit, uGlobal;
+  uRouleMap, RedisList, LogUnit, uGlobal,System.StrUtils;
+
 
 var
   RouleMap: TRouleMap = nil;
@@ -53,14 +55,14 @@ var
   Action: TObject;
   ActoinClass: TRttiType;
   ActionMethod, CreateView, Interceptor: TRttiMethod;
-  Response, Request, ActionPath: TRttiProperty;
+  Response, Request, ActionPath, ActionRoule: TRttiProperty;
   url, url1: string;
   item: TRouleItem;
   tmp: string;
   methodname: string;
   k: integer;
   ret: TValue;
-  s: string;
+  s, s1: string;
   sessionid: string;
   //--------大量提供begin------------
   i: integer;
@@ -70,12 +72,19 @@ var
   sParameters: string;
   sValue: string;
   //-------大量提供end--------------
+  params: TStringList;
 begin
 
   web.Response.ContentEncoding := document_charset;
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
   url := LowerCase(web.Request.PathInfo);
+  if roule_suffix.Trim <> '' then
+  begin
+    if RightStr(url, Length(roule_suffix)) = roule_suffix then
+      url := url.Replace(roule_suffix, '');
+
+  end;
   k := Pos('.', url);
   if k <= 0 then
   begin
@@ -90,6 +99,7 @@ begin
       Request := ActoinClass.GetProperty('Request');
       Response := ActoinClass.GetProperty('Response');
       ActionPath := ActoinClass.GetProperty('ActionPath');
+      ActionRoule := ActoinClass.GetProperty('ActionRoule');
       try
         if (ActionMethod <> nil) then
         begin
@@ -98,20 +108,51 @@ begin
             Request.SetValue(Action, web.Request);
             Response.SetValue(Action, web.Response);
             ActionPath.SetValue(Action, item.path);
+            ActionRoule.SetValue(Action, item.Name);
             CreateView.Invoke(Action, []);
             //--------------大量提供begin----------------------
             ActionMethonValues := ActionMethod.GetParameters;
             SetLength(aValueArray, Length(ActionMethonValues));
-            for i := Low(ActionMethonValues) to High(ActionMethonValues) do
+            if Length(item.Name + methodname) = Length(url) then
             begin
-              ActionMethonValue := ActionMethonValues[i];
-              sParameters := ActionMethonValue.Name;   //参数名
-              if web.Request.MethodType = mtGet then  //从web.GET中提取值
-                sValue := web.Request.QueryFields.Values[sParameters]
-              else
-                sValue := web.Request.ContentFields.Values[sParameters]; //从web.POST中提取值
-              aValueArray[i] := StrToParamTypeValue(sValue, ActionMethonValue.ParamType.TypeKind); //根据参数数据类型，转换值，只传常量
+              for i := Low(ActionMethonValues) to High(ActionMethonValues) do
+              begin
+                ActionMethonValue := ActionMethonValues[i];
+                sParameters := ActionMethonValue.Name;   //参数名
+                if web.Request.MethodType = mtGet then  //从web.GET中提取值
+                  sValue := web.Request.QueryFields.Values[sParameters]
+                else
+                begin
+                  sValue := web.Request.ContentFields.Values[sParameters]; //从web.POST中提取值
+                  if sValue = '' then
+                    sValue := web.Request.QueryFields.Values[sParameters];
+                end;
+                aValueArray[i] := StrToParamTypeValue(sValue, ActionMethonValue.ParamType.TypeKind); //根据参数数据类型，转换值，只传常量
+              end;
+            end
+            else
+            begin
+              try
+                s1 := item.Name;
+                s := Copy(url, Length(s1) + 1, Length(url) - Length(s1));
+                params := TStringList.Create;
+                params.Delimiter := '/';
+                params.DelimitedText := s;
+                for i := Low(ActionMethonValues) to High(ActionMethonValues) do
+                begin
+                  ActionMethonValue := ActionMethonValues[i];
+                  if (i < params.Count - 1) then
+                    sValue := params.Strings[i + 1]
+                  else
+                    sValue := '';
+                  aValueArray[i] := StrToParamTypeValue(sValue, ActionMethonValue.ParamType.TypeKind); //根据参数数据类型，转换值，只传常量
+                end;
+              finally
+                params.Free;
+              end;
             end;
+
+
             //-----------------大量提供end------------------------
             if item.Interceptor then
             begin

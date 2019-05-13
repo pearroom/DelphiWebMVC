@@ -6,6 +6,7 @@ const
   __APP__ = '';                               // 应用名称 ,可当做虚拟目录使用
   template = 'view';                        // 模板根目录
   template_type = '.html';                  // 模板文件类型
+  roule_suffix='.html';                     // 伪静态后缀文件名
   session_start = true;                     // 启用session
   session_timer = 30;                        // session过期时间分钟
   config = 'resources\config.json';         // 配置文件地址
