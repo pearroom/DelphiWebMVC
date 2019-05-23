@@ -94,6 +94,7 @@ begin
       break;
     end;
   end;
+  Result := true;
 end;
 
 constructor TRedisList.Create(size: integer);
@@ -107,7 +108,6 @@ begin
   begin
     additem();
   end;
-
 end;
 
 destructor TRedisList.Destroy;
@@ -131,6 +131,7 @@ var
   i: Integer;
   isok: boolean;
 begin
+  Result := nil;
   isok := false;
   for i := 0 to list.Count - 1 do
   begin
@@ -150,7 +151,7 @@ end;
 
 procedure TRedisList.RunClear;
 var
-  i, sum, index: Integer;
+   sum, index: Integer;
 begin
   try
     sum := list.Count - 1;
@@ -162,7 +163,6 @@ begin
         list[index].Free;
         list.Delete(index);
         break;
-
       end;
 
       index := index + 1;
@@ -192,7 +192,6 @@ begin
       log(e.Message);
     end;
   end;
-
 end;
 
 { TRedisItem }
@@ -200,7 +199,6 @@ end;
 constructor TRedisItem.Create();
 begin
   item := TRedisM.Create();
-
 end;
 
 destructor TRedisItem.Destroy;

@@ -29,8 +29,6 @@ begin
 end;
 
 destructor TGlobal.Destroy;
-var
-  i: Integer;
 begin
   //ÀàµÄÊÍ·Å
  // list.Clear;

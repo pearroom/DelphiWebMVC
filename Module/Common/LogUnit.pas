@@ -10,8 +10,8 @@ unit LogUnit;
 interface
 
 uses
-  System.SysUtils, System.Rtti, System.Classes, Web.HTTPApp, uConfig, System.DateUtils,
-  Vcl.StdCtrls;
+  System.SysUtils, System.Rtti, System.Classes, Web.HTTPApp, uConfig,
+  System.DateUtils, Vcl.StdCtrls;
 
 procedure log(msg: string);
 
@@ -84,7 +84,7 @@ begin
   begin
     Sleep(10);
     Inc(k);
-    if k >= 100 then
+    if k >= 50 then
     begin
       k := 0;
       if _LogList.Count > 0 then
@@ -92,7 +92,6 @@ begin
         writelog(_LogList.Strings[0]);
         _LogList.Delete(0);
       end;
-
     end;
 
   end;
@@ -128,7 +127,6 @@ begin
     Writeln(tf, log);
     Flush(tf);
     CloseFile(tf);
-
   finally
    //   CoUnInitialize;
   end;

@@ -3,7 +3,7 @@ unit UsersInterface;
 interface
 
 uses
-  superobject;
+  superobject,MHashMap;
 
 type
   IUsersInterface = interface

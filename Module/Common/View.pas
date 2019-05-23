@@ -11,13 +11,17 @@ interface
 
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, Web.HTTPProd, System.StrUtils,
-  FireDAC.Comp.Client, Page, superobject, uConfig, Web.ReqMulti, Vcl.Imaging.jpeg,
-  Vcl.Graphics, Data.DB, System.RegularExpressions, HTMLParser, SimpleXML,
-  uDBConfig;
+  FireDAC.Comp.Client, Page, superobject, uConfig, Web.ReqMulti, RedisM,
+  RedisList, Vcl.Imaging.jpeg, Vcl.Graphics, Data.DB, System.RegularExpressions,
+  HTMLParser, uDBConfig, uPlugin;
 
 type
   TView = class
   private
+    RedisM: TRedisM;
+    RedisItem: TRedisItem;
+    ActionP: string;
+    ActionR: string;
     sessionid: string;
     htmlpars: THTMLParser;
     url: string; // 当前模板路径
@@ -27,12 +31,16 @@ type
     procedure makeSession;
   public
     Db: TDBConfig;
-   // Db2: TDB2; //第2个数据源
-    ActionP: string;
-    ActionR: string;
+    Plugin: TPlugin;
     Response: TWebResponse;
     Request: TWebRequest;
     function Q(str: string): string;
+    function RedisRemove(key: string): Boolean;
+    procedure RedisSetKeyText(key: string; value: string; timerout: Integer = 0);
+    function RedisGetKeyText(key: string): string;
+    procedure RedisSetKeyJSON(key: string; value: ISuperObject; timerout: Integer = 0);
+    function RedisGetKeyJSON(key: string): ISuperObject;
+    procedure RedisSetExpire(key: string; timerout: Integer);
     procedure SessionSet(key, value: string);   // session控制 value传入json字符串作为对象存储
     procedure SessionSetJSON(key: string; json: ISuperObject);
     function SessionGet(key: string): string;   // session 值获取
@@ -50,12 +58,13 @@ type
     procedure ShowHTML(html: string);           // 显示模板
     procedure ShowText(text: string);           // 显示文本，json格式需转换后显示
     procedure ShowJSON(jo: ISuperObject);       // 显示 json
-    procedure ShowXML(xml: IXmlDocument);        // 显示 xml 数据
+    procedure ShowXML(xml: string);        // 显示 xml 数据
     procedure ShowPage(count: Integer; data: ISuperObject);   //渲染分页数据
     procedure Redirect(action: string; path: string = '');        // 跳转 action 路由,path 路径
     procedure ShowVerifyCode(num: string);  // 显示验证码
     procedure Success(code: Integer = 0; msg: string = '');
     procedure Fail(code: Integer = -1; msg: string = '');
+    procedure setData(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
     constructor Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
     destructor Destroy; override;
   end;
@@ -66,6 +75,76 @@ uses
   SessionList, command, LogUnit;
 
 { TView }
+function TView.RedisGetKeyJSON(key: string): ISuperObject;
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    Result := RedisM.getKeyJSON(key)
+  else
+    Result := nil;
+end;
+
+function TView.RedisGetKeyText(key: string): string;
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    Result := RedisM.getKeyText(key)
+  else
+    Result := '';
+end;
+
+function TView.RedisRemove(key: string): Boolean;
+begin
+  Result := false;
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    Result := RedisM.delKey(key);
+end;
+
+procedure TView.RedisSetExpire(key: string; timerout: Integer);
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    RedisM.setExpire(key, timerout);
+end;
+
+procedure TView.RedisSetKeyJSON(key: string; value: ISuperObject; timerout: Integer);
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    RedisM.setKeyJSON(key, value, timerout);
+end;
+
+procedure TView.RedisSetKeyText(key, value: string; timerout: Integer);
+begin
+  if (_RedisList <> nil) and (RedisItem = nil) then
+  begin
+    RedisItem := _RedisList.OpenRedis();
+    RedisM := RedisItem.item;
+  end;
+  if (_RedisList <> nil) then
+    RedisM.setKeyText(key, value, timerout);
+end;
 
 function TView.CDSToJSON(cds: TFDQuery): string;
 var
@@ -106,6 +185,22 @@ begin
     setAttr(key, json.AsString);
 end;
 
+procedure TView.setData(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
+begin
+  self.ActionP := ActionPath;
+  self.ActionR := ActionRoule;
+  if (Trim(self.ActionP) <> '') then
+  begin
+    self.ActionP := self.ActionP + '/';
+  end;
+  url := WebApplicationDirectory + template + '/' + self.ActionP;
+  self.Response := Response_;
+  self.Request := Request_;
+
+  if (session_start) then
+    CreateSession();
+end;
+
 procedure TView.ShowText(text: string);
 begin
 
@@ -114,10 +209,10 @@ begin
   Response.SendResponse;
 end;
 
-procedure TView.ShowXML(xml: IXmlDocument);
+procedure TView.ShowXML(xml: string);
 begin
   Response.ContentType := 'application/xml; charset=' + document_charset;
-  Response.Content := xml.XML;
+  Response.Content := xml;
   Response.SendResponse;
 end;
 
@@ -166,7 +261,6 @@ begin
       htmlpars.Parser(htmlcontent, params, self.url);
       Response.Content := htmlcontent;
     end;
-
   end
   else
   begin
@@ -192,7 +286,6 @@ begin
   json.I['count'] := count;
   json.O['data'] := data;
   ShowJSON(json);
-
 end;
 
 procedure TView.ShowVerifyCode(num: string);
@@ -224,7 +317,6 @@ begin
       bmp_t.Canvas.Font.Name := 'Verdana';
 
       bmp_t.Canvas.TextOut(i * 15, 5, s); // 加入文字
-
     end;
     jp.Assign(bmp_t);
     jp.CompressionQuality := 100;
@@ -240,7 +332,6 @@ begin
     FreeAndNil(bmp_t);
     FreeAndNil(jp);
   end;
-
 end;
 
 function TView.Cookies: TCookie;
@@ -260,22 +351,13 @@ end;
 
 constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
 begin
+  RedisItem := nil;
+  RedisM := nil;
   Db := TDBConfig.Create();
+  Plugin := TPlugin.Create;
   params := TStringList.Create;
   htmlpars := THTMLParser.Create(Db);
-  self.ActionP := ActionPath;
-  self.ActionR := ActionRoule;
-  if (Trim(self.ActionP) <> '') then
-  begin
-    self.ActionP := self.ActionP + '/';
-  end;
-  url := WebApplicationDirectory + template + '/' + self.ActionP;
-  self.Response := Response_;
-  self.Request := Request_;
-
-  if (session_start) then
-    CreateSession();
-
+  setData(Response_, Request_, ActionPath, ActionRoule);
 end;
 
 procedure TView.CreateSession;
@@ -291,9 +373,7 @@ begin
       Name := SessionName;
       value := sessionid;
     end;
-
   end;
-
 end;
 
 function TView.GetGUID: string;
@@ -310,9 +390,14 @@ end;
 
 destructor TView.Destroy;
 begin
-  FreeAndNil(htmlpars);
-  FreeAndNil(params);
-  FreeAndNil(Db);
+  if (Redisitem <> nil) and (_RedisList <> nil) then
+  begin
+    _RedisList.CloseRedis(Redisitem.guid);
+  end;
+  htmlpars.Free;
+  params.Free;
+  Db.Free;
+  Plugin.Free;
   inherited;
 end;
 
@@ -338,7 +423,6 @@ begin
   begin
     result := Request.QueryFields.Values[param];
   end;
-
 end;
 
 function TView.InputByIndex(index: Integer): string;
@@ -346,11 +430,12 @@ var
   s, s1: string;
   params: TStringList;
 begin
+  params := TStringList.Create;
   try
     s1 := ActionR;
     s := Request.PathInfo;
     s := Copy(s, Length(s1) + 1, Length(s) - Length(s1));
-    params := TStringList.Create;
+
     params.Delimiter := '/';
     params.DelimitedText := s;
     if (index < params.Count) and (index > -1) then
@@ -365,7 +450,6 @@ begin
   finally
     params.Free;
   end;
-
 end;
 
 function TView.InputInt(param: string): Integer;
@@ -377,12 +461,19 @@ procedure TView.makeSession;
 var
   timerout: TDateTime;
 begin
-  if (session_timer <> 0) then
-    timerout := Now + (1 / 24 / 60) * session_timer
+  if _RedisList <> nil then
+  begin
+    RedisSetKeyJSON(sessionid, SO('{}'), session_timer);
+  end
   else
-    timerout := Now + (1 / 24 / 60) * 60 * 24; //24小时过期
-  SessionListMap.setValueByKey(sessionid, '{}');
-  SessionListMap.setTimeroutByKey(sessionid, DateTimeToStr(timerout));
+  begin
+    if (session_timer <> 0) then
+      timerout := Now + (1 / 24 / 60) * session_timer
+    else
+      timerout := Now + (1 / 24 / 60) * 60 * 24; //24小时过期
+    SessionListMap.setValueByKey(sessionid, '{}');
+    SessionListMap.setTimeroutByKey(sessionid, DateTimeToStr(timerout));
+  end;
  // log('创建Session:' + sessionid);
 end;
 
@@ -412,22 +503,37 @@ var
 begin
   if (not session_start) then
     exit;
-
-  s := SessionListMap.getValueByKey(sessionid);
-  if (s = '') then
+  if _RedisList <> nil then
+  begin
+    s := RedisGetKeyJSON(sessionid).AsString;
+  end
+  else
+  begin
+    s := SessionListMap.getValueByKey(sessionid);
+  end;
+  if (s = '') or (s = '{}') then
   begin
     makeSession;
     s := '{}';
   end;
   jo := SO(s);
   jo.S[key] := value;
-  SessionListMap.setValueByKey(sessionid, jo.AsString);
+  if _RedisList <> nil then
+  begin
+    RedisSetKeyJSON(sessionid, jo);
+  end
+  else
+  begin
+    SessionListMap.setValueByKey(sessionid, jo.AsString);
+  end;
 end;
 
 procedure TView.SessionSetJSON(key: string; json: ISuperObject);
 begin
   if json <> nil then
+  begin
     SessionSet(key, json.AsString);
+  end;
 end;
 
 function TView.SessionGet(key: string): string;
@@ -437,7 +543,10 @@ var
 begin
   if (not session_start) then
     exit;
-  s := SessionListMap.getValueByKey(sessionid);
+  if _RedisList <> nil then
+    s := RedisGetKeyJSON(sessionid).AsString
+  else
+    s := SessionListMap.getValueByKey(sessionid);
   if s = '' then
   begin
     Result := '';
@@ -447,7 +556,6 @@ begin
     jo := SO(s);
     Result := jo.S[key];
   end;
- // result := SessionListMap.get(sessionid).jo.Values[key];
 end;
 
 function TView.SessionGetJSON(key: string): ISuperObject;
@@ -464,7 +572,10 @@ begin
   if (not session_start) then
     exit;
   try
-    s := SessionListMap.getValueByKey(sessionid);
+    if _RedisList <> nil then
+      s := RedisGetKeyJSON(sessionid).AsString
+    else
+      s := SessionListMap.getValueByKey(sessionid);
     if s = '' then
     begin
       Result := false;
@@ -473,7 +584,10 @@ begin
 
     jo := SO(s);
     jo.Delete(key);
-    SessionListMap.setValueByKey(sessionid, jo.AsString);
+    if _RedisList <> nil then
+      RedisSetKeyJSON(sessionid, jo)
+    else
+      SessionListMap.setValueByKey(sessionid, jo.AsString);
   except
     Result := false;
   end;

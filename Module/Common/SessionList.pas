@@ -93,12 +93,13 @@ function TSessionList.setTimeroutByKey(sessionid, timerout: string): boolean;
 begin
 
   SessionLs_timerout.AddOrSetValue(sessionid, timerout);
+  Result:=true;
 end;
 
 function TSessionList.setValueByKey(sessionid, value: string): boolean;
 begin
   SessionLs_vlue.AddOrSetValue(sessionid, value);
-
+  Result:=true;
 end;
 
 end.

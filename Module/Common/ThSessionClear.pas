@@ -31,8 +31,6 @@ uses
 { TThSession }
 procedure TThSessionClear.clearMap();
 var
-  i: integer;
-  k: integer;
   key, s: string;
 begin
   try

@@ -74,7 +74,6 @@ end;
 
 function THTMLParser.checkifwhere(where: string): boolean;
 var
-  s: string;
   sn: Integer;
 begin
   where := where.Replace('neq', ' != ');
@@ -204,8 +203,6 @@ var
   s, datavalue: string;
   strls: TStringList;
   html: string;
-  s1, s2: string;
-  k: integer;
   isok: Boolean;
 begin
   isok := False;
@@ -286,7 +283,6 @@ var
   matchs: TMatchCollection;
   match: TMatch;
   s: string;
-  html: string;
 begin
 
   s := text;
@@ -467,7 +463,6 @@ var
   match: TMatch;
   s: string;
   html: string;
-  opt: TRegExOptions;
 begin
 
   matchs := TRegEx.Matches(text, '<#if[\s\S]*?</#if>');

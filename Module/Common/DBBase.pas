@@ -39,6 +39,7 @@ type
     procedure StartTransaction(); //启动事务
     procedure Commit;        //事务提交
     procedure Rollback;      //事务回滚
+    function StoredProcToJSON(StoredProc: TFDStoredProc): ISuperObject;
     procedure StoredProcSetName(StoredProcName: string);
     function StoredProcOpen(var json: ISuperObject): Boolean;
     procedure StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant); overload; virtual;
@@ -52,7 +53,7 @@ type
     function FindPage(var count: Integer; tablename, where, order: string; pageindex, pagesize: Integer): ISuperObject; overload;
     function FindPage(var count: Integer; tablename: string; JSONWhere: ISuperObject; order: string; pageindex, pagesize: Integer): ISuperObject; overload;
     function CDSToJSONArray(cds: TFDQuery; isfirst: Boolean = false): ISuperObject;
-    function StoredProcToJSON(StoredProc: TFDStoredProc): ISuperObject;
+
     function CDSToJSONObject(cds: TFDQuery): ISuperObject;
     function Query(sql: string; var cds: TFDQuery): Boolean; overload;
     function Query(sql: string): ISuperObject; overload;
@@ -117,7 +118,10 @@ begin
   condb.StartTransaction;
 end;
 
-procedure TDBBase.StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant);
+
+
+procedure TDBBase.StoredProcAddParams(DisplayName_: string;
+  DataType_: TFieldType; ParamType_: TParamType; Value_: Variant);
 begin
 
 end;
@@ -407,7 +411,6 @@ end;
 function TDBBase.Query(sql: string): ISuperObject;
 var
   ja: ISuperObject;
-  CDS1: TFDQuery;
 begin
   Result := nil;
   if not TryConnDB then
@@ -454,8 +457,6 @@ begin
 end;
 
 function TDBBase.QueryFirst(sql: string): ISuperObject;
-var
-  CDS: TFDQuery;
 begin
   Result := nil;
   if not TryConnDB then

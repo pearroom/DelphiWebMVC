@@ -10,7 +10,7 @@ unit DBMSSQL;
 interface
 
 uses
-  System.SysUtils, FireDAC.Comp.Client, superobject, DBBase,Data.DB;
+  System.SysUtils, FireDAC.Comp.Client, superobject, DBBase, Data.DB;
 
 type
   TDBMSSQL = class(TDBBase)
@@ -80,19 +80,16 @@ begin
         DBlog(e.ToString);
         Result := nil;
       end;
-
     end;
   finally
     CDS.Free;
     //FreeAndNil(CDS);
   end;
-
 end;
 
-procedure TDBMSSQL.StoredProcAddParams(DisplayName_: string;
-  DataType_: TFieldType; ParamType_: TParamType; Value_: Variant);
+procedure TDBMSSQL.StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant);
 begin
-   with StoredProc.Params.Add do
+  with StoredProc.Params.Add do
   begin
     DisplayName := '@' + DisplayName_;
     Name := '@' + DisplayName_;

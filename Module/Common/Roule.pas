@@ -50,6 +50,7 @@ var
   item, defitem: TRouleItem;
 begin
   Result := nil;
+  defitem := nil;
   for I := 0 to list.Count - 1 do
   begin
     item := list.Items[I];
@@ -63,7 +64,6 @@ begin
     begin
       defitem := item;
     end;
-
   end;
   if Result = nil then
     Result := defitem;
@@ -72,7 +72,7 @@ end;
 function TRoule.GetItem(roule: string): TRouleItem;
 var
   I: Integer;
-  item, defitem: TRouleItem;
+  item: TRouleItem;
 begin
   Result := nil;
   for I := 0 to list.Count - 1 do
@@ -158,7 +158,6 @@ begin
     tmp.Clear;
     tmp.Free;
   end;
-
 end;
 
 procedure TRoule.SetRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
@@ -180,7 +179,6 @@ begin
   item.ACtion := ACtion;
   item.path := path;
   list.Add(item);
-
 end;
 
 end.

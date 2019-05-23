@@ -117,15 +117,11 @@ object Main: TMain
     object ts1: TTabSheet
       Caption = #20851#20110
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pnl1: TPanel
         Left = 0
         Top = 0
-        Width = 451
-        Height = 290
+        Width = 441
+        Height = 280
         Align = alClient
         Caption = 'pnl1'
         Color = clWhite
@@ -135,8 +131,8 @@ object Main: TMain
           AlignWithMargins = True
           Left = 4
           Top = 4
-          Width = 443
-          Height = 282
+          Width = 433
+          Height = 272
           Align = alClient
           Center = True
           Picture.Data = {

@@ -41,7 +41,6 @@ function TDBMSSQL08.QueryPage(var count: Integer; select, from, order: string; p
 var
   CDS: TFDQuery;
   sql: string;
-  tmp: string;
 begin
   Result := nil;
   if (not TryConnDB) or (Trim(select) = '') or (Trim(from) = '') then

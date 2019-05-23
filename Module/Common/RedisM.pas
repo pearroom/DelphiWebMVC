@@ -295,7 +295,7 @@ begin
       on e: Exception do
       begin
         isConn := false;
-        log(e.Message);
+        log('Redis服务连接失败:'+e.Message);
       end;
     end;
   finally

@@ -10,11 +10,9 @@ unit Command;
 interface
 
 uses
-
   System.SysUtils, System.Variants, RouleItem, System.Rtti, System.Classes,
   Web.HTTPApp, uConfig, System.DateUtils, SessionList, superobject, uInterceptor,
-  uRouleMap, RedisList, LogUnit, uGlobal,System.StrUtils;
-
+  uRouleMap, RedisList, LogUnit, uGlobal, System.StrUtils, SynWebConfig;
 
 var
   RouleMap: TRouleMap = nil;
@@ -48,7 +46,7 @@ uses
 
 var
   sessionclear: TThSessionClear;
-  FreeMemory: TFreeMemory;
+  FreeMemory: TFreeMemory = nil;
 
 procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
 var
@@ -83,7 +81,6 @@ begin
   begin
     if RightStr(url, Length(roule_suffix)) = roule_suffix then
       url := url.Replace(roule_suffix, '');
-
   end;
   k := Pos('.', url);
   if k <= 0 then
@@ -132,10 +129,11 @@ begin
             end
             else
             begin
+              params := TStringList.Create;
               try
                 s1 := item.Name;
                 s := Copy(url, Length(s1) + 1, Length(url) - Length(s1));
-                params := TStringList.Create;
+
                 params.Delimiter := '/';
                 params.DelimitedText := s;
                 for i := Low(ActionMethonValues) to High(ActionMethonValues) do
@@ -149,6 +147,7 @@ begin
                 end;
               finally
                 params.Free;
+               // FreeAndNil(params);
               end;
             end;
 
@@ -279,12 +278,12 @@ begin
       end
       else
       begin
-        txt := DeCryptStr(txt, key);
+        txt := string(DeCryptStr(AnsiString(txt), AnsiString(key)));
       end;
       jo := SO(txt);
       jo.O['Server'].s['Port'];
     except
-      log(config + '配置文件错误,服务启动失败');
+      log(config + '配置文件错误');
       jo := nil;
     end;
   finally
@@ -307,7 +306,7 @@ begin
       txt := f.Text.Trim;
       jo := SO(txt);
     except
-      log(mime + '配置文件错误,服务启动失败');
+      log(mime + '配置文件错误');
       jo := nil;
     end;
   finally
@@ -334,70 +333,101 @@ end;
 
 function StartServer: string;
 var
-  LURL: string;
   FPort: string;
   jo: ISuperObject;
 begin
+  _LogList := TStringList.Create;
+  _logThread := TLogTh.Create(false);
+  FPort := '0000';
   jo := OpenConfigFile();
-  if jo <> nil then
-  begin
-    //服务启动在SynWebApp查询
-    _LogList := TStringList.Create;
-    _logThread := TLogTh.Create(false);
-    SessionName := '__guid_session';
-    FPort := jo.O['Server'].s['Port'];
-    _RedisList := nil;
-    if jo.O['Redis'] <> nil then
-    begin
-      Redis_IP := jo.O['Redis'].s['Host'];
-      Redis_Port := jo.O['Redis'].i['Port'];
-      Redis_PassWord := jo.O['Redis'].s['PassWord'];
-      Redis_InitSize := jo.O['Redis'].i['InitSize'];
-      Redis_TimeOut := jo.O['Redis'].i['TimeOut'];
-      Redis_ReadTimeOut := jo.O['Redis'].i['ReadTimeOut'];
-      if redis_ip <> '' then
+  try
+    try
+      if jo <> nil then
       begin
-        _RedisList := TRedisList.Create(Redis_InitSize);
+      //服务启动在SynWebApp查询
+        SessionName := '__guid_session';
+        FPort := jo.O['Server'].s['Port'];
+        //////////////////////////////////////////
+        syn_Port:=FPort;
+        syn_Compress := jo.O['Server'].s['Compress'];
+        syn_HTTPQueueLength := jo.O['Server'].i['HTTPQueueLength'];
+        syn_ChildThreadCount := jo.O['Server'].i['ChildThreadCount'];
+        ////////////////////////////////////////////////////
+        _RedisList := nil;
+        if jo.O['Redis'] <> nil then
+        begin
+          Redis_IP := jo.O['Redis'].s['Host'];
+          Redis_Port := jo.O['Redis'].i['Port'];
+          Redis_PassWord := jo.O['Redis'].s['PassWord'];
+          Redis_InitSize := jo.O['Redis'].i['InitSize'];
+          Redis_TimeOut := jo.O['Redis'].i['TimeOut'];
+          Redis_ReadTimeOut := jo.O['Redis'].i['ReadTimeOut'];
+          if redis_ip <> '' then
+          begin
+            _RedisList := TRedisList.Create(Redis_InitSize);
+          end;
+        end;
+
+        if auto_free_memory then
+          FreeMemory := TFreeMemory.Create(False);
+        Global := TGlobal.Create;
+        RouleMap := TRouleMap.Create;
+        SessionListMap := TSessionList.Create;
+        sessionclear := TThSessionClear.Create(false);
+        _Interceptor := TInterceptor.Create;
+        setDataBase(jo);
+      end
+      else
+      begin
+        log('服务启动失败');
+      end;
+    except
+      on e: Exception do
+      begin
+        log('服务启动失败:' + e.Message);
       end;
     end;
-    if auto_free_memory then
-      FreeMemory := TFreeMemory.Create(False);
-    Global := TGlobal.Create;
-    RouleMap := TRouleMap.Create;
-    SessionListMap := TSessionList.Create;
-    sessionclear := TThSessionClear.Create(false);
-    _Interceptor := TInterceptor.Create;
-    setDataBase(jo);
-    log('服务启动');
+  finally
     Result := FPort;
   end;
 end;
 
 procedure CloseServer;
 begin
+  if _RedisList <> nil then
+    _RedisList.Free;
+  if Global <> nil then
+    Global.Free;
+  if _Interceptor <> nil then
+    _Interceptor.Free;
   if SessionListMap <> nil then
+    SessionListMap.Free;
+  if RouleMap <> nil then
+    RouleMap.Free;
+  if DM <> nil then
+    DM.Free;
+  if _LogList <> nil then
   begin
     _LogList.Clear;
     _LogList.Free;
+  end;
+  if _logThread <> nil then
+  begin
     _logThread.Terminate;
-    Sleep(100);
+    Sleep(50);
     _logThread.Free;
-    _Interceptor.Free;
-    SessionListMap.Free;
-    RouleMap.Free;
-    DM.Free;
+  end;
+  if sessionclear <> nil then
+  begin
     sessionclear.Terminate;
-    Sleep(100);
+    Sleep(50);
     sessionclear.Free;
-    if auto_free_memory then
-    begin
-      FreeMemory.Terminate;
-      Sleep(100);
-      FreeMemory.Free;
-    end;
-    if _RedisList <> nil then
-      _RedisList.Free;
-    Global.Free;
+  end;
+  if auto_free_memory and (FreeMemory <> nil) then
+  begin
+    FreeMemory.Terminate;
+    Sleep(50);
+    FreeMemory.Free;
   end;
 end;
 

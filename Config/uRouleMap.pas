@@ -14,7 +14,8 @@ type
 implementation
 
 uses
-  IndexController, MainController, RoleController, UserController;
+  IndexController, MainController, RoleController, UserController, VIPController,
+  PayController;
 
 constructor TRouleMap.Create;
 begin
@@ -24,6 +25,8 @@ begin
   SetRoule('Main', TMainController, '');
   SetRoule('User', TUserController, 'User');
   SetRoule('Role', TRoleController, 'Role');
+  SetRoule('VIP', TVIPController, 'VIP');
+  SetRoule('Pay', TPayController, 'Pay');
 
 end;
 

@@ -12,15 +12,14 @@ unit BaseController;
 interface
 
 uses
-  System.Classes, System.SysUtils, Web.HTTPApp, View, IdCustomHTTPServer, System.Net.URLClient,
-  System.Net.HttpClient, System.Net.HttpClientComponent, IdURI, IdGlobal, RedisM,
-  RedisList, superobject;
+  System.Classes, System.SysUtils, Web.HTTPApp, View, IdCustomHTTPServer,
+  System.Net.URLClient, System.Net.HttpClient, System.Net.HttpClientComponent,
+  IdURI, IdGlobal, RedisM, RedisList, superobject;
 
 type
   TBaseController = class
   private
-    RedisM: TRedisM;
-    RedisItem: TRedisItem;
+
     FRequest: TWebRequest;
     FResponse: TWebResponse;
     FActionPath: string;
@@ -42,12 +41,7 @@ type
     function isPatch: Boolean;
     function isNil(text: string): Boolean;
     function isNotNil(text: string): Boolean;
-    function RedisRemove(key: string): Boolean;
-    procedure RedisSetKeyText(key: string; value: string; timerout: Integer = 0);
-    function RedisGetKeyText(key: string): string;
-    procedure RedisSetKeyJSON(key: string; value: ISuperObject; timerout: Integer = 0);
-    function RedisGetKeyJSON(key: string): ISuperObject;
-    procedure RedisSetExpire(key: string; timerout: Integer);
+
     function URLDecode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function Interceptor: boolean;
@@ -59,7 +53,7 @@ type
     property Request: TWebRequest read FRequest write SetRequest;
     property Response: TWebResponse read FResponse write SetResponse;
     property ActionPath: string read FActionPath write SetActionPath;
-    property ActionRoule:string read FActionRoule write SetActionRoule;
+    property ActionRoule: string read FActionRoule write SetActionRoule;
   end;
 
 implementation
@@ -78,7 +72,6 @@ begin
   begin
     Result := false;
   end;
-
 end;
 
 function TBaseController.isAny: Boolean;
@@ -129,76 +122,7 @@ begin
   Result := Request.MethodType = mtPut;
 end;
 
-function TBaseController.RedisGetKeyJSON(key: string): ISuperObject;
-begin
-  if (_RedisList <> nil) and (RedisItem = nil) then
-  begin
-    RedisItem := _RedisList.OpenRedis();
-    RedisM := RedisItem.item;
-  end;
-  if (_RedisList <> nil) then
-    Result := RedisM.getKeyJSON(key)
-  else
-    Result := nil;
-end;
 
-function TBaseController.RedisGetKeyText(key: string): string;
-begin
-  if (_RedisList <> nil) and (RedisItem = nil) then
-  begin
-    RedisItem := _RedisList.OpenRedis();
-    RedisM := RedisItem.item;
-  end;
-  if (_RedisList <> nil) then
-    Result := RedisM.getKeyText(key)
-  else
-    Result := '';
-end;
-
-function TBaseController.RedisRemove(key: string): Boolean;
-begin
-  Result := false;
-  if (_RedisList <> nil) and (RedisItem = nil) then
-  begin
-    RedisItem := _RedisList.OpenRedis();
-    RedisM := RedisItem.item;
-  end;
-  if (_RedisList <> nil) then
-    Result := RedisM.delKey(key);
-end;
-
-procedure TBaseController.RedisSetExpire(key: string; timerout: Integer);
-begin
-  if (_RedisList <> nil) and (RedisItem = nil) then
-  begin
-    RedisItem := _RedisList.OpenRedis();
-    RedisM := RedisItem.item;
-  end;
-  if (_RedisList <> nil) then
-    RedisM.setExpire(key, timerout);
-end;
-
-procedure TBaseController.RedisSetKeyJSON(key: string; value: ISuperObject; timerout: Integer);
-begin
-  if (_RedisList <> nil) and (RedisItem = nil) then
-  begin
-    RedisItem := _RedisList.OpenRedis();
-    RedisM := RedisItem.item;
-  end;
-  if (_RedisList <> nil) then
-    RedisM.setKeyJSON(key, value, timerout);
-end;
-
-procedure TBaseController.RedisSetKeyText(key, value: string; timerout: Integer);
-begin
-  if (_RedisList <> nil) and (RedisItem = nil) then
-  begin
-    RedisItem := _RedisList.OpenRedis();
-    RedisM := RedisItem.item;
-  end;
-  if (_RedisList <> nil) then
-    RedisM.setKeyText(key, value, timerout);
-end;
 
 procedure TBaseController.SetActionPath(const Value: string);
 begin
@@ -245,15 +169,16 @@ constructor TBaseController.Create();
 begin
   View := nil;
   ActionPath := '';
-  RedisItem := nil;
-  RedisM := nil;
+
 end;
 
 procedure TBaseController.CreateView;
 begin
   try
-    View := TView.Create(Response, Request, ActionPath,ActionRoule);
-    RedisItem := nil;
+    if View = nil then
+      View := TView.Create(Response, Request, ActionPath, ActionRoule)
+    else
+      View.setData(Response, Request, ActionPath, ActionRoule);
   except
     on e: Exception do
     begin
@@ -265,10 +190,7 @@ end;
 
 destructor TBaseController.Destroy;
 begin
-  if (Redisitem <> nil) and (_RedisList <> nil) then
-  begin
-    _RedisList.CloseRedis(Redisitem.guid);
-  end;
+
   FreeAndNil(View);
   inherited;
 end;

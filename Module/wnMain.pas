@@ -3,9 +3,9 @@ unit wnMain;
 interface
 
 uses
-  Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, superobject,
-  Vcl.ComCtrls, Vcl.Imaging.pngimage;
+  Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  superobject, Vcl.ComCtrls, Vcl.Imaging.pngimage;
 
 type
   TMain = class(TForm)
@@ -63,7 +63,6 @@ begin
 end;
 
 procedure TMain.btnCloseClick(Sender: TObject);
-
 begin
   Close;
 end;
@@ -84,7 +83,6 @@ begin
       else
         lbllog.Caption := '日志加载完毕';
     end).Start;
-
 end;
 
 procedure TMain.ButtonOpenBrowserClick(Sender: TObject);
@@ -118,6 +116,11 @@ begin
   pgc1.ActivePageIndex := 0;
 
   edtport.Text := StartServer;
+  if edtport.Text = '0000' then
+  begin
+    mmolog.Lines.Add('服务启动失败,请检查配置文件');
+    ButtonOpenBrowser.Enabled := false;
+  end;
 end;
 
 procedure TMain.FormShow(Sender: TObject);

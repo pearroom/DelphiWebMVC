@@ -3,7 +3,7 @@ unit UsersService;
 interface
 
 uses
-  UsersInterface, superobject, uTableMap, BaseService;
+  UsersInterface, superobject, uTableMap, BaseService,MHashMap;
 
 type
   TUsersService = class(TBaseService, IUsersInterface)
@@ -22,7 +22,8 @@ implementation
 
 function TUsersService.checkuser(map: ISuperObject): ISuperObject;
 begin
-  Result := Db.Default.FindFirst(tb_users, map);
+  Result:=db.Default.FindFirst(tb_users,map);
+ // Result := Db.Default.FindFirst(tb_users, 'and username='+Q(map.username)+' and pwd='+Q(map.pwd));
 end;
 
 function TUsersService.delById(id: string): Boolean;

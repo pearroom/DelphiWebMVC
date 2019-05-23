@@ -18,26 +18,28 @@ type
 implementation
 
 uses
-  UsersService, UsersInterface, uGlobal;
+  UsersService, UsersInterface, uGlobal, MHashMap;
 
 
 { TIndexController }
 
 procedure TIndexController.check;
 var
-  s: string;
   map, ret: ISuperObject;
   code: string;
   user_service: IUsersInterface;
+ // m:TMHashMap;
 begin
+  
   user_service := TUsersService.Create(View.Db);
   with view do
   begin
-//    ret := Db.MYSQL.FindFirst('tb_users');  //mysql 使用
-//    s := ret.AsString;
     map := SO();
     map.S['username'] := Input('username');
     map.S['pwd'] := Input('pwd');
+//	MHashMapNew(m);
+//    m.username:=Input('username');
+//    m.pwd:=Input('pwd');
     code := Input('vcode');
     if code.ToLower = SessionGet('vcode').ToLower then
     begin
@@ -77,14 +79,13 @@ begin
 end;
 
 procedure TIndexController.Index(num: Double);
-var
-  s: string;
-  jo: ISuperObject;
+
 begin
   with View do
   begin
-    Global.test:='ok'; //全局变量使用
-    SessionRemove('user');
+   // Plugin.Wechat.checktoken();
+   // Global.test:='ok'; //全局变量使用
+
 //    jo := SO();
 //    jo.S['msg'] := '你好呀';
 //    RedisSetKeyJSON('name', jo);
@@ -92,6 +93,8 @@ begin
 //    s := RedisGetKeyJSON('name').AsString;
 //    RedisSetKeyText('sex', '男');
 //    s := RedisGetKeyText('sex');
+
+    SessionRemove('user');
     ShowHTML('login');
   end;
 end;
