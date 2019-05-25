@@ -92,14 +92,7 @@
 
 	interface
 
-	uses
-	  DBMySql, DBSQLite, DBMSSQL, DBMSSQL12, DBOracle;
-
-	type
-	  TDB = TDBSQLite;                // TDBMySql,TDBSQLite,TDBMSSQL,TDBMSSQL12(2012版本以上),TDBOracle
-
 	const
-	  db_type = 'MYSQL';                       // MYSQL,SQLite,MSSQL,ORACLE
 	  __APP__='Admin';            				// 应用名称 ,可当做虚拟目录使用
 	  template = 'view';                        // 模板根目录
 	  template_type = '.html';                  // 模板文件类型
@@ -112,15 +105,47 @@
 	  open_interceptor = true;                  // 开启拦截器
 	  default_charset = 'utf-8';                // 字符集
 	  password_key = '';                        // 配置文件秘钥设置,为空时不启用秘钥,结合加密工具使用.
-	  auto_free_memory = false;          //自动释放内存
-	  auto_free_memory_timer = 10;      //默认10分钟释放内存
 	  open_debug = false;                        // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
 
 	implementation
 
 	end.
+	
+	数据库引用
+	unit uDBConfig;
 
+	interface
 
+	uses
+	  DBSQLite, DBMySql;
+
+	type
+	  TDBConfig = class
+	  public
+		Default: TDBSQLite;   //必须有Default成员变量名
+		MYSQL: TDBMySql;
+		constructor Create;
+		destructor Destroy; override;
+	  end;
+
+	implementation
+
+	{ TDBConfig }
+
+	constructor TDBConfig.Create;
+	begin
+	  Default := TDBSQLite.Create('SQLite');
+	  MYSQL := TDBMySql.Create('MYSQL');
+	end;
+
+	destructor TDBConfig.Destroy;
+	begin
+	  Default.Free;
+	  MYSQL.Free;
+	  inherited;
+	end;
+
+	end.
 
 	路由配置：
 	Config/uRouleMap.pas配置相关路由
@@ -147,7 +172,7 @@
 	begin
 	  inherited;
 	//路径,控制器,视图目录,是否拦截
-	//SetRoule(name: string; ACtion: TClass; path: string = '';isInterceptor:Boolean=True);
+	  SetRoule(name: string; ACtion: TClass; path: string = '';isInterceptor:Boolean=True);
 	  SetRoule('', TLoginController, 'login');
 	  SetRoule('Main', TMainController, 'main');
 	  SetRoule('Users', TUsersController, 'users');
