@@ -200,7 +200,7 @@ begin
       web.Response.SetCustomHeader('Pragma', 'Pragma');
       tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(now()));
       web.Response.SetCustomHeader('Last-Modified', tmp);
-      tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(now() + 24 * 60 * 60));
+      tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(IncHour(now(), 24)));
       web.Response.SetCustomHeader('Expires', tmp);
     end
     else
