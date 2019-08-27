@@ -1,8 +1,8 @@
 {*******************************************************}
 {                                                       }
-{       苏兴迎                                         }
-{                                                       }
-{       管理权限启动delphi ，部署exe管理员启动          }
+{       苏兴迎                                          }
+{       E-Mail:pearroom@yeah.net                        }
+{       管理员权限启动delphi,管理员权限启动部署程序     }
 {                                                       }
 {*******************************************************}
 
@@ -13,57 +13,56 @@ uses
   Vcl.Forms,
   Web.WebReq,
   Winapi.Windows,
-  wnMain in '..\Module\wnMain.pas' {Main},
-  wnWeb in '..\Module\wnWeb.pas' {WM: TWebModule},
-  wnDM in '..\Module\wnDM.pas' {DM: TDataModule},
   uConfig in '..\Config\uConfig.pas',
   uRouleMap in '..\Config\uRouleMap.pas',
   uTableMap in '..\Config\uTableMap.pas',
   uInterceptor in '..\Config\uInterceptor.pas',
-  BaseController in '..\Module\Common\BaseController.pas',
-  command in '..\Module\Common\command.pas',
-  DBBase in '..\Module\Common\DBBase.pas',
-  DBMSSQL in '..\Module\Common\DBMSSQL.pas',
-  DBMSSQL12 in '..\Module\Common\DBMSSQL12.pas',
-  DBMySql in '..\Module\Common\DBMySql.pas',
-  DBOracle in '..\Module\Common\DBOracle.pas',
-  DBSQLite in '..\Module\Common\DBSQLite.pas',
-  DES in '..\Module\Common\DES.pas',
-  HTMLParser in '..\Module\Common\HTMLParser.pas',
-  Page in '..\Module\Common\Page.pas',
-  Roule in '..\Module\Common\Roule.pas',
-  RouleItem in '..\Module\Common\RouleItem.pas',
-  SessionList in '..\Module\Common\SessionList.pas',
-  superobject in '..\Module\Common\superobject.pas',
-  ThSessionClear in '..\Module\Common\ThSessionClear.pas',
-  View in '..\Module\Common\View.pas',
-  BaseService in '..\Module\Common\BaseService.pas',
-  FreeMemory in '..\Module\Common\FreeMemory.pas',
-  LogUnit in '..\Module\Common\LogUnit.pas',
   IndexController in '..\Controller\IndexController.pas',
-  MainController in '..\Controller\MainController.pas',
-  RoleController in '..\Controller\RoleController.pas',
-  UserController in '..\Controller\UserController.pas',
-  RoleService in '..\Service\RoleService.pas',
-  UsersService in '..\Service\UsersService.pas',
-  RoleInterface in '..\Service\Interface\RoleInterface.pas',
-  UsersInterface in '..\Service\Interface\UsersInterface.pas',
-  RedisM in '..\Module\Common\RedisM.pas',
-  RedisList in '..\Module\Common\RedisList.pas',
-  RedisClear in '..\Module\Common\RedisClear.pas',
   uDBConfig in '..\Config\uDBConfig.pas',
-  DBMSSQL08 in '..\Module\Common\DBMSSQL08.pas',
   uGlobal in '..\Config\uGlobal.pas',
-  VIPController in '..\Controller\VIPController.pas',
-  PayController in '..\Controller\PayController.pas',
   uPlugin in '..\Config\uPlugin.pas',
-  MHashMap in '..\Module\Common\MHashMap.pas',
-  SynWebApp in '..\Module\Net\SynWebApp.pas',
-  SynWebConfig in '..\Module\Net\SynWebConfig.pas',
-  SynWebEnv in '..\Module\Net\SynWebEnv.pas',
-  SynWebReqRes in '..\Module\Net\SynWebReqRes.pas',
-  SynWebServer in '..\Module\Net\SynWebServer.pas',
-  SynWebUtils in '..\Module\Net\SynWebUtils.pas';
+  Plugin.Layui in '..\Plugin\Plugin.Layui.pas',
+  Plugin.Tool in '..\Plugin\Plugin.Tool.pas',
+  MVC.ActionClear in '..\MVC\Common\MVC.ActionClear.pas',
+  MVC.ActionList in '..\MVC\Common\MVC.ActionList.pas',
+  MVC.BaseController in '..\MVC\Common\MVC.BaseController.pas',
+  MVC.BasePackage in '..\MVC\Common\MVC.BasePackage.pas',
+  MVC.BaseService in '..\MVC\Common\MVC.BaseService.pas',
+  MVC.Command in '..\MVC\Common\MVC.Command.pas',
+  MVC.DBBase in '..\MVC\Common\MVC.DBBase.pas',
+  MVC.DBFirebird in '..\MVC\Common\MVC.DBFirebird.pas',
+  MVC.DBMSSQL in '..\MVC\Common\MVC.DBMSSQL.pas',
+  MVC.DBMSSQL08 in '..\MVC\Common\MVC.DBMSSQL08.pas',
+  MVC.DBMSSQL12 in '..\MVC\Common\MVC.DBMSSQL12.pas',
+  MVC.DBMySql in '..\MVC\Common\MVC.DBMySql.pas',
+  MVC.DBOracle in '..\MVC\Common\MVC.DBOracle.pas',
+  MVC.DBPool in '..\MVC\Common\MVC.DBPool.pas',
+  MVC.DBSQLite in '..\MVC\Common\MVC.DBSQLite.pas',
+  MVC.DES in '..\MVC\Common\MVC.DES.pas',
+  MVC.DM in '..\MVC\Common\MVC.DM.pas' {MVCDM: TDataModule},
+  MVC.HTMLParser in '..\MVC\Common\MVC.HTMLParser.pas',
+  MVC.LogUnit in '..\MVC\Common\MVC.LogUnit.pas',
+  MVC.Main in '..\MVC\Common\MVC.Main.pas' {MVCMain},
+  MVC.PackageManager in '..\MVC\Common\MVC.PackageManager.pas',
+  MVC.Page in '..\MVC\Common\MVC.Page.pas',
+  MVC.PageCache in '..\MVC\Common\MVC.PageCache.pas',
+  MVC.RedisClear in '..\MVC\Common\MVC.RedisClear.pas',
+  MVC.RedisList in '..\MVC\Common\MVC.RedisList.pas',
+  MVC.RedisM in '..\MVC\Common\MVC.RedisM.pas',
+  MVC.Roule in '..\MVC\Common\MVC.Roule.pas',
+  MVC.RouleItem in '..\MVC\Common\MVC.RouleItem.pas',
+  MVC.SessionList in '..\MVC\Common\MVC.SessionList.pas',
+  MVC.ThSessionClear in '..\MVC\Common\MVC.ThSessionClear.pas',
+  MVC.View in '..\MVC\Common\MVC.View.pas',
+  MVC.Web in '..\MVC\Common\MVC.Web.pas' {MVCWeb: TWebModule},
+  XSuperJSON in '..\MVC\Common\XSuperJSON.pas',
+  XSuperObject in '..\MVC\Common\XSuperObject.pas',
+  SynWebApp in '..\MVC\Net\SynWebApp.pas',
+  SynWebConfig in '..\MVC\Net\SynWebConfig.pas',
+  SynWebEnv in '..\MVC\Net\SynWebEnv.pas',
+  SynWebReqRes in '..\MVC\Net\SynWebReqRes.pas',
+  SynWebServer in '..\MVC\Net\SynWebServer.pas',
+  SynWebUtils in '..\MVC\Net\SynWebUtils.pas';
 
 {$R *.res}
 var
@@ -77,8 +76,8 @@ begin
   try
     if GetLastError = Error_Already_Exists then
     begin
-      Application.MessageBox(PChar(Application.Title + '已经启动'),
-        '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
+      AppOpen := false;
+      Application.MessageBox(PChar(Application.Title + '已经启动'), '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
       Exit;
     end;
   finally
@@ -87,7 +86,8 @@ begin
 
   if WebRequestHandler <> nil then
     WebRequestHandler.WebModuleClass := WebModuleClass;
-  Application.CreateForm(TMain, Main);
+
+  Application.CreateForm(TMVCMain, MVCMain);
   Application.Run;
 end.
 

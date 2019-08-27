@@ -39,6 +39,17 @@
 			"POOL_ExpireTimeout": "90000",
 			"POOL_MaximumItems": "50"
 		},
+		"FireBird": {
+			"DriverID": "FB",
+			"Database": "firebird.FDB",
+			"User_Name": "SYSDBA",
+			"Password": "masterkey",
+			"CharacterSet": "UTF8",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		},		
 		"MSSQL": {
 			"DriverID": "MSSQL",
 			"Server": "127.0.0.1",

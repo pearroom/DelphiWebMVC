@@ -3,7 +3,7 @@ unit uInterceptor;
 interface
 
 uses
-  System.SysUtils, View, System.Classes;
+  System.SysUtils, MVC.View, System.Classes;
 
 type
   TInterceptor = class

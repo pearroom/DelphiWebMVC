@@ -98,70 +98,73 @@
         <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <Icon_MainIcon>favicon.ico</Icon_MainIcon>
+        <DCC_ExeOutput>..\Publish\Release</DCC_ExeOutput>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\Module\wnMain.pas">
-            <Form>Main</Form>
-        </DCCReference>
-        <DCCReference Include="..\Module\wnWeb.pas">
-            <Form>WM</Form>
-            <DesignClass>TWebModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="..\Module\wnDM.pas">
-            <Form>DM</Form>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
         <DCCReference Include="..\Config\uConfig.pas"/>
         <DCCReference Include="..\Config\uRouleMap.pas"/>
         <DCCReference Include="..\Config\uTableMap.pas"/>
         <DCCReference Include="..\Config\uInterceptor.pas"/>
-        <DCCReference Include="..\Module\Common\BaseController.pas"/>
-        <DCCReference Include="..\Module\Common\command.pas"/>
-        <DCCReference Include="..\Module\Common\DBBase.pas"/>
-        <DCCReference Include="..\Module\Common\DBMSSQL.pas"/>
-        <DCCReference Include="..\Module\Common\DBMSSQL12.pas"/>
-        <DCCReference Include="..\Module\Common\DBMySql.pas"/>
-        <DCCReference Include="..\Module\Common\DBOracle.pas"/>
-        <DCCReference Include="..\Module\Common\DBSQLite.pas"/>
-        <DCCReference Include="..\Module\Common\DES.pas"/>
-        <DCCReference Include="..\Module\Common\HTMLParser.pas"/>
-        <DCCReference Include="..\Module\Common\Page.pas"/>
-        <DCCReference Include="..\Module\Common\Roule.pas"/>
-        <DCCReference Include="..\Module\Common\RouleItem.pas"/>
-        <DCCReference Include="..\Module\Common\SessionList.pas"/>
-        <DCCReference Include="..\Module\Common\superobject.pas"/>
-        <DCCReference Include="..\Module\Common\ThSessionClear.pas"/>
-        <DCCReference Include="..\Module\Common\View.pas"/>
-        <DCCReference Include="..\Module\Common\BaseService.pas"/>
-        <DCCReference Include="..\Module\Common\FreeMemory.pas"/>
-        <DCCReference Include="..\Module\Common\LogUnit.pas"/>
         <DCCReference Include="..\Controller\IndexController.pas"/>
-        <DCCReference Include="..\Controller\MainController.pas"/>
-        <DCCReference Include="..\Controller\RoleController.pas"/>
-        <DCCReference Include="..\Controller\UserController.pas"/>
-        <DCCReference Include="..\Service\RoleService.pas"/>
-        <DCCReference Include="..\Service\UsersService.pas"/>
-        <DCCReference Include="..\Service\Interface\RoleInterface.pas"/>
-        <DCCReference Include="..\Service\Interface\UsersInterface.pas"/>
-        <DCCReference Include="..\Module\Common\RedisM.pas"/>
-        <DCCReference Include="..\Module\Common\RedisList.pas"/>
-        <DCCReference Include="..\Module\Common\RedisClear.pas"/>
         <DCCReference Include="..\Config\uDBConfig.pas"/>
-        <DCCReference Include="..\Module\Common\DBMSSQL08.pas"/>
         <DCCReference Include="..\Config\uGlobal.pas"/>
-        <DCCReference Include="..\Controller\VIPController.pas"/>
-        <DCCReference Include="..\Controller\PayController.pas"/>
         <DCCReference Include="..\Config\uPlugin.pas"/>
-        <DCCReference Include="..\Module\Common\MHashMap.pas"/>
-        <DCCReference Include="..\Module\Net\SynWebApp.pas"/>
-        <DCCReference Include="..\Module\Net\SynWebConfig.pas"/>
-        <DCCReference Include="..\Module\Net\SynWebEnv.pas"/>
-        <DCCReference Include="..\Module\Net\SynWebReqRes.pas"/>
-        <DCCReference Include="..\Module\Net\SynWebServer.pas"/>
-        <DCCReference Include="..\Module\Net\SynWebUtils.pas"/>
+        <DCCReference Include="..\Plugin\Plugin.Layui.pas"/>
+        <DCCReference Include="..\Plugin\Plugin.Tool.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.ActionClear.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.ActionList.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.BaseController.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.BasePackage.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.BaseService.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.Command.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBBase.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBFirebird.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBMSSQL.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBMSSQL08.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBMSSQL12.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBMySql.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBOracle.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBPool.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBSQLite.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DES.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DM.pas">
+            <Form>MVCDM</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\MVC\Common\MVC.HTMLParser.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.LogUnit.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.Main.pas">
+            <Form>MVCMain</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="..\MVC\Common\MVC.PackageManager.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.Page.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.PageCache.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.RedisClear.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.RedisList.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.RedisM.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.Roule.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.RouleItem.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.SessionList.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.ThSessionClear.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.View.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.Web.pas">
+            <Form>MVCWeb</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TWebModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\MVC\Common\XSuperJSON.pas"/>
+        <DCCReference Include="..\MVC\Common\XSuperObject.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebApp.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebConfig.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebEnv.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebReqRes.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebServer.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebUtils.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -183,8 +186,9 @@
                     <Source Name="MainSource">WebMVC.dpr</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k250.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp250.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\DataExplorerDBXPluginEnt260.bpl">DBExpress Enterprise Data Explorer Integration</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
@@ -209,7 +213,6 @@
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="Win32">
-                        <RemoteDir>Contents\MacOS</RemoteDir>
                         <Operation>0</Operation>
                     </Platform>
                 </DeployClass>
@@ -345,6 +348,11 @@
                         <Operation>1</Operation>
                         <Extensions>.framework</Extensions>
                     </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.framework</Extensions>
+                    </Platform>
                     <Platform Name="Win32">
                         <Operation>0</Operation>
                     </Platform>
@@ -363,6 +371,11 @@
                         <Extensions>.dylib</Extensions>
                     </Platform>
                     <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>Contents\MacOS</RemoteDir>
                         <Operation>1</Operation>
                         <Extensions>.dylib</Extensions>
@@ -390,6 +403,11 @@
                         <Operation>1</Operation>
                         <Extensions>.dylib</Extensions>
                     </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
                     <Platform Name="Win32">
                         <Operation>0</Operation>
                         <Extensions>.bpl</Extensions>
@@ -409,6 +427,10 @@
                         <Operation>0</Operation>
                     </Platform>
                     <Platform Name="OSX32">
+                        <RemoteDir>Contents\Resources\StartUp\</RemoteDir>
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>Contents\Resources\StartUp\</RemoteDir>
                         <Operation>0</Operation>
                     </Platform>
@@ -559,15 +581,27 @@
                         <RemoteDir>..\</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>..\</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXInfoPList">
                     <Platform Name="OSX32">
                         <RemoteDir>Contents</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
+                    <Platform Name="OSX64">
+                        <RemoteDir>Contents</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXResource">
                     <Platform Name="OSX32">
+                        <RemoteDir>Contents\Resources</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>Contents\Resources</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
@@ -590,6 +624,10 @@
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="OSX64">
                         <RemoteDir>Contents\MacOS</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>

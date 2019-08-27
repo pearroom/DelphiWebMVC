@@ -2,11 +2,14 @@ unit uPlugin;
 
 interface
 
+uses
+  Plugin.Layui,Plugin.Tool;
 
 type
   TPlugin = class
   public
-   // Wechat: TWechatApi;
+    Layui: TLayui;
+    Tool:TTool;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -17,12 +20,14 @@ implementation
 
 constructor TPlugin.Create;
 begin
-  //Wechat := TWechatApi.Create;
+  Layui := TLayui.Create;
+  Tool:=TTool.Create;
 end;
 
 destructor TPlugin.Destroy;
 begin
-//  Wechat.Free;
+  Layui.Free;
+  Tool.Free;
   inherited;
 end;
 

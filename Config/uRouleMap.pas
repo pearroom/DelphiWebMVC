@@ -3,7 +3,7 @@ unit uRouleMap;
 interface
 
 uses
-  Roule;
+  MVC.Roule;
 
 type
   TRouleMap = class(TRoule)
@@ -14,19 +14,14 @@ type
 implementation
 
 uses
-  IndexController, MainController, RoleController, UserController, VIPController,
-  PayController;
+  IndexController;
 
 constructor TRouleMap.Create;
 begin
   inherited;
-  //路径,控制器,视图目录
+  //路径,控制器,视图目录,拦截器(默认拦截)
   SetRoule('', TIndexController, '', False);
-  SetRoule('Main', TMainController, '');
-  SetRoule('User', TUserController, 'User');
-  SetRoule('Role', TRoleController, 'Role');
-  SetRoule('VIP', TVIPController, 'VIP');
-  SetRoule('Pay', TPayController, 'Pay');
+
 
 end;
 
