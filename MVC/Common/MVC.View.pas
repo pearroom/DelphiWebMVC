@@ -12,7 +12,7 @@ interface
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
   XSuperObject, uConfig, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin, MVC.RedisM,
-  MVC.RedisList, MVC.PageCache;
+  MVC.RedisList, MVC.PageCache,MVC.DBPoolList;
 
 type
   TView = class
@@ -28,10 +28,12 @@ type
     procedure CreateSession(); // 创建获取session
     procedure makeSession;
   public
+    DbItem:TDbItem;
     Db: TDBConfig;
     Plugin: TPlugin;
     Response: TWebResponse;
     Request: TWebRequest;
+    procedure FreeDb;
     function JsonToString(json: string): string;
     function GetGUID: string;
     function Q(str: string): string;
@@ -255,6 +257,9 @@ end;
 
 procedure TView.setData(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
 begin
+  DbItem:= getDbFromPool;
+  Db:=DbItem.Db;
+  htmlpars.Db:=Db;
   self.ActionP := ActionPath;
   self.ActionR := ActionRoule;
   if (Trim(self.ActionP) <> '') then
@@ -413,10 +418,13 @@ end;
 
 constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
 begin
-  Db := TDBConfig.Create();
+
   Plugin := TPlugin.Create;
   params := TStringList.Create;
-  htmlpars := THTMLParser.Create(Db);
+//  Db := TDBConfig.Create();
+//  DbItem:= getDbFromPool;
+//  Db:=DbItem.Db;
+  htmlpars := THTMLParser.Create();
   setData(Response_, Request_, ActionPath, ActionRoule);
 end;
 
@@ -490,7 +498,7 @@ begin
   htmlpars.Free;
   params.Free;
   Plugin.Free;
-  Db.Free;
+ // Db.Free;
   inherited;
 end;
 
@@ -504,6 +512,11 @@ begin
     msg := '操作成功';
   jo.S['message'] := msg;
   ShowJSON(jo);
+end;
+
+procedure TView.FreeDb;
+begin
+  FreeDbToPool(DbItem);
 end;
 
 function TView.Input(param: string): string;

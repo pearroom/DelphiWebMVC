@@ -16,7 +16,8 @@ uses
 type
   THTMLParser = class
   private
-    Db: TDBConfig;
+    FDb: TDBConfig;
+
     procedure foreachother(var text: string);
     procedure foreachinclude(var text: string; param: TStringList; url: string);
     procedure foreachclear(var text: string);
@@ -30,9 +31,11 @@ type
     function foreachsetif(text: string): string;
     function foreachelseif(text: string): string;
     function checkifwhere(where: string): boolean;
+    procedure SetDb(const Value: TDBConfig);
   public
+    property Db: TDBConfig read FDb write SetDb;
     procedure Parser(var text: string; param: TStringList; url: string);
-    constructor Create(_Db: TDBConfig);
+    constructor Create();
   end;
 
 implementation
@@ -70,6 +73,11 @@ begin
   foreachother(text);
 end;
 
+procedure THTMLParser.SetDb(const Value: TDBConfig);
+begin
+  FDb := Value;
+end;
+
 function THTMLParser.checkifwhere(where: string): boolean;
 var
   sn: Integer;
@@ -92,9 +100,8 @@ begin
   end;
 end;
 
-constructor THTMLParser.Create(_Db: TDBConfig);
+constructor THTMLParser.Create();
 begin
-  self.Db := _Db;
 end;
 
 function THTMLParser.foreach(text: string; param: TStringList): string;

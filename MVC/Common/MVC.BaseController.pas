@@ -43,6 +43,7 @@ type
     function Interceptor: boolean;
     procedure CreateView(); virtual;
     procedure SetParams();
+    procedure FreeDb;
     function HttpGet(url: string; encode: TEncoding): string;
     constructor Create();
     destructor Destroy; override;
@@ -194,6 +195,11 @@ destructor TBaseController.Destroy;
 begin
   View.Free;
   inherited;
+end;
+
+procedure TBaseController.FreeDb;
+begin
+  view.FreeDb;
 end;
 
 function TBaseController.HttpGet(url: string; encode: TEncoding): string;

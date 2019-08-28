@@ -50,7 +50,8 @@ procedure Error404(web: TWebModule; url: string);
 implementation
 
 uses
-  MVC.DES, MVC.ThSessionClear, MVC.RedisM, MVC.ActionClear;
+  MVC.DES, MVC.ThSessionClear, MVC.RedisM, MVC.ActionClear, MVC.DBPoolList,
+  MVC.DBPoolClear;
 
 var
   sessionclear: TThSessionClear;
@@ -59,7 +60,7 @@ procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
 var
   Action: TObject;
   ActoinClass: TRttiType;
-  ActionMethod, SetParams, Interceptor: TRttiMethod;
+  ActionMethod, SetParams, Interceptor, FreeDb: TRttiMethod;
   Response, Request, ActionPath, ActionRoule: TRttiProperty;
   url, url1: string;
   item: TRouleItem;
@@ -99,6 +100,7 @@ begin
       ActoinClass := RTTIContext.GetType(item.Action);
       ActionMethod := ActoinClass.GetMethod(methodname);
       SetParams := ActoinClass.GetMethod('SetParams');
+      FreeDb := ActoinClass.GetMethod('FreeDb');
       if item.Interceptor then
         Interceptor := ActoinClass.GetMethod('Interceptor');
       Request := ActoinClass.GetProperty('Request');
@@ -185,7 +187,8 @@ begin
                 Error404(web, url);
             end;
           finally
-            actionitem.isStop := 1;
+            FreeDb.Invoke(Action, []);
+            _ActionList.FreeAction(actionitem);
            // Action.Free;
           end;
         end
@@ -398,8 +401,11 @@ begin
         sessionclear := TThSessionClear.Create(false);
         _Interceptor := TInterceptor.Create;
         _PageCache := TPageCache.Create;
+
         _ActionList := TActionList.Create;
         _ActoinClear := TActionClear.Create(False);
+        _DBPoolList := TDBPoolList.Create;
+        _DBPoolClear := TDBPoolClear.Create(False);
         setDataBase(jo);
         log('StartService Port:' + FPort);
         AppRun := True;
@@ -433,6 +439,9 @@ begin
   end;
   if _ActoinClear <> nil then
     _ActoinClear.Terminate;
+  if _DBPoolClear <> nil then
+    _DBPoolClear.Terminate;
+
   Sleep(200);
 
   if _logThread <> nil then
@@ -472,6 +481,10 @@ begin
     _ActoinClear.Free;
   if _ActionList <> nil then
     _ActionList.Free;
+  if _DBPoolList <> nil then
+    _DBPoolList.Free;
+  if _DBPoolClear <> nil then
+    _DBPoolClear.Free;
 end;
 
 function OpenPackageConfigFile(): ISuperObject;

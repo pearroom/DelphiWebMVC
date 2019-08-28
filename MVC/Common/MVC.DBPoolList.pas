@@ -1,4 +1,4 @@
-unit MVC.ActionList;
+unit MVC.DBPoolList;
 
 interface
 
@@ -6,51 +6,72 @@ uses
   System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
   FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB, MVC.LogUnit,
-  FireDAC.Comp.DataSet, FireDAC.Comp.Client, System.Generics.Collections;
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, System.Generics.Collections,
+  uDbConfig;
 
 type
-  TActionItem = class
+  TDbItem = class
   private
     FisStop: Integer;
-    FAction: TObject;
+    FAction: TDBConfig;
     FActionName: string;
     FUpDate: TDateTime;
     FisDead: integer;
     Fkey: string;
-    procedure SetAction(const Value: TObject);
+    procedure SetAction(const Value: TDBConfig);
     procedure SetisStop(const Value: Integer);
     procedure SetActionName(const Value: string);
     procedure SetUpDate(const Value: TDateTime);
     procedure SetisDead(const Value: integer);
   public
     property isStop: Integer read FisStop write SetisStop;
-    property Action: TObject read FAction write SetAction;
+    property Db: TDBConfig read FAction write SetAction;
     property ActionName: string read FActionName write SetActionName;
     property UpDate: TDateTime read FUpDate write SetUpDate;
     property isDead: integer read FisDead write SetisDead;
   end;
 
 type
-  TActionList = class
+  TDBPoolList = class
   private
-    List: TDictionary<string, TActionItem>;
+    DBList: TDictionary<string, TDbItem>;
     function GetGUID: string;
   public
-    function Add(Action: TObject): TActionItem;
-    function Get(ActionName: string): TActionItem;
-    procedure FreeAction(actionitem: TActionItem);
+    function Add(Db: TDBConfig): TDbItem;
+    function Get(): TDbItem;
     constructor Create();
     destructor Destroy; override;
     procedure ClearAction;
   end;
 
 var
-  _ActionList: TActionList;
+  _DBPoolList: TDBPoolList;
+
+function getDbFromPool(): TDbItem;
+
+function FreeDbToPool(DbItem: TDbItem): boolean;
 
 implementation
 
 { TActionList }
-function TActionList.GetGUID: string;
+function getDbFromPool(): TDbItem;
+var
+  item: TDbItem;
+begin
+  item := _DBPoolList.Get;
+  if item = nil then
+  begin
+    item := _DBPoolList.Add(TDBConfig.Create);
+  end;
+  Result := item;
+end;
+
+function FreeDbToPool(DbItem: TDbItem): boolean;
+begin
+  DbItem.isStop := 1;
+end;
+
+function TDBPoolList.GetGUID: string;
 var
   LTep: TGUID;
   sGUID: string;
@@ -62,45 +83,45 @@ begin
   result := sGUID;
 end;
 
-function TActionList.Add(Action: TObject): TActionItem;
+function TDBPoolList.Add(Db: TDBConfig): TDbItem;
 var
-  item: TActionItem;
+  item: TDbItem;
   key: string;
 begin
-  MonitorEnter(List);
+  MonitorEnter(DBList);
   try
-    item := TActionItem.Create;
-    item.Action := Action;
+    item := TDbItem.Create;
+    item.Db := Db;
     item.isStop := 0;
     item.isDead := 0;
-    item.ActionName := Action.ClassName;
+ //   item.ActionName := Action.ClassName;
     item.UpDate := Now + (1 / 24 / 60) * 1;
     key := GetGUID;
     try
-      List.AddOrSetValue(key, item);
+      DBList.AddOrSetValue(key, item);
     except
      // log('session error2');
     end;
   finally
-    MonitorExit(List);
+    MonitorExit(DBList);
     Result := item;
   end;
 end;
 
-procedure TActionList.ClearAction;
+procedure TDBPoolList.ClearAction;
 var
-  item: TActionItem;
+  item: TDbItem;
   k, i: integer;
   ndate: TDateTime;
   key: string;
 begin
-  MonitorEnter(List);
+  MonitorEnter(DBList);
 
   try
-    for key in List.Keys do
+    for key in DBList.Keys do
     begin
       try
-        List.TryGetValue(key, item);
+        DBList.TryGetValue(key, item);
         if item <> nil then
         begin
           if (Now() > item.UpDate) then
@@ -109,11 +130,11 @@ begin
             begin
               item.isDead := 1;
             end
-            else if item.isStop = 1 then
+            else
             begin
-              item.Action.Free;
+              item.Db.Free;
               item.Free;
-              List.Remove(key);
+              DBList.Remove(key);
              // Log('¶ÔÏó³ØÒÆ³ý:' + key);
             end;
             break;
@@ -123,56 +144,50 @@ begin
       end;
     end;
   finally
-    MonitorExit(List);
+    MonitorExit(DBList);
   end;
 end;
 
-constructor TActionList.Create;
+constructor TDBPoolList.Create;
 begin
-  List := TDictionary<string, TActionItem>.Create;
+  DBList := TDictionary<string, TDbItem>.Create;
 end;
 
-destructor TActionList.Destroy;
+destructor TDBPoolList.Destroy;
 var
   key: string;
-  item: TActionItem;
+  item: TDbItem;
 begin
 
-  for key in List.Keys do
+  for key in DBList.Keys do
   begin
-    List.TryGetValue(key, item);
+    DBList.TryGetValue(key, item);
     if item <> nil then
     begin
-      item.Action.Free;
+      item.Db.Free;
       item.Free;
     end;
   end;
-  List.Clear;
-  List.Free;
+  DBList.Clear;
+  DBList.Free;
 
   inherited;
 end;
 
-procedure TActionList.FreeAction(actionitem: TActionItem);
-begin
-  actionitem.isStop := 1;
-
-end;
-
-function TActionList.Get(ActionName: string): TActionItem;
+function TDBPoolList.Get(): TDbItem;
 var
   key: string;
-  item: TActionItem;
+  item: TDbItem;
 begin
   Result := nil;
-  MonitorEnter(List);
+  MonitorEnter(DBList);
   try
-    for key in List.Keys do
+    for key in DBList.Keys do
     begin
-      List.TryGetValue(key, item);
+      DBList.TryGetValue(key, item);
       if item <> nil then
       begin
-        if (item.isDead = 0) and (item.isStop = 1) and (item.ActionName = ActionName) then
+        if (item.isDead = 0) and (item.isStop = 1) then
         begin
           item.isStop := 0;
           item.UpDate := Now + (1 / 24 / 60) * 1;
@@ -182,33 +197,33 @@ begin
       end;
     end;
   finally
-    MonitorExit(List);
+    MonitorExit(DBList);
   end;
 end;
 
 { TActionItem }
 
-procedure TActionItem.SetAction(const Value: TObject);
+procedure TDbItem.SetAction(const Value: TDBConfig);
 begin
   FAction := Value;
 end;
 
-procedure TActionItem.SetActionName(const Value: string);
+procedure TDbItem.SetActionName(const Value: string);
 begin
   FActionName := Value;
 end;
 
-procedure TActionItem.SetisDead(const Value: integer);
+procedure TDbItem.SetisDead(const Value: integer);
 begin
   FisDead := Value;
 end;
 
-procedure TActionItem.SetisStop(const Value: Integer);
+procedure TDbItem.SetisStop(const Value: Integer);
 begin
   FisStop := Value;
 end;
 
-procedure TActionItem.SetUpDate(const Value: TDateTime);
+procedure TDbItem.SetUpDate(const Value: TDateTime);
 begin
   FUpDate := Value;
 end;

@@ -1,4 +1,4 @@
-unit MVC.ActionClear;
+unit MVC.DBPoolClear;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   System.Classes, System.SysUtils;
 
 type
-  TActionClear = class(TThread)
+  TDBPoolClear = class(TThread)
   private
     procedure Cleardata();
     { Private declarations }
@@ -17,21 +17,21 @@ type
   end;
 
 var
-  _ActoinClear: TActionClear;
+  _DBPoolClear: TDBPoolClear;
 
 implementation
 
 uses
-  MVC.ActionList;
+  MVC.DBPoolList;
 
-{ TActionClear }
+{ TDBPoolClear }
 
-procedure TActionClear.Cleardata;
+procedure TDBPoolClear.Cleardata;
 begin
-  _ActionList.ClearAction;
+  _DBPoolList.ClearAction;
 end;
 
-procedure TActionClear.Execute;
+procedure TDBPoolClear.Execute;
 var
   k: Integer;
 begin
