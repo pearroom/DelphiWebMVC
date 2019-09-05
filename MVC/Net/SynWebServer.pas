@@ -122,7 +122,8 @@ begin
     on e: Exception do
     begin
       log(e.Message);
-      AContext.OutContent := StringTOUTF8('<HTML><BODY>' + '<H1>服务器运行出错</H1>' + '<P>' + UTF8ToString(AContext.Method + ' ' + AContext.URL) + '</P>' + '<P>' + e.Message + '</P>' + '</HTML></BODY>');
+      AContext.OutContent := StringTOUTF8('<HTML><BODY>' + '<H1>服务器运行出错</H1>' + '<P>'
+      + UTF8ToString(AContext.Method + ' ' + AContext.URL) + '</P>' + '<P>' + e.Message + '</P>' + '</BODY></HTML>');
       AContext.OutContentType := HTML_CONTENT_TYPE;
       Result := 500;
     end;
