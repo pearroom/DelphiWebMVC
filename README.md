@@ -1,7 +1,7 @@
 # DelphiWebMVC使用说明:
 	版本:1.0
 	运行时使用管理员权限。
-	项目用到mORMot代码库,主页下载。
+	项目用到mORMot代码库 https://github.com/synopse/mORMot
 	项目主页：http://www.delphiwebmvc.com
 	讨论QQ群: 685072623
 
