@@ -18,7 +18,7 @@
 			"DriverID": "MySQL",
 			"Server": "127.0.0.1",
 			"Port": "3306",
-			"Database": "test",
+			"Database": "soft",
 			"User_Name": "root",
 			"Password": "root",
 			"CharacterSet": "utf8",

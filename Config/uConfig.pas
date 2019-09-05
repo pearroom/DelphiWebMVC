@@ -2,7 +2,6 @@ unit uConfig;
 
 interface
 
-
 const
   __APP__ = '';                               // 应用名称 ,可当做虚拟目录使用
   template = 'view';                        // 模板根目录
@@ -23,7 +22,7 @@ const
   document_charset = 'utf-8';               // 字符集
   password_key = '';                        // 配置文件秘钥设置,为空时不启用秘钥,结合加密工具使用.
   show_sql = false;                            //日志打印sql
-  open_debug=true;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
+  open_debug = false;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
 implementation
 
 end.

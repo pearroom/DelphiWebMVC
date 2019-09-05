@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<title>DelphiWebMVC</title>
+	
 		<link rel="stylesheet" href="__APP__/assets/css/layui.css">
 		<link rel="stylesheet" href="__APP__/assets/css/main.css">
 		<script src="__APP__/assets/layui.all.js"></script>
@@ -13,30 +14,39 @@
 
 	<body class="layui-layout-body">
 		<div class="layui-layout layui-layout-admin">
-			<div class="layui-header">
-				<div class="layui-logo">管理平台</div>
+			<div class="layui-header" style="background-color: teal;">
+				<div class="layui-logo" style="background-color: teal;color:cornsilk;border-bottom:1px solid #FFF">DelphiWebMVC</div>
 				<!-- 头部区域（可配合layui已有的水平导航） -->
 
 				<ul class="layui-nav layui-layout-right">
 					<li class="layui-nav-item">
-						<a href="javascript:;">							
+						<a href="javascript:;">		
+								<i class="layui-icon layui-icon-username"></i>					
 							#{realname}
 						</a>
-						<dl class="layui-nav-child">
-							<dd><a href="">基本资料</a></dd>
-							<dd><a href="">安全设置</a></dd>
-						</dl>
+						
 					</li>
-					<li class="layui-nav-item"><a href="__APP__/">退出</a></li>
+					<li class="layui-nav-item"><a href="https://www.delphiwebmvc.com/doc/help.html">
+						<i class="layui-icon layui-icon-help"></i>
+						开发手册</a></li>
+					<li class="layui-nav-item"><a href="__APP__/">
+						<i class="layui-icon layui-icon-close-fill"></i>退出</a></li>
 				</ul>
 			</div>
 
-			<div class="layui-side layui-bg-black">
+			<div class="layui-side" style="background-color: teal;">
 				<div class="layui-side-scroll">
 					<!-- 左侧导航区域（可配合layui已有的垂直导航） -->
-					<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<ul class="layui-nav layui-nav-tree" lay-filter="test" style="background-color: teal;">
 						<#list data=menuls item=i>
-							<li class="layui-nav-item"><a id="__APP__#{i.url}" href="javascript:;" onclick="load(this.id)">#{i.menuname}</a></li>
+						
+							<li class="layui-nav-item">
+							
+							<a id="__APP__#{i.url}" href="javascript:;" onclick="load(this.id)">
+							<i class="layui-icon layui-icon-app"></i>
+							<cite>#{i.menuname}</cite>
+							</a>
+							</li>
 						</#list>
 
 					</ul>
@@ -52,7 +62,7 @@
 
 		</div>
 		<script src="__APP__/js/index.js"></script>
-		<script src="__APP__/assets/js/jquery-1.11.0.min.js"></script>
+		<script src="__APP__/assets/js/jquery-1.11.0.min.js"></script>	
 	</body>
 
 </html>

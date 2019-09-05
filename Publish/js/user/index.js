@@ -31,6 +31,9 @@ layui.use(['table', 'form'], function() {
 				field: 'realname',
 				title: '姓名'
 			}, {
+				field: 'uptime',
+				title: '日期'
+			}, {
 				field: '',
 				title: '操作',
 				width: 180,
@@ -89,7 +92,27 @@ $("#btnadd").click(function() {
 $("#btnsearch").click(function() {
 	reload();
 });
+$("#btnprint").click(function() {
+	$.get("../user/print", {roleid: $("#role").val()}, function(ret) {
+		layer.open({
+			type: 1,
+			title: '新增',
+			id: 'layer1', //防止重复弹出
+			area: ['800px', '600px'],
+			content: ret,
+			btn: ['取消'],
+			btnAlign: 'c', //按钮居中
 
+
+			yes: function() {
+				layer.closeAll();
+			},
+			btn2: function() {
+				layer.closeAll();
+			}
+		});
+	}, 'html');
+});
 function add() {
 	$.get("../user/add", {}, function(ret) {
 		layer.open({

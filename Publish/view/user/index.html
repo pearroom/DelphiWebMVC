@@ -1,14 +1,17 @@
+<style type="text/css">
+
+</style>
 <script type="text/html" id="barDemo">
 	<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">编辑</a>
 	<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>  
 </script>
-<body class="layui-view-body">
+<body>
 	<form class="layui-form">
 
 
 		<div class="layui-form-item">
 
-			<label class="layui-form-label">角色</label>
+			<label class="layui-form-label" style="width: 40px;">角色</label>
 			<div class="layui-input-inline">
 				<select id="role" name="role">
 					<#list data=role item=i>
@@ -17,12 +20,13 @@
 				</select>
 			</div>
 
-			<div class="layui-input-inline">
+			<div class="layui-btn-group" style="width:300px;">
 				<input type="button" class="layui-btn" id="btnsearch" value="查询" />
 				<input type="button" class="layui-btn" id="btnadd" value="新增" />
+				<input type="button" class="layui-btn" id="btnprint" value="打印" />
 			</div>
 		</div>
-		<div style="width: 600px;">
+		<div style="width: 100%;">
 			<table class="layui-hide" id="tbuser" lay-filter="tbuser"></table>
 		</div>
 	</form>

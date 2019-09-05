@@ -3,3 +3,6 @@
     /*去掉底部固定区域44px*/
     bottom: 0px;
 }
+.layui-table th {
+   background-color: burlywood;
+}

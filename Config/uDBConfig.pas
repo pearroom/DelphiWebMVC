@@ -9,7 +9,7 @@ type
   TDBConfig = class
   public
     Default: TDBSQLite;   //必须有Default成员变量名
-   // Default: TDBMySql;
+   // MYSQL: TDBMySql;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -21,7 +21,7 @@ implementation
 constructor TDBConfig.Create;
 begin
   Default := TDBSQLite.Create('SQLite');
- // Default := TDBMySql.Create('MYSQL');
+ // MYSQL := TDBMySql.Create('MYSQL');
 end;
 
 destructor TDBConfig.Destroy;

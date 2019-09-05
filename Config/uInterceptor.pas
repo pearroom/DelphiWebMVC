@@ -31,6 +31,7 @@ begin
   Result := false;
   with View do
   begin
+
     if (SessionGet('user') = '') then
     begin
       Result := true;

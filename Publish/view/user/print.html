@@ -1,0 +1,68 @@
+<div style="text-align: right;padding: 10px;">
+    <div class="layui-btn-group">
+        <input type="button" class="layui-btn" id="btnStartPrint" value="打印" />
+        <input type="button" class="layui-btn" id="btnExpExcel" value="导出" />
+    </div>
+</div>
+<div id="printarea" style="padding: 10px;">
+    <style>
+        .define-table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            border-left: 1px solid #888;
+            border-top: 1px solid #888;
+        }
+
+        .define-table th,
+        .define-table td {
+            border-right: 1px solid #888;
+            border-bottom: 1px solid #888;
+            padding: 5px 15px;
+        }
+
+        .define-table th {
+            font-weight: bold;
+            background: #ccc;
+        }
+    </style>
+    <div style="text-align: center;">
+        <h1>用户花名册</h1>
+    </div>
+    <div>打印时间:#{nowdate}</div>
+    <table class="define-table" style="width: 100%; ">
+        <tr>
+            <td>用户名</td>
+            <td>姓名</td>
+        </tr>
+
+        <#list data=list item=i>
+            <tr>
+                <td>#{i.username}</td>
+                <td>#{i.realname}</td>
+            </tr>
+        </#list>
+    </table>
+    <script src="__APP__/assets/js/jquery-1.11.0.min.js"></script>	    
+    <script src="__APP__/assets/js/jquery.table2excel.js"></script>
+    <script src="__APP__/assets/js/jquery.PrintArea.js"></script>
+    <script>
+
+        $("#btnStartPrint").click(function () {
+       
+            $("#printarea").printArea();
+        });
+        $("#btnExpExcel").click(function () {
+          
+            $(".define-table").table2excel({
+                exclude: ".noExl",
+                name: "Excel",
+                filename: "用户花名册",
+                exclude_img: true,
+                exclude_links: true,
+                exclude_inputs: true
+            });
+
+        });
+
+    </script>
+</div>

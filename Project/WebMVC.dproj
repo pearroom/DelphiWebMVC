@@ -108,12 +108,15 @@
         <DCCReference Include="..\Config\uRouleMap.pas"/>
         <DCCReference Include="..\Config\uTableMap.pas"/>
         <DCCReference Include="..\Config\uInterceptor.pas"/>
-        <DCCReference Include="..\Controller\IndexController.pas"/>
         <DCCReference Include="..\Config\uDBConfig.pas"/>
         <DCCReference Include="..\Config\uGlobal.pas"/>
         <DCCReference Include="..\Config\uPlugin.pas"/>
-        <DCCReference Include="..\Plugin\Plugin.Layui.pas"/>
-        <DCCReference Include="..\Plugin\Plugin.Tool.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebApp.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebConfig.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebEnv.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebReqRes.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebServer.pas"/>
+        <DCCReference Include="..\MVC\Net\SynWebUtils.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.ActionClear.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.ActionList.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.BaseController.pas"/>
@@ -128,6 +131,8 @@
         <DCCReference Include="..\MVC\Common\MVC.DBMySql.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DBOracle.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DBPool.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBPoolClear.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.DBPoolList.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DBSQLite.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DES.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DM.pas">
@@ -159,12 +164,16 @@
         </DCCReference>
         <DCCReference Include="..\MVC\Common\XSuperJSON.pas"/>
         <DCCReference Include="..\MVC\Common\XSuperObject.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebApp.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebConfig.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebEnv.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebReqRes.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebServer.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebUtils.pas"/>
+        <DCCReference Include="..\Controller\IndexController.pas"/>
+        <DCCReference Include="..\Controller\MainController.pas"/>
+        <DCCReference Include="..\Controller\PayController.pas"/>
+        <DCCReference Include="..\Controller\RoleController.pas"/>
+        <DCCReference Include="..\Controller\UserController.pas"/>
+        <DCCReference Include="..\Controller\VIPController.pas"/>
+        <DCCReference Include="..\Plugin\Plugin.Layui.pas"/>
+        <DCCReference Include="..\Plugin\Plugin.Tool.pas"/>
+        <DCCReference Include="..\Service\RoleService.pas"/>
+        <DCCReference Include="..\Service\UsersService.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -192,7 +201,7 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="\DelphiMVC.exe" Configuration="Release" Class="ProjectOutput"/>
+                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Login.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Check.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Login.css" Configuration="Release" Class="ProjectFile"/>
@@ -203,7 +212,7 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="\DelphiMVC.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>

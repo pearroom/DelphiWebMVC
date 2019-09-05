@@ -52,7 +52,7 @@
 							<td style="width: 60px;"></td>
 							<td>
 								<div class="col-md-12" style="margin: 4px">
-									<img id="imgid" src="verifycode" style="cursor:pointer" onclick="changevcode()">
+									<img id="imgid" style="cursor:pointer;width:90px;height: 35px;" onclick="changevcode()">
 								</div>
 							</td>
 						</tr>
@@ -75,9 +75,11 @@
 
 	</form>
 	<script>
+		
 		var form = layui.form;
 		layui.use('form', function () {
 			form.render("checkbox");
+			changevcode();
 		});
 
 		form.on('submit(save)', function (data) {
@@ -98,8 +100,12 @@
 		function changevcode() {
 			//console.log("刷新验证码");
 			var randomnum = Math.random();
-			var img = document.getElementById("imgid");
-			img.src = "verifycode?d=" + randomnum;
+			$.get("verifycode?d=" + randomnum,function(ret){
+				var img = document.getElementById("imgid");
+				img.src = ret;
+			});
+			
+
 		}
 	
 	</script>

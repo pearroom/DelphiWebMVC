@@ -42,7 +42,7 @@ type
     function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function Interceptor: boolean;
     procedure CreateView(); virtual;
-    procedure SetParams();
+    procedure SetParams();virtual;
     procedure FreeDb;
     function HttpGet(url: string; encode: TEncoding): string;
     constructor Create();
