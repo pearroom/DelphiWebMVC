@@ -104,7 +104,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\Config\uConfig.pas"/>
         <DCCReference Include="..\Config\uRouleMap.pas"/>
         <DCCReference Include="..\Config\uTableMap.pas"/>
         <DCCReference Include="..\Config\uInterceptor.pas"/>
@@ -117,12 +116,24 @@
         <DCCReference Include="..\MVC\Net\SynWebReqRes.pas"/>
         <DCCReference Include="..\MVC\Net\SynWebServer.pas"/>
         <DCCReference Include="..\MVC\Net\SynWebUtils.pas"/>
+        <DCCReference Include="..\Controller\IndexController.pas"/>
+        <DCCReference Include="..\Controller\MainController.pas"/>
+        <DCCReference Include="..\Controller\PayController.pas"/>
+        <DCCReference Include="..\Controller\RoleController.pas"/>
+        <DCCReference Include="..\Controller\UserController.pas"/>
+        <DCCReference Include="..\Controller\VIPController.pas"/>
+        <DCCReference Include="..\Plugin\Plugin.Layui.pas"/>
+        <DCCReference Include="..\Plugin\Plugin.Tool.pas"/>
+        <DCCReference Include="..\Service\RoleService.pas"/>
+        <DCCReference Include="..\Service\UsersService.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.ActionClear.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.ActionList.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.BaseController.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.BaseInterceptor.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.BasePackage.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.BaseService.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.Command.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.Config.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DBBase.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DBFirebird.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DBMSSQL.pas"/>
@@ -141,6 +152,7 @@
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="..\MVC\Common\MVC.HTMLParser.pas"/>
+        <DCCReference Include="..\MVC\Common\MVC.Interceptor.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.LogUnit.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.Main.pas">
             <Form>MVCMain</Form>
@@ -164,16 +176,6 @@
         </DCCReference>
         <DCCReference Include="..\MVC\Common\XSuperJSON.pas"/>
         <DCCReference Include="..\MVC\Common\XSuperObject.pas"/>
-        <DCCReference Include="..\Controller\IndexController.pas"/>
-        <DCCReference Include="..\Controller\MainController.pas"/>
-        <DCCReference Include="..\Controller\PayController.pas"/>
-        <DCCReference Include="..\Controller\RoleController.pas"/>
-        <DCCReference Include="..\Controller\UserController.pas"/>
-        <DCCReference Include="..\Controller\VIPController.pas"/>
-        <DCCReference Include="..\Plugin\Plugin.Layui.pas"/>
-        <DCCReference Include="..\Plugin\Plugin.Tool.pas"/>
-        <DCCReference Include="..\Service\RoleService.pas"/>
-        <DCCReference Include="..\Service\UsersService.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -201,7 +203,7 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Login.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Check.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Login.css" Configuration="Release" Class="ProjectFile"/>
@@ -211,7 +213,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="\DelphiMVC.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">

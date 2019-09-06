@@ -10,7 +10,7 @@ unit MVC.PackageManager;
 interface
 
 uses
-  System.SysUtils, System.Classes, Generics.Collections, xsuperobject, uConfig,
+  System.SysUtils, System.Classes, Generics.Collections, xsuperobject, MVC.Config,
   uDBConfig, System.Variants;
 
 type
@@ -143,7 +143,7 @@ begin
         begin
           sleep(100);
           inc(k);
-          if k > bpl_Reload_timer * 10 then
+          if k > Config.bpl_Reload_timer * 10 then
           begin
             k := 0;
             if isok then
@@ -224,7 +224,7 @@ begin
         begin
           sleep(100);
           inc(k);
-          if k >= bpl_unload_timer * 10 then
+          if k >= Config.bpl_unload_timer * 10 then
           begin
             TThread.Synchronize(TThread.CurrentThread,
               procedure

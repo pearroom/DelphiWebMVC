@@ -10,7 +10,7 @@ unit MVC.BasePackage;
 interface
 
 uses
-  System.Classes, Vcl.Controls,System.SysUtils, uConfig,uDBConfig;
+  System.Classes, Vcl.Controls,System.SysUtils, MVC.Config,uDBConfig;
 
 type
   TBasePackage = class(TPersistent)

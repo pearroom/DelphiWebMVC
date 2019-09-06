@@ -11,10 +11,10 @@ interface
 
 uses
   System.SysUtils, System.Variants, MVC.RouleItem, System.Rtti, System.Classes,
-  Web.HTTPApp, uConfig, System.DateUtils, MVC.SessionList, XSuperObject,
-  SynWebConfig, uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal,
-  uPlugin, System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM,
-  MVC.ActionList, MVC.DBPool;
+  Web.HTTPApp, System.DateUtils, MVC.SessionList, XSuperObject, SynWebConfig,
+  uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
+  System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
+  MVC.DBPool;
 
 var
   RouleMap: TRouleMap = nil;
@@ -26,6 +26,8 @@ var
   _PackageManager: TPackageManager = nil;
   _MIMEConfig: string;
   RTTIContext: TRttiContext;
+
+procedure SetConfig(param: ISuperObject);
 
 function OpenPackageConfigFile(): ISuperObject;
 
@@ -47,14 +49,84 @@ function StrToParamTypeValue(AValue: string; AParamType: TTypeKind): TValue;
 
 procedure Error404(web: TWebModule; url: string);
 
+procedure RegisterRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
+
 implementation
 
 uses
   MVC.DES, MVC.ThSessionClear, MVC.RedisM, MVC.ActionClear, MVC.DBPoolList,
-  MVC.DBPoolClear;
+  MVC.DBPoolClear, MVC.Config;
 
 var
   sessionclear: TThSessionClear;
+
+procedure RegisterRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
+begin
+  RouleMap.SetRoule(name, ACtion, path, isInterceptor);
+end;
+
+procedure SetConfig(param: ISuperObject);
+var
+  jo: ISuperObject;
+  s: string;
+begin
+  with Config do
+  begin
+    __APP__ := '';                               // 应用名称 ,可当做虚拟目录使用
+    template := 'view';                        // 模板根目录
+    template_type := '.html';                  // 模板文件类型
+    roule_suffix := '.html';                     // 伪静态后缀文件名
+    session_start := true;                     // 启用session
+    session_timer := 30;                        // session过期时间分钟
+    bpl_Reload_timer := 5;                                     // bpl包检测时间间隔 默认5秒
+    bpl_unload_timer := 10;                                    // bpl包卸载时间间隔 默认10秒，加载新包后等待10秒卸载旧包
+    open_package := false;                                      // 使用 bpl包开发模式
+    open_log := true;                          // 开启日志;open_debug=true并开启日志将在UI显示
+    open_cache := true;                        // 开启缓存模式open_debug=false时有效
+    cache_max_age := '315360000';                // 缓存超期时长秒
+    open_interceptor := true;                 // 开启拦截器
+    document_charset := 'utf-8';               // 字符集
+    show_sql := false;                            //日志打印sql
+    open_debug := true;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
+    session_name := '__guid_session';
+  end;
+  jo := param.O['Config'];
+  if (jo.Count > 0) then
+  begin
+    if jo['__APP__'] <> nil then
+      Config.__APP__ := jo['__APP__'].AsString;
+    if jo['template'] <> nil then
+      Config.template := jo['template'].AsString;
+    if jo['template_type'] <> nil then
+      Config.template_type := jo['template_type'].AsString;
+    if jo['session_start'] <> nil then
+      Config.session_start := jo['session_start'].AsBoolean;
+    if jo['session_timer'] <> nil then
+      Config.session_timer := jo['session_timer'].AsInteger;
+    if jo['bpl_Reload_timer'] <> nil then
+      Config.bpl_Reload_timer := jo['bpl_Reload_timer'].AsInteger;
+    if jo['bpl_unload_timer'] <> nil then
+      Config.bpl_unload_timer := jo['bpl_unload_timer'].AsInteger;
+    if jo['open_package'] <> nil then
+      Config.open_package := jo['open_package'].AsBoolean;
+    if jo['open_log'] <> nil then
+      Config.open_log := jo['open_log'].AsBoolean;
+    if jo['open_cache'] <> nil then
+      Config.open_cache := jo['open_cache'].AsBoolean;
+    if jo['cache_max_age'] <> nil then
+      Config.cache_max_age := jo['cache_max_age'].AsString;
+    if jo['open_interceptor'] <> nil then
+      Config.open_interceptor := jo['open_interceptor'].AsBoolean;
+    if jo['document_charset'] <> nil then
+      Config.document_charset := jo['document_charset'].AsString;
+    if jo['show_sql'] <> nil then
+      Config.show_sql := jo['show_sql'].AsBoolean;
+    if jo['open_debug'] <> nil then
+      Config.open_debug := jo['open_debug'].AsBoolean;
+    if jo['sessoin_name'] <> nil then
+      Config.session_name := jo['sessoin_name'].AsString;
+  end;
+end;
 
 procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
 var
@@ -82,14 +154,14 @@ var
   actionitem: TActionItem;
 begin
 
-  web.Response.ContentEncoding := document_charset;
+  web.Response.ContentEncoding := Config.document_charset;
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
   url := LowerCase(web.Request.PathInfo);
-  if roule_suffix.Trim <> '' then
+  if Config.roule_suffix.Trim <> '' then
   begin
-    if RightStr(url, Length(roule_suffix)) = roule_suffix then
-      url := url.Replace(roule_suffix, '');
+    if RightStr(url, Length(Config.roule_suffix)) = Config.roule_suffix then
+      url := url.Replace(Config.roule_suffix, '');
   end;
   k := Pos('.', url);
   if k <= 0 then
@@ -207,9 +279,9 @@ begin
   end
   else
   begin
-    if (not open_debug) and open_cache then
+    if (not Config.open_debug) and Config.open_cache then
     begin
-      web.Response.SetCustomHeader('Cache-Control', 'max-age=' + cache_max_age);
+      web.Response.SetCustomHeader('Cache-Control', 'max-age=' + Config.cache_max_age);
       web.Response.SetCustomHeader('Pragma', 'Pragma');
       tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(now()));
       web.Response.SetCustomHeader('Last-Modified', tmp);
@@ -228,7 +300,7 @@ var
   s: string;
 begin
   web.Response.StatusCode := 404;
-  web.Response.ContentType := 'text/html; charset=' + document_charset;
+  web.Response.ContentType := 'text/html; charset=' + Config.document_charset;
   s := '<html><body><div style="text-align: left;">';
   s := s + '<div><h1>Error 404</h1></div>';
   s := s + '<hr><div>[ ' + url + ' ] Not Find Page' + '</div></div></body></html>';
@@ -291,11 +363,12 @@ var
   txt: string;
   key: string;
 begin
-  key := password_key;
+  key := Config.password_key;
+
   f := TStringList.Create;
   try
     try
-      f.LoadFromFile(WebApplicationDirectory + config);
+      f.LoadFromFile(WebApplicationDirectory + Config.config);
       txt := f.Text.Trim;
       if Trim(key) = '' then
       begin
@@ -308,8 +381,9 @@ begin
       jo := SO(txt);
       txt := jo.AsJSON();
       jo.O['Server'].s['Port'];
+      SetConfig(jo);
     except
-      log(config + '无法加载配置文件');
+      log(Config.config + '无法加载配置文件');
       jo := nil;
     end;
   finally
@@ -328,11 +402,11 @@ begin
   f := TStringList.Create;
   try
     try
-      f.LoadFromFile(WebApplicationDirectory + mime);
+      f.LoadFromFile(WebApplicationDirectory + Config.mime);
       txt := f.Text.Trim;
       jo := SO(txt);
     except
-      log(mime + '无法加载配置文件');
+      log(Config.mime + '无法加载配置文件');
       jo := nil;
     end;
   finally
@@ -362,6 +436,9 @@ var
   FPort: string;
   jo: ISuperObject;
 begin
+  Config.config := 'resources/config.json';
+  Config.mime := 'resources/mime.json';
+  Config.package_config := 'resources/package.json';
   _LogList := TStringList.Create;
   _logThread := TLogTh.Create(false);
   FPort := '0000';
@@ -378,7 +455,7 @@ begin
         syn_HTTPQueueLength := jo.O['Server'].i['HTTPQueueLength'];
         syn_ChildThreadCount := jo.O['Server'].i['ChildThreadCount'];
         ////////////////////////////////////////////////////
-        SessionName := '__guid_session';
+        SessionName := Config.session_name;
         _RedisList := nil;
         if jo.O['Redis'] <> nil then
         begin
@@ -394,7 +471,7 @@ begin
           end;
         end;
         Global := TGlobal.Create;
-        if open_package then
+        if Config.open_package then
           _PackageManager := TPackageManager.Create;
         RouleMap := TRouleMap.Create;
         SessionListMap := TSessionList.Create;
@@ -433,7 +510,7 @@ begin
   begin
     sessionclear.Terminate;
   end;
-  if open_package and (_PackageManager <> nil) then
+  if Config.open_package and (_PackageManager <> nil) then
   begin
     _PackageManager.isstop := true;
   end;
@@ -452,7 +529,7 @@ begin
   begin
     sessionclear.Free;
   end;
-  if open_package and (_PackageManager <> nil) then
+  if Config.open_package and (_PackageManager <> nil) then
   begin
     _PackageManager.Free;
   end;
@@ -494,11 +571,11 @@ var
   txt: string;
   key: string;
 begin
-  key := password_key;
+  key := Config.password_key;
   f := TStringList.Create;
   try
     try
-      f.LoadFromFile(WebApplicationDirectory + package_config);
+      f.LoadFromFile(WebApplicationDirectory + Config.package_config);
       txt := f.Text.Trim;
       if Trim(key) = '' then
       begin
@@ -510,7 +587,7 @@ begin
       end;
       jo := SO(txt);
     except
-      log(package_config + '无法加载配置文件');
+      log(Config.package_config + '无法加载配置文件');
       jo := nil;
     end;
   finally
@@ -567,7 +644,7 @@ begin
           MVCDM.DBManager.AddConnectionDef(dbjo.CurrentKey, DriverID, oParams);
           if PoolSize <> '' then
             _DbPool.AddDb(1, dbjo.CurrentKey);
-          if open_debug then
+          if Config.open_debug then
             log('数据库配置:' + oParams.Text);
           oParams.Free;
           dbjo.Next;

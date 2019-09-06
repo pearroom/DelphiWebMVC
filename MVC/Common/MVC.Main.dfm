@@ -76,6 +76,10 @@ object MVCMain: TMVCMain
     object ts3: TTabSheet
       Caption = #26085#24535
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pnl2: TPanel
         Left = 0
         Top = 0
@@ -88,10 +92,9 @@ object MVCMain: TMVCMain
           Left = 499
           Top = 0
           Width = 3
-          Height = 27
+          Height = 13
           Align = alRight
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object btnlogget: TButton
           Left = 0
@@ -117,6 +120,10 @@ object MVCMain: TMVCMain
     object ts1: TTabSheet
       Caption = #32531#23384
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 0
         Top = 0

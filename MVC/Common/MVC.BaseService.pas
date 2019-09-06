@@ -10,7 +10,7 @@ unit MVC.BaseService;
 interface
 
 uses
-  uConfig, xsuperobject, uTableMap, System.SysUtils, System.Classes,
+  MVC.Config, xsuperobject, uTableMap, System.SysUtils, System.Classes,
   MVC.PackageManager, uDBConfig;
 
 type

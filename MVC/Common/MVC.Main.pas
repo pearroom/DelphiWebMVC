@@ -61,7 +61,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Winapi.Windows, Winapi.ShellApi, MVC.command, MVC.LogUnit, uConfig;
+  Winapi.Windows, Winapi.ShellApi, MVC.command, MVC.LogUnit, MVC.Config;
 
 procedure TMVCMain.WMSysCommand(var Msg: TWMSysCommand);
 begin
@@ -83,7 +83,7 @@ var
   logfile: string;
 begin
   Result := false;
-  if open_log then
+  if Config.open_log then
   begin
     logfile := ExtractFileDir(Application.ExeName) + '\log\';
     if not DirectoryExists(logfile) then
@@ -159,8 +159,8 @@ procedure TMVCMain.ButtonOpenBrowserClick(Sender: TObject);
 var
   LURL: string;
 begin
-  if __APP__.Trim <> '' then
-    LURL := Format('http://localhost:%s%s', [edtport.Text, '/' + __APP__ + '/'])
+  if Config.__APP__.Trim <> '' then
+    LURL := Format('http://localhost:%s%s', [edtport.Text, '/' + Config.__APP__ + '/'])
   else
     LURL := Format('http://localhost:%s', [edtport.Text]);
   ShellExecute(0, nil, PChar(LURL), nil, nil, SW_SHOWNOACTIVATE);

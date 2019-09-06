@@ -86,7 +86,7 @@ type
 implementation
 
 uses
-  uConfig, MVC.LogUnit, XSuperJSON;
+  MVC.Config, MVC.LogUnit, XSuperJSON;
 
 function TDBBase.AddData(tablename: string): TFDQuery;
 var
@@ -502,7 +502,7 @@ end;
 
 function TDBBase.filterSQL(sql: string): string;
 begin
-  if show_sql then
+  if Config.show_sql then
     log(sql);
  // Result := sql.Replace(';', '').Replace('-', '');
   Result := sql;

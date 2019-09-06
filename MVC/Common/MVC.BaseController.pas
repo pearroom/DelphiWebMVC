@@ -57,12 +57,12 @@ type
 implementation
 
 uses
-  MVC.command, uConfig;
+  MVC.command, MVC.Config;
 
 { TBaseController }
 function TBaseController.Interceptor: boolean;
 begin
-  if open_interceptor then
+  if Config.open_interceptor then
   begin
     Result := _interceptor.execute(View, Error);
   end

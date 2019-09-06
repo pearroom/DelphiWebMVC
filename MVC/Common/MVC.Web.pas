@@ -18,7 +18,7 @@ var
 implementation
 
 uses
-  MVC.command, MVC.LogUnit, uConfig, XSuperObject, XSuperJSON;
+  MVC.command, MVC.LogUnit, MVC.Config, XSuperObject, XSuperJSON;
 
 {$R *.dfm}
 
@@ -50,9 +50,9 @@ var
   ja: ISuperArray;
   I: Integer;
 begin
-  if __APP__.Trim <> '' then
+  if Config.__APP__.Trim <> '' then
   begin
-    WebFile.VirtualPath := __APP__;
+    WebFile.VirtualPath := Config.__APP__;
   end
   else
   begin
@@ -70,7 +70,7 @@ begin
         try
           jo := ja.O[I];
           Extensions := jo.s['Extensions'];
-          MimeType := jo.s['MimeType'] + '; charset=' + document_charset;
+          MimeType := jo.s['MimeType'] + '; charset=' + Config.document_charset;
         except
           log('MIME配置文件错误,服务启动失败');
           break;

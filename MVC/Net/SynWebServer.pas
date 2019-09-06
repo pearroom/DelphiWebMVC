@@ -25,6 +25,7 @@ type
     function WebBrokerDispatch(const AEnv: TSynWebEnv): Boolean;
   protected
     FHttpServer: THttpApiServer;
+
   public
     procedure Start();
     property Active: Boolean read FActive;
@@ -36,7 +37,7 @@ type
 implementation
 
 uses
-  SynZip, SynWebReqRes, uConfig, MVC.command, MVC.LogUnit;
+  SynZip, SynWebReqRes, MVC.Config, MVC.command, MVC.LogUnit;
 
 var
   RequestHandler: TWebRequestHandler = nil;
@@ -80,6 +81,7 @@ begin
     FHttpServer.OnRequest := Process;
     FHttpServer.HTTPQueueLength := HTTPQueueLength;
     FHttpServer.Clone(ChildThreadCount);
+
     FActive := true;
 	 {$IFDEF CONSOLE}
     Writeln('StartServer Port:' + FPort);
@@ -122,8 +124,7 @@ begin
     on e: Exception do
     begin
       log(e.Message);
-      AContext.OutContent := StringTOUTF8('<HTML><BODY>' + '<H1>服务器运行出错</H1>' + '<P>'
-      + UTF8ToString(AContext.Method + ' ' + AContext.URL) + '</P>' + '<P>' + e.Message + '</P>' + '</BODY></HTML>');
+      AContext.OutContent := StringTOUTF8('<HTML><BODY>' + '<H1>服务器运行出错</H1>' + '<P>' + UTF8ToString(AContext.Method + ' ' + AContext.URL) + '</P>' + '<P>' + e.Message + '</P>' + '</HTML></BODY>');
       AContext.OutContentType := HTML_CONTENT_TYPE;
       Result := 500;
     end;

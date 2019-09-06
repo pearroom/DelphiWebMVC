@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
-  xsuperobject, uConfig, System.RegularExpressions, uDBConfig;
+  xsuperobject, MVC.Config, System.RegularExpressions, uDBConfig;
 
 type
   THTMLParser = class
@@ -330,7 +330,7 @@ begin
       end;
       htmlfile := htmlfile.Replace('''', '').Replace('"', '');
       if (htmlfile.IndexOf('/') = 0) then
-        htmlfile := WebApplicationDirectory + template + htmlfile
+        htmlfile := WebApplicationDirectory + Config.template + htmlfile
       else
         htmlfile := url + htmlfile;
       if (Trim(htmlfile) <> '') then
@@ -449,10 +449,10 @@ begin
   matchs := TRegEx.Matches(text, '__APP__');
   for match in matchs do
   begin
-    if __APP__.Trim = '' then
+    if Config.__APP__.Trim = '' then
       text := TRegEx.Replace(text, match.Value, '')
     else
-      text := TRegEx.Replace(text, match.Value, '/' + __APP__)
+      text := TRegEx.Replace(text, match.Value, '/' + Config.__APP__)
 
   end;
 end;

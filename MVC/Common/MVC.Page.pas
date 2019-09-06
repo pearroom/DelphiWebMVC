@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes,
-  XSuperObject, uConfig;
+  XSuperObject, MVC.Config;
 
 type
   TPage = class
@@ -33,15 +33,15 @@ constructor TPage.Create(htmlfile: string; params: TStringList; _url: string);
 begin
   Page := TStringList.Create;
   plist := params;
-  if UpperCase(document_charset) = 'UTF-8' then
+  if UpperCase(Config.document_charset) = 'UTF-8' then
   begin
     Page.LoadFromFile(htmlfile, TEncoding.UTF8);
   end
-  else if UpperCase(document_charset) = 'UTF-7' then
+  else if UpperCase(Config.document_charset) = 'UTF-7' then
   begin
     Page.LoadFromFile(htmlfile, TEncoding.UTF7);
   end
-  else if UpperCase(document_charset) = 'UNICODE' then
+  else if UpperCase(Config.document_charset) = 'UNICODE' then
   begin
     Page.LoadFromFile(htmlfile, TEncoding.Unicode);
   end

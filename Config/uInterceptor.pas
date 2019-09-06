@@ -3,28 +3,18 @@ unit uInterceptor;
 interface
 
 uses
-  System.SysUtils, MVC.View, System.Classes;
+  System.SysUtils, MVC.View, System.Classes, MVC.BaseInterceptor;
 
 type
-  TInterceptor = class
-    url: string;
+  TInterceptor = class(TBaseInterceptor)
+  public
     function execute(View: TView; error: Boolean): Boolean;
-    constructor Create;
   end;
 
 implementation
 
-uses
-  uConfig;
 
 { TInterceptor }
-
-constructor TInterceptor.Create;
-begin
-  url := '/';
-  if __APP__.Trim <> '' then
-    url := '/' + __APP__ + '/';
-end;
 
 function TInterceptor.execute(View: TView; error: Boolean): Boolean;
 begin

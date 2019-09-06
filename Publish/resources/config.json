@@ -13,6 +13,25 @@
 		"TimeOut":60,
 		"ReadTimeOut":10
 	},
+	"Config":{
+		"__APP__":"",
+		"template":"view",
+		"template_type":".html",
+		"document_charset":"utf-8",
+		"sessoin_name":"__guid_session",
+		"roule_suffix":"",
+		"session_start":true,
+		"session_timer":30,
+		"bpl_Reload_timer":5,
+		"bpl_unload_timer":10,
+		"open_package":true,
+		"open_log":false,
+		"open_cache":true,
+		"cache_max_age":"315360000",
+		"open_interceptor":true,
+		"show_sql":false,
+		"open_debug":false
+	},
 	"DBConfig":{
 		"MYSQL": {
 			"DriverID": "MySQL",

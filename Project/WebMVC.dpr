@@ -13,7 +13,6 @@ uses
   Vcl.Forms,
   Web.WebReq,
   Winapi.Windows,
-  uConfig in '..\Config\uConfig.pas',
   uRouleMap in '..\Config\uRouleMap.pas',
   uTableMap in '..\Config\uTableMap.pas',
   uInterceptor in '..\Config\uInterceptor.pas',
@@ -26,12 +25,24 @@ uses
   SynWebReqRes in '..\MVC\Net\SynWebReqRes.pas',
   SynWebServer in '..\MVC\Net\SynWebServer.pas',
   SynWebUtils in '..\MVC\Net\SynWebUtils.pas',
+  IndexController in '..\Controller\IndexController.pas',
+  MainController in '..\Controller\MainController.pas',
+  PayController in '..\Controller\PayController.pas',
+  RoleController in '..\Controller\RoleController.pas',
+  UserController in '..\Controller\UserController.pas',
+  VIPController in '..\Controller\VIPController.pas',
+  Plugin.Layui in '..\Plugin\Plugin.Layui.pas',
+  Plugin.Tool in '..\Plugin\Plugin.Tool.pas',
+  RoleService in '..\Service\RoleService.pas',
+  UsersService in '..\Service\UsersService.pas',
   MVC.ActionClear in '..\MVC\Common\MVC.ActionClear.pas',
   MVC.ActionList in '..\MVC\Common\MVC.ActionList.pas',
   MVC.BaseController in '..\MVC\Common\MVC.BaseController.pas',
+  MVC.BaseInterceptor in '..\MVC\Common\MVC.BaseInterceptor.pas',
   MVC.BasePackage in '..\MVC\Common\MVC.BasePackage.pas',
   MVC.BaseService in '..\MVC\Common\MVC.BaseService.pas',
   MVC.Command in '..\MVC\Common\MVC.Command.pas',
+  MVC.Config in '..\MVC\Common\MVC.Config.pas',
   MVC.DBBase in '..\MVC\Common\MVC.DBBase.pas',
   MVC.DBFirebird in '..\MVC\Common\MVC.DBFirebird.pas',
   MVC.DBMSSQL in '..\MVC\Common\MVC.DBMSSQL.pas',
@@ -46,6 +57,7 @@ uses
   MVC.DES in '..\MVC\Common\MVC.DES.pas',
   MVC.DM in '..\MVC\Common\MVC.DM.pas' {MVCDM: TDataModule},
   MVC.HTMLParser in '..\MVC\Common\MVC.HTMLParser.pas',
+  MVC.Interceptor in '..\MVC\Common\MVC.Interceptor.pas',
   MVC.LogUnit in '..\MVC\Common\MVC.LogUnit.pas',
   MVC.Main in '..\MVC\Common\MVC.Main.pas' {MVCMain},
   MVC.PackageManager in '..\MVC\Common\MVC.PackageManager.pas',
@@ -61,17 +73,7 @@ uses
   MVC.View in '..\MVC\Common\MVC.View.pas',
   MVC.Web in '..\MVC\Common\MVC.Web.pas' {MVCWeb: TWebModule},
   XSuperJSON in '..\MVC\Common\XSuperJSON.pas',
-  XSuperObject in '..\MVC\Common\XSuperObject.pas',
-  IndexController in '..\Controller\IndexController.pas',
-  MainController in '..\Controller\MainController.pas',
-  PayController in '..\Controller\PayController.pas',
-  RoleController in '..\Controller\RoleController.pas',
-  UserController in '..\Controller\UserController.pas',
-  VIPController in '..\Controller\VIPController.pas',
-  Plugin.Layui in '..\Plugin\Plugin.Layui.pas',
-  Plugin.Tool in '..\Plugin\Plugin.Tool.pas',
-  RoleService in '..\Service\RoleService.pas',
-  UsersService in '..\Service\UsersService.pas';
+  XSuperObject in '..\MVC\Common\XSuperObject.pas';
 
 {$R *.res}
 var
@@ -81,6 +83,7 @@ begin
   ReportMemoryLeaksOnShutdown := True;
   Application.Initialize;
   Application.Title := 'WebMVC';
+  Config.password_key:='';//≈‰÷√Œƒº˛√ÿ‘ø
   hMutex := CreateMutex(nil, false, PChar(Application.Title));
   try
     if GetLastError = Error_Already_Exists then

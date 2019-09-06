@@ -29,7 +29,7 @@ type
 implementation
 
 uses
-  uConfig;
+  MVC.Config;
 
 { TRoule }
 
@@ -114,6 +114,7 @@ begin
   Result := item;
 end;
 
+
 function DescCompareStrings(List: TStringList; Index1, Index2: Integer): Integer;
 begin
   Result := -AnsiCompareText(List[Index1], List[Index2]);
@@ -127,9 +128,9 @@ begin
     name := '/' + name + '/'
   else
     name := '/';
-  if __APP__.Trim <> '' then
+  if Config.__APP__.Trim <> '' then
   begin
-    name := '/' + __APP__ + name;
+    name := '/' + Config.__APP__ + name;
   end;
 
   item := TRouleItem.Create;

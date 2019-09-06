@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
-  XSuperObject, uConfig, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin, MVC.RedisM,
+  XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin, MVC.RedisM,
   MVC.RedisList, MVC.PageCache,MVC.DBPoolList;
 
 type
@@ -271,28 +271,28 @@ begin
     {$ENDIF}
   end;
   {$IFDEF LINUX}
-  url := WebApplicationDirectory + template + '/' + self.ActionP;
+  url := WebApplicationDirectory + Config.template + '/' + self.ActionP;
   {$ELSE}
-  url := WebApplicationDirectory + template + '\' + self.ActionP;
+  url := WebApplicationDirectory + Config.template + '\' + self.ActionP;
   {$ENDIF}
   self.Response := Response_;
   self.Request := Request_;
 
-  if (session_start) then
+  if (Config.session_start) then
     CreateSession();
 end;
 
 procedure TView.ShowText(text: string);
 begin
 
-  Response.ContentType := 'text/html; charset=' + document_charset;
+  Response.ContentType := 'text/html; charset=' + Config.document_charset;
   Response.Content := text;
   Response.SendResponse;
 end;
 
 procedure TView.ShowXML(xml: string);
 begin
-  Response.ContentType := 'application/xml; charset=' + document_charset;
+  Response.ContentType := 'application/xml; charset=' + Config.document_charset;
   Response.Content := xml;
   Response.SendResponse;
 end;
@@ -319,10 +319,10 @@ var
 begin
   p := '';
   Response.Content := '';
-  Response.ContentType := 'text/html; charset=' + document_charset;
+  Response.ContentType := 'text/html; charset=' + Config.document_charset;
   if (Trim(html) <> '') then
   begin
-    S := url + html + template_type;
+    S := url + html + Config.template_type;
     if _PageCache.PageList.ContainsKey(S) then
     begin
       _PageCache.PageList.TryGetValue(S, htmlcontent);
@@ -335,7 +335,7 @@ begin
       begin
         S := '<html><body><div style="text-align: left;">';
         S := S + '<div><h1>Error 404</h1></div>';
-        S := S + '<hr><div>[ ' + html + template_type + ' ] Not Find Template';
+        S := S + '<hr><div>[ ' + html + Config.template_type + ' ] Not Find Template';
         S := S + '</div></div></body></html>';
         Response.Content := S;
       end
@@ -344,7 +344,7 @@ begin
         page := TPage.Create(S, params, self.url);
         try
           htmlcontent := page.HTML;
-          if not open_debug then
+          if not Config.open_debug then
             _PageCache.PageList.AddOrSetValue(S, htmlcontent);
         finally
           page.Free;
@@ -363,7 +363,7 @@ end;
 
 procedure TView.ShowJSON(json: string);
 begin
-  Response.ContentType := 'application/json; charset=' + document_charset;
+  Response.ContentType := 'application/json; charset=' + Config.document_charset;
   Response.Content := json;
   Response.SendResponse;
 end;
@@ -465,7 +465,7 @@ begin
   begin
     sessionid := GetGUID();
   end;
-  timerout := Now + (1 / 24 / 60) * session_timer;
+  timerout := Now + (1 / 24 / 60) * Config.session_timer;
   with Cookies do
   begin
     Path := '/';
@@ -555,12 +555,12 @@ var
 begin
   if _RedisList <> nil then
   begin
-    RedisSetKeyJSON(sessionid, SO('{}'), session_timer);
+    RedisSetKeyJSON(sessionid, SO('{}'), Config.session_timer);
   end
   else
   begin
-    if (session_timer <> 0) then
-      timerout := Now + (1 / 24 / 60) * session_timer
+    if (Config.session_timer <> 0) then
+      timerout := Now + (1 / 24 / 60) * Config.session_timer
     else
       timerout := Now + (1 / 24 / 60) * 60 * 24; //24小时过期
     SessionListMap.setValueByKey(sessionid, '{}');
@@ -578,7 +578,7 @@ procedure TView.Redirect(action: string; path: string = '');
 var
   S: string;
 begin
-  S := __APP__ + '/';
+  S := Config.__APP__ + '/';
   if action.Trim <> '' then
     S := S + action + '/';
   if path.Trim <> '' then
@@ -592,7 +592,7 @@ var
   s: string;
   jo: ISuperObject;
 begin
-  if (not session_start) then
+  if (not Config.session_start) then
     exit;
   if _RedisList <> nil then
   begin
@@ -627,7 +627,7 @@ end;
 
 function TView.SessionCount: integer;
 begin
-  if (not session_start) then
+  if (not Config.session_start) then
     exit;
   if _RedisList <> nil then
     Result := RedisGetKeyCount
@@ -637,7 +637,7 @@ end;
 
 function TView.SessionDestroy: Boolean;
 begin
-  if (not session_start) then
+  if (not Config.session_start) then
     exit;
   if _RedisList <> nil then
     Result := RedisRemove(sessionid)
@@ -652,7 +652,7 @@ var
   s: string;
   jo: ISuperObject;
 begin
-  if (not session_start) then
+  if (not Config.session_start) then
     exit;
   if _RedisList <> nil then
     s := JsonToString(RedisGetKeyJSON(sessionid).AsJSON())
@@ -680,7 +680,7 @@ var
   jo: ISuperObject;
 begin
   Result := true;
-  if (not session_start) then
+  if (not Config.session_start) then
     exit;
   try
     if _RedisList <> nil then

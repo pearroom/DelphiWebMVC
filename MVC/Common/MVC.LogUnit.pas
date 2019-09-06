@@ -10,7 +10,7 @@ unit MVC.LogUnit;
 interface
 
 uses
-  System.SysUtils, System.Classes, Web.HTTPApp, uConfig;
+  System.SysUtils, System.Classes, Web.HTTPApp, MVC.Config;
 
 procedure log(msg: string);
 
@@ -30,7 +30,7 @@ implementation
 
 procedure log(msg: string);
 begin
-  if open_log then
+  if Config.open_log then
   begin
     _LogList.Add(msg);
   end;
