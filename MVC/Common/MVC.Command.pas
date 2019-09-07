@@ -14,7 +14,7 @@ uses
   Web.HTTPApp, System.DateUtils, MVC.SessionList, XSuperObject, SynWebConfig,
   uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
   System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
-  MVC.DBPool;
+  MVC.DBPool, XSuperJSON, System.Generics.Collections;
 
 var
   RouleMap: TRouleMap = nil;
@@ -26,6 +26,9 @@ var
   _PackageManager: TPackageManager = nil;
   _MIMEConfig: string;
   RTTIContext: TRttiContext;
+  directory_permission: TDictionary<string, Boolean>;
+
+function check_directory_permission(path: string): Boolean;
 
 procedure SetConfig(param: ISuperObject);
 
@@ -49,7 +52,6 @@ function StrToParamTypeValue(AValue: string; AParamType: TTypeKind): TValue;
 
 procedure Error404(web: TWebModule; url: string);
 
-procedure RegisterRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
 
 implementation
 
@@ -60,15 +62,33 @@ uses
 var
   sessionclear: TThSessionClear;
 
-procedure RegisterRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
+function check_directory_permission(path: string): Boolean;
+var
+  key: string;
+  ret: Boolean;
 begin
-  RouleMap.SetRoule(name, ACtion, path, isInterceptor);
+  Result := true;
+  ret := true;
+  for key in directory_permission.Keys do
+  begin
+    if copy(path, 0, length(key)) = key then
+    begin
+      directory_permission.TryGetValue(key, ret);
+      Result := ret;
+      break;
+    end;
+
+  end;
 end;
 
 procedure SetConfig(param: ISuperObject);
 var
   jo: ISuperObject;
   s: string;
+  directory: ISuperArray;
+  i: integer;
+  path: string;
+  permission: Boolean;
 begin
   with Config do
   begin
@@ -125,7 +145,31 @@ begin
       Config.open_debug := jo['open_debug'].AsBoolean;
     if jo['sessoin_name'] <> nil then
       Config.session_name := jo['sessoin_name'].AsString;
+    //获取访问路径权限
+    directory := jo.A['directory'];
+    if (directory.Length > 0) then
+    begin
+      if directory.DataType = TDataType.dtArray then
+      begin
+        for i := 0 to directory.Length - 1 do
+        begin
+          begin
+            try
+              jo := directory.O[i];
+              path := jo.s['path'];
+              permission := jo.B['permission'];
+              directory_permission.Add(path, permission);
+            except
+              log('directory参数错误,服务启动失败');
+              break;
+            end;
+          end;
+        end;
+      end;
+    end;
+
   end;
+
 end;
 
 procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
@@ -158,6 +202,11 @@ begin
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
   url := LowerCase(web.Request.PathInfo);
+  if not check_directory_permission(url) then
+  begin
+    Error404(web, url);
+    exit;
+  end;
   if Config.roule_suffix.Trim <> '' then
   begin
     if RightStr(url, Length(Config.roule_suffix)) = Config.roule_suffix then
@@ -441,6 +490,7 @@ begin
   Config.package_config := 'resources/package.json';
   _LogList := TStringList.Create;
   _logThread := TLogTh.Create(false);
+  directory_permission := TDictionary<string, Boolean>.Create;
   FPort := '0000';
   try
     try
@@ -502,6 +552,8 @@ end;
 procedure CloseServer();
 begin
   AppClose := true;
+  directory_permission.Clear;
+  directory_permission.Free;
   if _logThread <> nil then
   begin
     _logThread.Terminate;

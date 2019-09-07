@@ -30,7 +30,13 @@
 		"cache_max_age":"315360000",
 		"open_interceptor":true,
 		"show_sql":false,
-		"open_debug":false
+		"open_debug":false,
+		"directory":[
+			{
+				"path":"/view/data",
+				"permission":false
+			}
+		]
 	},
 	"DBConfig":{
 		"MYSQL": {
