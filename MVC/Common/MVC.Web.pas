@@ -50,6 +50,10 @@ var
   ja: ISuperArray;
   I: Integer;
 begin
+  if Config.__WebRoot__.Trim<>'' then
+  begin
+    webFile.RootDirectory:=Config.__WebRoot__;
+  end;
   if Config.__APP__.Trim <> '' then
   begin
     WebFile.VirtualPath := Config.__APP__;

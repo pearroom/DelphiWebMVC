@@ -312,6 +312,7 @@ var
   s: string;
   htmlfile: string;
   page: TPage;
+  root:string;
 begin
   matchs := TRegEx.Matches(text, '<#include.*file=[\s\S]*?\>');
 
@@ -328,9 +329,13 @@ begin
         htmlfile := Copy(htmlfile, 0, htmlfile.Length - 1);
         htmlfile := Trim(htmlfile);
       end;
+      if Config.__WebRoot__.Trim<>'' then
+      begin
+        root:=Config.__WebRoot__+'/';
+      end;
       htmlfile := htmlfile.Replace('''', '').Replace('"', '');
       if (htmlfile.IndexOf('/') = 0) then
-        htmlfile := WebApplicationDirectory + Config.template + htmlfile
+        htmlfile := WebApplicationDirectory +root+ Config.template + htmlfile
       else
         htmlfile := url + htmlfile;
       if (Trim(htmlfile) <> '') then

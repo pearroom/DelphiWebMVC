@@ -98,7 +98,7 @@ $("#btnprint").click(function() {
 			type: 1,
 			title: '新增',
 			id: 'layer1', //防止重复弹出
-			area: ['800px', '600px'],
+			area: ['400px', '400px'],
 			content: ret,
 			btn: ['取消'],
 			btnAlign: 'c', //按钮居中

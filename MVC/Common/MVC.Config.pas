@@ -5,6 +5,7 @@ interface
 type
   TConfig = record
     __APP__: string;                               // 应用名称 ,可当做虚拟目录使用
+    __WebRoot__:string;                     //根目录
     template: string;                     // 模板根目录
     template_type: string;                  // 模板文件类型
     roule_suffix: string;                     // 伪静态后缀文件名

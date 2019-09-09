@@ -52,7 +52,6 @@ function StrToParamTypeValue(AValue: string; AParamType: TTypeKind): TValue;
 
 procedure Error404(web: TWebModule; url: string);
 
-
 implementation
 
 uses
@@ -77,7 +76,6 @@ begin
       Result := ret;
       break;
     end;
-
   end;
 end;
 
@@ -93,9 +91,10 @@ begin
   with Config do
   begin
     __APP__ := '';                               // 应用名称 ,可当做虚拟目录使用
+    __WebRoot__ := '.';
     template := 'view';                        // 模板根目录
     template_type := '.html';                  // 模板文件类型
-    roule_suffix := '.html';                     // 伪静态后缀文件名
+    roule_suffix := '';                     // 伪静态后缀文件名
     session_start := true;                     // 启用session
     session_timer := 30;                        // session过期时间分钟
     bpl_Reload_timer := 5;                                     // bpl包检测时间间隔 默认5秒
@@ -115,10 +114,14 @@ begin
   begin
     if jo['__APP__'] <> nil then
       Config.__APP__ := jo['__APP__'].AsString;
+    if jo['__WebRoot__'] <> nil then
+      Config.__WebRoot__ := jo['__WebRoot__'].AsString;
     if jo['template'] <> nil then
       Config.template := jo['template'].AsString;
     if jo['template_type'] <> nil then
       Config.template_type := jo['template_type'].AsString;
+    if jo['roule_suffix'] <> nil then
+      Config.roule_suffix := jo['roule_suffix'].AsString;
     if jo['session_start'] <> nil then
       Config.session_start := jo['session_start'].AsBoolean;
     if jo['session_timer'] <> nil then
@@ -167,9 +170,7 @@ begin
         end;
       end;
     end;
-
   end;
-
 end;
 
 procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
@@ -201,7 +202,7 @@ begin
   web.Response.ContentEncoding := Config.document_charset;
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
-  url := LowerCase(web.Request.PathInfo);
+  url := web.Request.PathInfo;
   if not check_directory_permission(url) then
   begin
     Error404(web, url);
@@ -218,6 +219,11 @@ begin
     item := RouleMap.GetRoule(url, url1, methodname);
     if (item <> nil) then
     begin
+      if (methodname = 'index') and (url.Substring(url.Length - 1) <> '/') then
+      begin
+        web.Response.SendRedirect(url + '/');
+        exit;
+      end;
       ActoinClass := RTTIContext.GetType(item.Action);
       ActionMethod := ActoinClass.GetMethod(methodname);
       SetParams := ActoinClass.GetMethod('SetParams');

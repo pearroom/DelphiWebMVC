@@ -11,8 +11,8 @@ interface
 
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
-  XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin, MVC.RedisM,
-  MVC.RedisList, MVC.PageCache,MVC.DBPoolList;
+  XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin,
+  MVC.RedisM, MVC.RedisList, MVC.PageCache, MVC.DBPoolList;
 
 type
   TView = class
@@ -28,7 +28,7 @@ type
     procedure CreateSession(); // 创建获取session
     procedure makeSession;
   public
-    DbItem:TDbItem;
+    DbItem: TDbItem;
     Db: TDBConfig;
     Plugin: TPlugin;
     Response: TWebResponse;
@@ -256,10 +256,12 @@ begin
 end;
 
 procedure TView.setData(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
+var
+  webroot: string;
 begin
-  DbItem:= getDbFromPool;
-  Db:=DbItem.Db;
-  htmlpars.Db:=Db;
+  DbItem := getDbFromPool;
+  Db := DbItem.Db;
+  htmlpars.Db := Db;
   self.ActionP := ActionPath;
   self.ActionR := ActionRoule;
   if (Trim(self.ActionP) <> '') then
@@ -271,9 +273,13 @@ begin
     {$ENDIF}
   end;
   {$IFDEF LINUX}
-  url := WebApplicationDirectory + Config.template + '/' + self.ActionP;
+  if Config.__WebRoot__.Trim <> '' then
+    webroot := Config.__WebRoot__ + '/';
+  url := WebApplicationDirectory + webroot + Config.template + '/' + self.ActionP;
   {$ELSE}
-  url := WebApplicationDirectory + Config.template + '\' + self.ActionP;
+  if Config.__WebRoot__.Trim <> '' then
+    webroot := Config.__WebRoot__ + '\';
+  url := WebApplicationDirectory + webroot + Config.template + '\' + self.ActionP;
   {$ENDIF}
   self.Response := Response_;
   self.Request := Request_;

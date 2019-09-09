@@ -61,8 +61,5 @@
 	{
 		"Extensions": "apk",
 		"MimeType": "application/vnd.android.package-archive"
-	},{
-		"Extensions": "ppx",
-		"MimeType": "text/plain"
 	}
 ]
