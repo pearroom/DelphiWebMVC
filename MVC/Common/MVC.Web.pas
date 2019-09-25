@@ -18,7 +18,7 @@ var
 implementation
 
 uses
-  MVC.command, MVC.LogUnit, MVC.Config, XSuperObject, XSuperJSON;
+  MVC.command, MVC.LogUnit, MVC.Config, XSuperObject, XSuperJSON, MVC.Page;
 
 {$R *.dfm}
 
@@ -26,6 +26,7 @@ procedure TMVCWeb.WebModuleBeforeDispatch(Sender: TObject; Request: TWebRequest;
 var
   s: string;
   error: string;
+  page: Tpage;
 begin
   try
     OpenRoule(Self, RouleMap, Handled);
@@ -34,10 +35,24 @@ begin
     begin
       error := e.ToString;
       log(error);
+      if Trim(Config.Error500) <> '' then
+      begin
+        page := TPage.Create(Config.Error500, nil, '');
+        try
+          s := page.HTML;
+        finally
+          page.Free;
+        end;
+      end
+      else
+      begin
+
+        s := '<html><body><div style="text-align: left;">';
+        s := s + '<div><h1> Error 500 </h1></div>';
+        s := s + '<hr><div>' + error + '</div></div></body></html>';
+      end;
       Response.StatusCode := 500;
-      s := '<html><body><div style="text-align: left;">';
-      s := s + '<div><h1> Error 500 </h1></div>';
-      s := s + '<hr><div>' + error + '</div></div></body></html>';
+      Response.ContentType := 'text/html; charset=' + Config.document_charset;
       Response.Content := s;
       Response.SendResponse;
     end;
@@ -50,9 +65,9 @@ var
   ja: ISuperArray;
   I: Integer;
 begin
-  if Config.__WebRoot__.Trim<>'' then
+  if Config.__WebRoot__.Trim <> '' then
   begin
-    webFile.RootDirectory:=Config.__WebRoot__;
+    webFile.RootDirectory := Config.__WebRoot__;
   end;
   if Config.__APP__.Trim <> '' then
   begin

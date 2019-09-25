@@ -80,7 +80,7 @@ type
 implementation
 
 uses
-  MVC.SessionList, MVC.command;
+  MVC.SessionList, MVC.command, MVC.LogUnit;
 
 { TView }
 function TView.JsonToString(json: string): string;
@@ -339,10 +339,23 @@ begin
     begin
       if (not FileExists(S)) then
       begin
-        S := '<html><body><div style="text-align: left;">';
-        S := S + '<div><h1>Error 404</h1></div>';
-        S := S + '<hr><div>[ ' + html + Config.template_type + ' ] Not Find Template';
-        S := S + '</div></div></body></html>';
+        if Trim(Config.Error404) <> '' then
+        begin
+          page := TPage.Create(Config.Error404, nil, '');
+          try
+            S := page.HTML;
+          finally
+            page.Free;
+          end;
+        end
+        else
+        begin
+          S := '<html><body><div style="text-align: left;">';
+          S := S + '<div><h1>Error 404</h1></div>';
+          S := S + '<hr><div>[ ' + html + Config.template_type + ' ] Not Find Page';
+          S := S + '</div></div></body></html>';
+        end;
+        log('Error 404 [ ' + html + Config.template_type + ' ] Not Find Page');
         Response.Content := S;
       end
       else
@@ -370,7 +383,10 @@ end;
 procedure TView.ShowJSON(json: string);
 begin
   Response.ContentType := 'application/json; charset=' + Config.document_charset;
-  Response.Content := json;
+  if Config.JsonToLower then
+    Response.Content := json.ToLower
+  else
+    Response.Content := json;
   Response.SendResponse;
 end;
 

@@ -32,6 +32,9 @@
 		"open_interceptor":true,
 		"show_sql":false,
 		"open_debug":true,
+		"Error404":"404.html",
+		"Error500":"500.html",
+		"JsonToLower":true,
 		"directory":[
 			{
 				"path":"/view/data/",

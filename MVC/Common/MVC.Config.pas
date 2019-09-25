@@ -26,6 +26,9 @@ type
     password_key: string;                        // 配置文件秘钥设置,为空时不启用秘钥,结合加密工具使用.
     show_sql: Boolean;                            //日志打印sql
     open_debug: Boolean;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
+    Error404:string;
+    Error500:string;
+		JsonToLower:boolean;// 返回json数据以小写形式显示
   end;
 
 var

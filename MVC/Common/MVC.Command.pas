@@ -56,7 +56,7 @@ implementation
 
 uses
   MVC.DES, MVC.ThSessionClear, MVC.RedisM, MVC.ActionClear, MVC.DBPoolList,
-  MVC.DBPoolClear, MVC.Config;
+  MVC.DBPoolClear, MVC.Config, MVC.Page;
 
 var
   sessionclear: TThSessionClear;
@@ -107,6 +107,9 @@ begin
     document_charset := 'utf-8';               // 字符集
     show_sql := false;                            //日志打印sql
     open_debug := true;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
+    Error404:='';
+    Error500:='';
+    JsonToLower:=false;
     session_name := '__guid_session';
   end;
   jo := param.O['Config'];
@@ -148,6 +151,14 @@ begin
       Config.open_debug := jo['open_debug'].AsBoolean;
     if jo['sessoin_name'] <> nil then
       Config.session_name := jo['sessoin_name'].AsString;
+    if jo['JsonToLower'] <> nil then
+      Config.JsonToLower := jo['JsonToLower'].AsBoolean;
+    if jo['Error404'] <> nil then
+      if jo['Error404'].AsString.Trim <> '' then
+        Config.Error404 := Config.__WebRoot__ + '/' + jo['Error404'].AsString;
+    if jo['Error500'] <> nil then
+      if jo['Error500'].AsString.Trim <> '' then
+        Config.Error500 := Config.__WebRoot__ + '/' + jo['Error500'].AsString;
     //获取访问路径权限
     directory := jo.A['directory'];
     if (directory.Length > 0) then
@@ -353,12 +364,26 @@ end;
 procedure Error404(web: TWebModule; url: string);
 var
   s: string;
+  page: Tpage;
 begin
   web.Response.StatusCode := 404;
   web.Response.ContentType := 'text/html; charset=' + Config.document_charset;
-  s := '<html><body><div style="text-align: left;">';
-  s := s + '<div><h1>Error 404</h1></div>';
-  s := s + '<hr><div>[ ' + url + ' ] Not Find Page' + '</div></div></body></html>';
+  if Trim(Config.Error404) <> '' then
+  begin
+    page := TPage.Create(Config.Error404, nil, '');
+    try
+      s := page.HTML;
+    finally
+      page.Free;
+    end;
+  end
+  else
+  begin
+    s := '<html><body><div style="text-align: left;">';
+    s := s + '<div><h1>Error 404</h1></div>';
+    s := s + '<hr><div>[ ' + url + ' ] Not Find Page' + '</div></div></body></html>';
+  end;
+  log('Error 404 [ ' + url + ' ] Not Find Page');
   web.Response.Content := s;
   web.Response.SendResponse;
 end;

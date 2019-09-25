@@ -17,7 +17,6 @@ type
   THTMLParser = class
   private
     FDb: TDBConfig;
-
     procedure foreachother(var text: string);
     procedure foreachinclude(var text: string; param: TStringList; url: string);
     procedure foreachclear(var text: string);
@@ -147,26 +146,33 @@ begin
     begin
       key := param.Names[i];
       value := param.ValueFromIndex[i];
-      jo := SO(value);
-      if jo.DataType = TDataType.dtObject then
+      try
+        jo := SO(value);
+      except
+        jo := nil;
+      end;
+      if jo <> nil then
       begin
-        html := foreachjson(html, key, jo, isok);
-        if isok then
+        if jo.DataType = TDataType.dtObject then
         begin
-          tmpstr.Add(key);
-        end;
-      end
-      else if jo.DataType = TDataType.dtArray then
-      begin
-        html := foreachlist(html, key, jo, isok);
-        if isok then
+          html := foreachjson(html, key, jo, isok);
+          if isok then
+          begin
+            tmpstr.Add(key);
+          end;
+        end
+        else if jo.DataType = TDataType.dtArray then
         begin
-          tmpstr.Add(key);
+          html := foreachlist(html, key, jo, isok);
+          if isok then
+          begin
+            tmpstr.Add(key);
+          end;
+        end
+        else
+        begin
+          html := foreachif(html, key, value, isok);
         end;
-      end
-      else
-      begin
-        html := foreachif(html, key, value, isok);
       end;
     end;
     for i := 0 to tmpstr.Count - 1 do
@@ -312,7 +318,7 @@ var
   s: string;
   htmlfile: string;
   page: TPage;
-  root:string;
+  root: string;
 begin
   matchs := TRegEx.Matches(text, '<#include.*file=[\s\S]*?\>');
 
@@ -329,13 +335,13 @@ begin
         htmlfile := Copy(htmlfile, 0, htmlfile.Length - 1);
         htmlfile := Trim(htmlfile);
       end;
-      if Config.__WebRoot__.Trim<>'' then
+      if Config.__WebRoot__.Trim <> '' then
       begin
-        root:=Config.__WebRoot__+'/';
+        root := Config.__WebRoot__ + '/';
       end;
       htmlfile := htmlfile.Replace('''', '').Replace('"', '');
       if (htmlfile.IndexOf('/') = 0) then
-        htmlfile := WebApplicationDirectory +root+ Config.template + htmlfile
+        htmlfile := WebApplicationDirectory + root + Config.template + htmlfile
       else
         htmlfile := url + htmlfile;
       if (Trim(htmlfile) <> '') then
