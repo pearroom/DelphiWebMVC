@@ -12,7 +12,8 @@ interface
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
   XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin,
-  MVC.RedisM, MVC.RedisList, MVC.PageCache, MVC.DBPoolList;
+  MVC.RedisM, MVC.RedisList, MVC.PageCache, MVC.DBPoolList,
+  System.RegularExpressions;
 
 type
   TView = class
@@ -132,7 +133,10 @@ begin
       item := '{';
       for i := 0 to Fields.Count - 1 do
       begin
-        key := Fields[i].DisplayLabel;
+        if Config.JsonToLower then
+          key := Fields[i].DisplayLabel.ToLower
+        else
+          key := Fields[i].DisplayLabel;
         ftype := Fields[i].DataType;
         if (ftype = ftAutoInc) then
           value := Fields[i].AsString
@@ -381,12 +385,13 @@ begin
 end;
 
 procedure TView.ShowJSON(json: string);
+var
+  S, value: string;
+  matchs: TMatchCollection;
+  match: TMatch;
 begin
   Response.ContentType := 'application/json; charset=' + Config.document_charset;
-  if Config.JsonToLower then
-    Response.Content := json.ToLower
-  else
-    Response.Content := json;
+  Response.Content := json;
   Response.SendResponse;
 end;
 

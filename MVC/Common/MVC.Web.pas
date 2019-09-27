@@ -35,21 +35,20 @@ begin
     begin
       error := e.ToString;
       log(error);
+      s := '<html><body><div style="text-align: left;">';
+      s := s + '<div><h1> Error 500 </h1></div>';
+      s := s + '<hr><div>' + error + '</div></div></body></html>';
       if Trim(Config.Error500) <> '' then
       begin
-        page := TPage.Create(Config.Error500, nil, '');
-        try
-          s := page.HTML;
-        finally
-          page.Free;
+        if FileExists(Config.Error500) then
+        begin
+          page := TPage.Create(Config.Error500, nil, '');
+          try
+            s := page.HTML;
+          finally
+            page.Free;
+          end;
         end;
-      end
-      else
-      begin
-
-        s := '<html><body><div style="text-align: left;">';
-        s := s + '<div><h1> Error 500 </h1></div>';
-        s := s + '<hr><div>' + error + '</div></div></body></html>';
       end;
       Response.StatusCode := 500;
       Response.ContentType := 'text/html; charset=' + Config.document_charset;

@@ -192,7 +192,7 @@ var
   jo: ISuperObject;
   ja: ISuperArray;
   i: Integer;
-  ret: string;
+  ret, key: string;
   ftype: TFieldType;
 begin
 
@@ -208,15 +208,19 @@ begin
       for i := 0 to Fields.Count - 1 do
       begin
         ftype := Fields[i].DataType;
+        if Config.JsonToLower then
+          key := Fields[i].DisplayLabel.ToLower
+        else
+          key := Fields[i].DisplayLabel;
         if (ftype = ftAutoInc) then
-          jo.I[Fields[i].DisplayLabel] := Fields[i].AsInteger
+          jo.I[key] := Fields[i].AsInteger
         else if (ftype = ftInteger) then
-          jo.I[Fields[i].DisplayLabel] := Fields[i].AsInteger
+          jo.I[key] := Fields[i].AsInteger
         else if (ftype = ftBoolean) then
-          jo.B[Fields[i].DisplayLabel] := Fields[i].AsBoolean
+          jo.B[key] := Fields[i].AsBoolean
         else
         begin
-          jo.S[Fields[i].DisplayLabel] := Fields[i].AsString;
+          jo.S[key] := Fields[i].AsString;
         end;
       end;
       ja.Add(jo);
@@ -259,7 +263,10 @@ begin
       item := '{';
       for i := 0 to Fields.Count - 1 do
       begin
-        key := Fields[i].DisplayLabel;
+        if Config.JsonToLower then
+          key := Fields[i].DisplayLabel.ToLower
+        else
+          key := Fields[i].DisplayLabel;
         ftype := Fields[i].DataType;
         if (ftype = ftAutoInc) then
           value := Fields[i].AsString

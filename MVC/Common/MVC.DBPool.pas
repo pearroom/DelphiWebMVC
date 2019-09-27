@@ -68,20 +68,29 @@ end;
 function TDBPool.GetDb(DbType: string): TFDConnection;
 var
   i: Integer;
+  Db:TFDConnection;
 begin
-  Result := nil;
-  try
-    for i := 0 to DbList.Count - 1 do
-    begin
-      if DbList[i].ConnectionDefName = DbType then
-      begin
-        Result := DbList[i].CloneConnection as TFDConnection;
-        break;
-      end;
-    end;
-  finally
 
+  try
+    Db:=TFDConnection.Create(nil);
+    Db.ConnectionDefName := DbType;
+    Result:=Db;
+  except
+    Result := nil;
   end;
+//  try
+//    for i := 0 to DbList.Count - 1 do
+//    begin
+//      if DbList[i].ConnectionDefName = DbType then
+//      begin
+//
+//        Result := DbList[i].CloneConnection as TFDConnection;
+//        break;
+//      end;
+//    end;
+//  finally
+//
+//  end;
 
 end;
 

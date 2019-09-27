@@ -22,7 +22,7 @@
 		"sessoin_name":"__guid_session",
 		"roule_suffix":"",
 		"session_start":true,
-		"session_timer":30,
+		"session_timer":60,
 		"bpl_Reload_timer":5,
 		"bpl_unload_timer":10,
 		"open_package":false,
@@ -32,7 +32,7 @@
 		"open_interceptor":true,
 		"show_sql":false,
 		"open_debug":true,
-		"Error404":"404.html",
+		"Error404":"4041.html",
 		"Error500":"500.html",
 		"JsonToLower":true,
 		"directory":[

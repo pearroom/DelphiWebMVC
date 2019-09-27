@@ -93,11 +93,17 @@ var
   k, i: integer;
   ndate: TDateTime;
   key: string;
+  tmp_list: TDictionary<string, TActionItem>;
 begin
   MonitorEnter(List);
+  try
+    tmp_list := TDictionary<string, TActionItem>.Create(List);
+  finally
+    MonitorExit(List);
+  end;
 
   try
-    for key in List.Keys do
+    for key in tmp_list.Keys do
     begin
       try
         List.TryGetValue(key, item);
@@ -113,17 +119,24 @@ begin
             begin
               item.Action.Free;
               item.Free;
-              List.Remove(key);
+              MonitorEnter(List);
+              try
+                List.Remove(key);
+              finally
+                MonitorExit(List);
+              end;
              // Log('¶ÔÏó³ØÒÆ³ý:' + key);
             end;
-            break;
+           // break;
+           Sleep(100);
           end;
         end;
       except
       end;
     end;
   finally
-    MonitorExit(List);
+    tmp_list.Clear;
+    tmp_list.Free;
   end;
 end;
 

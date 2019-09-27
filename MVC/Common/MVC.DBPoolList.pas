@@ -114,11 +114,17 @@ var
   k, i: integer;
   ndate: TDateTime;
   key: string;
+  tmp_dblist: TDictionary<string, TDbItem>;
 begin
   MonitorEnter(DBList);
-
   try
-    for key in DBList.Keys do
+    tmp_dblist := TDictionary<string, TDbItem>.Create(Dblist);
+
+  finally
+    MonitorExit(DBList);
+  end;
+  try
+    for key in tmp_dblist.Keys do
     begin
       try
         DBList.TryGetValue(key, item);
@@ -132,19 +138,28 @@ begin
             end
             else
             begin
+
               item.Db.Free;
               item.Free;
-              DBList.Remove(key);
+              MonitorEnter(DBList);
+              try
+                DBList.Remove(key);
+              finally
+                MonitorExit(DBList);
+              end;
+
              // Log('¶ÔÏó³ØÒÆ³ý:' + key);
             end;
-            break;
+          //  break;
+            Sleep(100);
           end;
         end;
       except
       end;
     end;
   finally
-    MonitorExit(DBList);
+    tmp_dblist.Clear;
+    tmp_dblist.Free;
   end;
 end;
 

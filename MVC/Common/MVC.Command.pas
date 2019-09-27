@@ -25,7 +25,6 @@ var
   _RedisList: TRedisList;
   _PackageManager: TPackageManager = nil;
   _MIMEConfig: string;
-  RTTIContext: TRttiContext;
   directory_permission: TDictionary<string, Boolean>;
 
 function check_directory_permission(path: string): Boolean;
@@ -107,9 +106,9 @@ begin
     document_charset := 'utf-8';               // 字符集
     show_sql := false;                            //日志打印sql
     open_debug := true;                       // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
-    Error404:='';
-    Error500:='';
-    JsonToLower:=false;
+    Error404 := '';
+    Error500 := '';
+    JsonToLower := false;
     session_name := '__guid_session';
   end;
   jo := param.O['Config'];
@@ -187,6 +186,7 @@ end;
 procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
 var
   Action: TObject;
+  RTTIContext: TRttiContext;
   ActoinClass: TRttiType;
   ActionMethod, SetParams, Interceptor, FreeDb: TRttiMethod;
   Response, Request, ActionPath, ActionRoule: TRttiProperty;
@@ -260,7 +260,7 @@ begin
             begin
               Action := actionitem.Action;
             end;
-           // Action := item.Action.Create;
+          //  Action := item.Action.Create;
             Request.SetValue(Action, web.Request);
             Response.SetValue(Action, web.Response);
             ActionPath.SetValue(Action, item.path);
@@ -368,20 +368,20 @@ var
 begin
   web.Response.StatusCode := 404;
   web.Response.ContentType := 'text/html; charset=' + Config.document_charset;
+  s := '<html><body><div style="text-align: left;">';
+  s := s + '<div><h1>Error 404</h1></div>';
+  s := s + '<hr><div>[ ' + url + ' ] Not Find Page' + '</div></div></body></html>';
   if Trim(Config.Error404) <> '' then
   begin
-    page := TPage.Create(Config.Error404, nil, '');
-    try
-      s := page.HTML;
-    finally
-      page.Free;
+    if FileExists(Config.Error404) then
+    begin
+      page := TPage.Create(Config.Error404, nil, '');
+      try
+        s := page.HTML;
+      finally
+        page.Free;
+      end;
     end;
-  end
-  else
-  begin
-    s := '<html><body><div style="text-align: left;">';
-    s := s + '<div><h1>Error 404</h1></div>';
-    s := s + '<hr><div>[ ' + url + ' ] Not Find Page' + '</div></div></body></html>';
   end;
   log('Error 404 [ ' + url + ' ] Not Find Page');
   web.Response.Content := s;
@@ -725,8 +725,8 @@ begin
           end;
 
           MVCDM.DBManager.AddConnectionDef(dbjo.CurrentKey, DriverID, oParams);
-          if PoolSize <> '' then
-            _DbPool.AddDb(1, dbjo.CurrentKey);
+       //   if PoolSize <> '' then
+       //     _DbPool.AddDb(1, dbjo.CurrentKey);
           if Config.open_debug then
             log('数据库配置:' + oParams.Text);
           oParams.Free;
