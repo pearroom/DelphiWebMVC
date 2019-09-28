@@ -21,11 +21,7 @@ type
   TDBBase = class
   private
     DBType_: string;
-    FFields: string;
-    FPageKey: string;
     function getJSONWhere(JSONwhere: ISuperObject): string;
-    procedure SetFields(const Value: string);
-    procedure SetPageKey(const Value: string);
     procedure CreateStoredProc;
     { Private declarations }
   protected
@@ -34,8 +30,8 @@ type
   public
     TMP_CDS: TFDQuery;
     dataset: TFDQuery;
-    property Fields: string read FFields write SetFields; // 用来设置查询时显示那些字段
-    property PageKey: string read FPageKey write SetPageKey; //分页ID设置 mssql2000 使用
+    Fields: string; // 用来设置查询时显示那些字段
+    PageKey: string; //分页ID设置 mssql2000 使用
     { Public declarations }
     function filterSQL(sql: string): string;
     procedure DBlog(msg: string);
@@ -155,7 +151,7 @@ var
   jo: ISuperObject;
   ja: ISuperArray;
   i: Integer;
-  ret: string;
+  ret, key: string;
   ftype: TFieldType;
 begin
   ja := SA;
@@ -168,16 +164,21 @@ begin
       jo := SO();
       for i := 0 to Fields.Count - 1 do
       begin
+        if Config.JsonToLower then
+          key := Fields[i].DisplayLabel.ToLower
+        else
+          key := Fields[i].DisplayLabel;
+
         ftype := Fields[i].DataType;
         if (ftype = ftAutoInc) then
-          jo.I[Fields[i].DisplayLabel] := Fields[i].AsInteger
+          jo.I[key] := Fields[i].AsInteger
         else if (ftype = ftInteger) then
-          jo.I[Fields[i].DisplayLabel] := Fields[i].AsInteger
+          jo.I[key] := Fields[i].AsInteger
         else if (ftype = ftBoolean) then
-          jo.B[Fields[i].DisplayLabel] := Fields[i].AsBoolean
+          jo.B[key] := Fields[i].AsBoolean
         else
         begin
-          jo.S[Fields[i].DisplayLabel] := Fields[i].AsString;
+          jo.S[key] := Fields[i].AsString;
         end;
       end;
       ja.Add(jo);
@@ -313,7 +314,7 @@ end;
 
 function TDBBase.TryConnDB: Boolean;
 begin
-  if not Assigned(condb) then
+  if condb = nil then
   begin
     condb := _DbPool.GetDb(DBType_);
     if condb = nil then
@@ -345,13 +346,15 @@ end;
 constructor TDBBase.Create(dbtype: string);
 begin
   DBType_ := dbtype;
+  condb := nil;
+  StoredProc := nil;
 end;
 
 procedure TDBBase.CreateStoredProc;
 begin
   if not TryConnDB then
     Exit;
-  if not Assigned(StoredProc) then
+  if StoredProc = nil then
   begin
     StoredProc := TFDStoredProc.Create(nil);
     StoredProc.Connection := condb;
@@ -417,7 +420,7 @@ destructor TDBBase.Destroy;
 var
   i: Integer;
 begin
-  if Assigned(condb) then
+  if condb <> nil then
   begin
     try
       if condb.Connected then
@@ -431,7 +434,7 @@ begin
       TMP_CDS.Free;
     end;
   end;
-  if Assigned(StoredProc) then
+  if StoredProc <> nil then
   begin
     StoredProc.Free;
   end;
@@ -614,16 +617,6 @@ end;
 function TDBBase.QueryPageT(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): string;
 begin
 
-end;
-
-procedure TDBBase.SetFields(const Value: string);
-begin
-  FFields := Value;
-end;
-
-procedure TDBBase.SetPageKey(const Value: string);
-begin
-  FPageKey := Value;
 end;
 
 function TDBBase.Find(tablename, where: string): ISuperObject;

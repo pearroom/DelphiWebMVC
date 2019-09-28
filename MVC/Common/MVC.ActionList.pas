@@ -36,6 +36,7 @@ type
     List: TDictionary<string, TActionItem>;
     function GetGUID: string;
   public
+    isstop: boolean;
     function Add(Action: TObject): TActionItem;
     function Get(ActionName: string): TActionItem;
     procedure FreeAction(actionitem: TActionItem);
@@ -101,38 +102,34 @@ begin
   finally
     MonitorExit(List);
   end;
-
   try
-    for key in tmp_list.Keys do
+    for key in List.Keys do
     begin
-      try
-        List.TryGetValue(key, item);
-        if item <> nil then
+      if isstop then
+        break;
+      List.TryGetValue(key, item);
+      if item <> nil then
+      begin
+        if (Now() > item.UpDate) then
         begin
-          if (Now() > item.UpDate) then
+          if item.isDead = 0 then
           begin
-            if item.isDead = 0 then
-            begin
-              item.isDead := 1;
-            end
-            else if item.isStop = 1 then
-            begin
+            item.isDead := 1;
+          end
+          else if item.isStop = 1 then
+          begin
+            MonitorEnter(List);
+            try
               item.Action.Free;
               item.Free;
-              MonitorEnter(List);
-              try
-                List.Remove(key);
-              finally
-                MonitorExit(List);
-              end;
-             // Log('¶ÔÏó³ØÒÆ³ý:' + key);
+              List.Remove(key);
+            finally
+              MonitorExit(List);
             end;
-           // break;
-           Sleep(100);
           end;
         end;
-      except
       end;
+      Sleep(100);
     end;
   finally
     tmp_list.Clear;
@@ -169,7 +166,6 @@ end;
 procedure TActionList.FreeAction(actionitem: TActionItem);
 begin
   actionitem.isStop := 1;
-
 end;
 
 function TActionList.Get(ActionName: string): TActionItem;

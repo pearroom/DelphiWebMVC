@@ -40,7 +40,7 @@ begin
   begin
     Sleep(10);
     Inc(k);
-    if k >= 100 then
+    if k >= 1000 then
     begin
       k := 0;
       Cleardata;
@@ -48,6 +48,8 @@ begin
     end;
 
   end;
+  _DBPoolList.isstop:=true;
+  Sleep(200);
 end;
 
 end.

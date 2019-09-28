@@ -37,6 +37,7 @@ type
     DBList: TDictionary<string, TDbItem>;
     function GetGUID: string;
   public
+    isstop: boolean;
     function Add(Db: TDBConfig): TDbItem;
     function Get(): TDbItem;
     constructor Create();
@@ -68,7 +69,12 @@ end;
 
 function FreeDbToPool(DbItem: TDbItem): boolean;
 begin
-  DbItem.isStop := 1;
+  MonitorEnter(_DBPoolList.DBList);
+  try
+    DbItem.isStop := 1;
+  finally
+    MonitorExit(_DBPoolList.DBList);
+  end;
 end;
 
 function TDBPoolList.GetGUID: string;
@@ -90,17 +96,16 @@ var
 begin
   MonitorEnter(DBList);
   try
-    item := TDbItem.Create;
-    item.Db := Db;
-    item.isStop := 0;
-    item.isDead := 0;
- //   item.ActionName := Action.ClassName;
-    item.UpDate := Now + (1 / 24 / 60) * 1;
-    key := GetGUID;
     try
+      item := TDbItem.Create;
+      item.Db := Db;
+      item.isStop := 0;
+      item.isDead := 0;
+      item.UpDate := Now + (1 / 24 / 60) * 1;
+      key := GetGUID;
       DBList.AddOrSetValue(key, item);
     except
-     // log('session error2');
+      item := nil;
     end;
   finally
     MonitorExit(DBList);
@@ -118,43 +123,39 @@ var
 begin
   MonitorEnter(DBList);
   try
-    tmp_dblist := TDictionary<string, TDbItem>.Create(Dblist);
-
+    tmp_dblist := TDictionary<string, TDbItem>.Create(DBlist);
   finally
     MonitorExit(DBList);
   end;
   try
     for key in tmp_dblist.Keys do
     begin
-      try
-        DBList.TryGetValue(key, item);
-        if item <> nil then
+      if isstop then
+        break;
+      DBList.TryGetValue(key, item);
+      if item <> nil then
+      begin
+        if (Now() > item.UpDate) then
         begin
-          if (Now() > item.UpDate) then
+          if item.isDead = 0 then
           begin
-            if item.isDead = 0 then
-            begin
-              item.isDead := 1;
-            end
-            else
-            begin
+            item.isDead := 1;
+          end
+          else
+          begin
 
+            MonitorEnter(DBList);
+            try
               item.Db.Free;
               item.Free;
-              MonitorEnter(DBList);
-              try
-                DBList.Remove(key);
-              finally
-                MonitorExit(DBList);
-              end;
-
-             // Log('对象池移除:' + key);
+              DBList.Remove(key);
+            finally
+              MonitorExit(DBList);
             end;
-          //  break;
-            Sleep(100);
+             // Log('对象池移除:' + key);
           end;
         end;
-      except
+        Sleep(100);
       end;
     end;
   finally
@@ -165,6 +166,7 @@ end;
 
 constructor TDBPoolList.Create;
 begin
+  isstop := false;
   DBList := TDictionary<string, TDbItem>.Create;
 end;
 
@@ -204,9 +206,12 @@ begin
       begin
         if (item.isDead = 0) and (item.isStop = 1) then
         begin
+
           item.isStop := 0;
           item.UpDate := Now + (1 / 24 / 60) * 1;
+
           Result := item;
+
           break;
         end;
       end;
