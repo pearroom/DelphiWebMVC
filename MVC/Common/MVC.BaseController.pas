@@ -26,6 +26,7 @@ type
     procedure SetActionPath(const Value: string);
     procedure SetActionRoule(const Value: string);
   protected
+    procedure CreateView(); virtual;
   public
     View: TView;
     Error: Boolean;
@@ -41,8 +42,7 @@ type
     function URLDecode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function Interceptor: boolean;
-    procedure CreateView(); virtual;
-    procedure SetParams();virtual;
+    procedure SetParams(); virtual;
     procedure FreeDb;
     function HttpGet(url: string; encode: TEncoding): string;
     constructor Create();

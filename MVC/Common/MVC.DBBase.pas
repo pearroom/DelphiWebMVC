@@ -316,19 +316,19 @@ function TDBBase.TryConnDB: Boolean;
 begin
   if condb = nil then
   begin
-    condb := _DbPool.GetDb(DBType_);
-    if condb = nil then
-    begin
+//    condb := _DbPool.GetDb(DBType_);
+//    if condb = nil then
+//    begin
       condb := TFDConnection.Create(nil);
       condb.ConnectionDefName := DBType_;
-    end;
+  //  end;
     TMP_CDS := TFDQuery.Create(nil);
   //  TMP_CDS.FetchOptions.Mode := fmAll;
    // TMP_CDS.FetchOptions.RecordCountMode := TFDRecordCountMode.cmTotal;
-    TMP_CDS.Connection := condb;
   end;
   try
     try
+      TMP_CDS.Connection := condb;
       if not condb.Connected then
         condb.Connected := true;
     except
@@ -357,8 +357,8 @@ begin
   if StoredProc = nil then
   begin
     StoredProc := TFDStoredProc.Create(nil);
-    StoredProc.Connection := condb;
   end;
+  StoredProc.Connection := condb;
 end;
 
 function TDBBase.Delete(tablename: string; JSONwhere: ISuperObject): Boolean;
@@ -472,7 +472,9 @@ end;
 
 function TDBBase.ExecCDS(var cds: TFDQuery): Boolean;
 begin
-
+  Result := False;
+  if not TryConnDB then
+    Exit;
   try
     cds.Connection := condb;
     Result := cds.OpenOrExecute;

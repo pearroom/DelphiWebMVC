@@ -123,6 +123,7 @@ begin
               item.Action.Free;
               item.Free;
               List.Remove(key);
+              //log('ÒÆ³ýAction-'+key);
             finally
               MonitorExit(List);
             end;
@@ -165,7 +166,13 @@ end;
 
 procedure TActionList.FreeAction(actionitem: TActionItem);
 begin
-  actionitem.isStop := 1;
+  MonitorEnter(List);
+  try
+    if actionitem <> nil then
+      actionitem.isStop := 1;
+  finally
+    MonitorExit(List);
+  end;
 end;
 
 function TActionList.Get(ActionName: string): TActionItem;

@@ -725,8 +725,8 @@ begin
           end;
 
           MVCDM.DBManager.AddConnectionDef(dbjo.CurrentKey, DriverID, oParams);
-       //   if PoolSize <> '' then
-       //     _DbPool.AddDb(1, dbjo.CurrentKey);
+//          if PoolSize <> '' then
+//            _DbPool.AddDb(1, dbjo.CurrentKey);
           if Config.open_debug then
             log(' ˝æ›ø‚≈‰÷√:' + oParams.Text);
           oParams.Free;

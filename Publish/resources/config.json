@@ -26,7 +26,7 @@
 		"bpl_Reload_timer":5,
 		"bpl_unload_timer":10,
 		"open_package":false,
-		"open_log":false,
+		"open_log":true,
 		"open_cache":true,
 		"cache_max_age":"315360000",
 		"open_interceptor":true,

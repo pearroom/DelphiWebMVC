@@ -149,10 +149,10 @@ begin
               item.Db.Free;
               item.Free;
               DBList.Remove(key);
+             // log('ÒÆ³ýDb-'+key);
             finally
               MonitorExit(DBList);
             end;
-             // Log('¶ÔÏó³ØÒÆ³ý:' + key);
           end;
         end;
         Sleep(100);

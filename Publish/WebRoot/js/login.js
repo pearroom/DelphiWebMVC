@@ -44,3 +44,9 @@
 			}
 		}
 	);
+	$.get("showxml",function(ret){
+		
+	});
+	$.get("showxml1",function(ret){
+		
+	});	
