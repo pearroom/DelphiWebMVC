@@ -213,7 +213,11 @@ begin
   web.Response.ContentEncoding := Config.document_charset;
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
+  {$IFDEF MORMOT}
   url := TIdURI.URLDecode(web.Request.PathInfo);
+  {$ELSE}
+  url := web.Request.PathInfo;
+  {$ENDIF }
   if not check_directory_permission(url) then
   begin
     Error404(web, url);
@@ -358,8 +362,10 @@ begin
     begin
 
       web.Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
+      {$IFDEF MORMOT}
       web.Response.Content:= WebApplicationDirectory+Config.__WebRoot__+ url ;
       web.Response.ContentType:='!STATICFILE';
+      {$ENDIF}
 
     end;
   end;
