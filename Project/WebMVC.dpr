@@ -8,7 +8,6 @@
 
 program WebMVC;
 {$APPTYPE GUI}
-
 uses
   Vcl.Forms,
   Web.WebReq,

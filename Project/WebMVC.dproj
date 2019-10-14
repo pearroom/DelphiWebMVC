@@ -148,7 +148,6 @@
         <DCCReference Include="..\MVC\Common\MVC.DES.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.DM.pas">
             <Form>MVCDM</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="..\MVC\Common\MVC.HTMLParser.pas"/>
@@ -156,7 +155,6 @@
         <DCCReference Include="..\MVC\Common\MVC.LogUnit.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.Main.pas">
             <Form>MVCMain</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="..\MVC\Common\MVC.PackageManager.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.Page.pas"/>
@@ -171,7 +169,6 @@
         <DCCReference Include="..\MVC\Common\MVC.View.pas"/>
         <DCCReference Include="..\MVC\Common\MVC.Web.pas">
             <Form>MVCWeb</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TWebModule</DesignClass>
         </DCCReference>
         <DCCReference Include="..\MVC\Common\XSuperJSON.pas"/>
@@ -200,10 +197,12 @@
                     <Excluded_Packages Name="$(BDSBIN)\DataExplorerDBXPluginEnt260.bpl">DBExpress Enterprise Data Explorer Integration</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k260.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp260.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Login.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Check.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Login.css" Configuration="Release" Class="ProjectFile"/>
@@ -213,7 +212,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="\DelphiMVC.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">

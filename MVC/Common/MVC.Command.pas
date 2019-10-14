@@ -14,7 +14,7 @@ uses
   Web.HTTPApp, System.DateUtils, MVC.SessionList, XSuperObject, SynWebConfig,
   uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
   System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
-  MVC.DBPool, XSuperJSON, System.Generics.Collections;
+  MVC.DBPool, XSuperJSON, System.Generics.Collections,IdURI;
 
 var
   RouleMap: TRouleMap = nil;
@@ -213,7 +213,7 @@ begin
   web.Response.ContentEncoding := Config.document_charset;
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
-  url := web.Request.PathInfo;
+  url := TIdURI.URLDecode(web.Request.PathInfo);
   if not check_directory_permission(url) then
   begin
     Error404(web, url);
@@ -356,7 +356,11 @@ begin
     end
     else
     begin
+
       web.Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
+      web.Response.Content:= WebApplicationDirectory+Config.__WebRoot__+ url ;
+      web.Response.ContentType:='!STATICFILE';
+
     end;
   end;
 end;
