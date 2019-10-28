@@ -14,7 +14,7 @@ uses
   Web.HTTPApp, System.DateUtils, MVC.SessionList, XSuperObject, SynWebConfig,
   uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
   System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
-  MVC.DBPool, XSuperJSON, System.Generics.Collections,IdURI;
+  MVC.DBPool, XSuperJSON, System.Generics.Collections, IdURI;
 
 var
   RouleMap: TRouleMap = nil;
@@ -234,6 +234,12 @@ begin
     item := RouleMap.GetRoule(url, url1, methodname);
     if (item <> nil) then
     begin
+      if (url.IndexOf('//') > -1) then
+      begin
+        url := url.Replace('//', '/');
+        web.Response.SendRedirect(url + '/');
+        exit;
+      end;
       if (methodname = 'index') and (url.Substring(url.Length - 1) <> '/') then
       begin
         web.Response.SendRedirect(url + '/');
@@ -363,8 +369,8 @@ begin
 
       web.Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
       {$IFDEF MORMOT}
-      web.Response.Content:= WebApplicationDirectory+Config.__WebRoot__+ url ;
-      web.Response.ContentType:='!STATICFILE';
+      web.Response.Content := WebApplicationDirectory + Config.__WebRoot__ + url;
+      web.Response.ContentType := '!STATICFILE';
       {$ENDIF}
 
     end;
