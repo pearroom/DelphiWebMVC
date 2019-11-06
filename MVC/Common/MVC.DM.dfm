@@ -2,12 +2,6 @@ object MVCDM: TMVCDM
   OldCreateOrder = False
   Height = 427
   Width = 491
-  object FDGUIxWait: TFDGUIxWaitCursor
-    Provider = 'Forms'
-    ScreenCursor = gcrNone
-    Left = 223
-    Top = 152
-  end
   object MySQLDriver: TFDPhysMySQLDriverLink
     Left = 75
     Top = 38
@@ -18,7 +12,7 @@ object MVCDM: TMVCDM
     FormatOptions.AssignedValues = [fvMapRules]
     FormatOptions.OwnMapRules = True
     FormatOptions.MapRules = <>
-    Active = True
+    ResourceOptions.AssignedValues = [rvSilentMode]
     Left = 220
     Top = 88
   end
@@ -39,15 +33,15 @@ object MVCDM: TMVCDM
     Top = 240
   end
   object FDStanStorageBinLink1: TFDStanStorageBinLink
-    Left = 208
-    Top = 228
+    Left = 216
+    Top = 148
   end
   object FDStanStorageJSONLink1: TFDStanStorageJSONLink
-    Left = 208
-    Top = 360
+    Left = 216
+    Top = 280
   end
   object FDStanStorageXMLLink1: TFDStanStorageXMLLink
-    Left = 204
-    Top = 300
+    Left = 212
+    Top = 220
   end
 end

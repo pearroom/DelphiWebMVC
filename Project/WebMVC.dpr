@@ -75,30 +75,16 @@ uses
   XSuperObject in '..\MVC\Common\XSuperObject.pas';
 
 {$R *.res}
-var
-  hMutex: THandle;
 
 begin
+  Config.password_key := '';   //配置文件解密秘钥
   ReportMemoryLeaksOnShutdown := True;
   Application.Initialize;
   Application.Title := 'WebMVC';
-  Config.password_key:='';//配置文件秘钥
-  hMutex := CreateMutex(nil, false, PChar(Application.Title));
-  try
-    if GetLastError = Error_Already_Exists then
-    begin
-      AppOpen := false;
-      Application.MessageBox(PChar(Application.Title + '已经启动'), '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
-      Exit;
-    end;
-  finally
-    ReleaseMutex(hMutex);
+  if not _MVCFun.checkCreate(Application.Title) then
+  begin
+    Application.CreateForm(TMVCMain, MVCMain);
+    Application.Run;
   end;
-
-  if WebRequestHandler <> nil then
-    WebRequestHandler.WebModuleClass := WebModuleClass;
-
-  Application.CreateForm(TMVCMain, MVCMain);
-  Application.Run;
 end.
 

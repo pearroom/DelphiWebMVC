@@ -14,9 +14,26 @@ uses
   Web.HTTPApp, System.DateUtils, MVC.SessionList, XSuperObject, SynWebConfig,
   uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
   System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
-  MVC.DBPool, XSuperJSON, System.Generics.Collections, IdURI;
+  MVC.DBPool, XSuperJSON, System.Generics.Collections, IdURI, Web.WebReq,
+  {$IFDEF WINDOWS} Vcl.Forms, Winapi.Windows, {$IFDEF MORMOT}
+  SynWebApp, {$ELSE} CrossWebApp, {$ENDIF}  {$ELSE} CrossWebApp, {$ENDIF }
+  Web.WebBroker, MVC.Web;
+
+type
+  TMVCFun = class
+  private
+    isShow: boolean;
+    PageList: TStringList;
+    procedure showpagelist();
+  public
+    function RunCommand(): Boolean;
+    function checkCreate(title: string): boolean;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 var
+  _MVCFun: TMVCFun;
   RouleMap: TRouleMap = nil;
   SessionListMap: TSessionList = nil;
   SessionName: string;
@@ -532,6 +549,13 @@ var
   FPort: string;
   jo: ISuperObject;
 begin
+  InitApplication; //启动服务
+  if WebRequestHandler <> nil then
+    WebRequestHandler.WebModuleClass := WebModuleClass;
+  ////////////////////顺序不可更换//////////////////////////
+  AppOpen := True;
+  _MVCFun := TMVCFun.Create;
+
   Config.config := 'resources/config.json';
   Config.mime := 'resources/mime.json';
   Config.package_config := 'resources/package.json';
@@ -593,12 +617,15 @@ begin
     end;
   finally
     Result := FPort;
+
   end;
 end;
 
 procedure CloseServer();
 begin
   AppClose := true;
+  _MVCFun.Free;
+
   directory_permission.Clear;
   directory_permission.Free;
   if _logThread <> nil then
@@ -754,6 +781,99 @@ begin
     end;
   finally
     MVCDM.DBManager.Active := true;
+  end;
+end;
+
+procedure TMVCFun.showpagelist();
+var
+  index, i: Integer;
+  key: string;
+begin
+  for key in _PageCache.PageList.Keys do
+  begin
+    if PageList.IndexOf(key) < 0 then
+      PageList.Add(key);
+  end;
+  PageList.Sorted := true;
+  for i := 0 to PageList.Count - 1 do
+  begin
+    Writeln(i, ': ', PageList.Strings[i]);
+  end;
+  if PageList.Count = 0 then
+    Writeln('PageCache is NULL');
+end;
+
+function TMVCFun.checkCreate(title: string): boolean;
+var
+  hMutex: THandle;
+begin
+  Result := False;
+	{$IFDEF WINDOWS}
+  hMutex := CreateMutex(nil, false, PChar(title));
+  try
+    if GetLastError = Error_Already_Exists then
+    begin
+      Application.MessageBox(PChar(title + '已经启动'), '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
+      Result := True;
+    end;
+  finally
+    ReleaseMutex(hMutex);
+  end;
+  {$ENDIF}
+end;
+
+constructor TMVCFun.Create;
+begin
+  PageList := TStringList.Create;
+
+end;
+
+destructor TMVCFun.Destroy;
+begin
+  PageList.Clear;
+  PageList.Free;
+  inherited;
+end;
+
+function TMVCFun.RunCommand(): Boolean;
+var
+  LResponse: string;
+  index, i: Integer;
+  key: string;
+begin
+  if not isShow then
+  begin
+    Writeln('''Stop'' Close Server');
+    Writeln('''ShowPage'' Show PageCatch');
+    Writeln('''Removekey key'' Remove PageCatch');
+    Writeln('''RemoveAll'' Remove All PageCatch');
+    isShow := true;
+  end;
+  readln(LResponse);
+  Result := true;
+  if LResponse.ToLower = 'stop' then
+    Result := False;
+  if LResponse.ToLower = 'removeall' then
+  begin
+    _PageCache.PageList.Clear;
+    PageList.Clear;
+    showpagelist();
+  end;
+  if LeftStr(LResponse.ToLower, 9) = 'removekey' then
+  begin
+    try
+      index := LResponse.ToLower.Replace('removekey', '').Trim().ToInteger;
+      key := PageList.Strings[index];
+      _PageCache.PageList.Remove(key);
+      PageList.Delete(index);
+      showpagelist();
+    except
+      Writeln('Input Error');
+    end;
+  end;
+  if LResponse.ToLower = 'showpage' then
+  begin
+    showpagelist();
   end;
 end;
 

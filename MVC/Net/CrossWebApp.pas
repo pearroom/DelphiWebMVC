@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, WebBroker, HTTPApp, CrossWebServer, Web.HTTPProd,
-  Web.ReqMulti, SynWebConfig,MVC.LogUnit;
+  Web.ReqMulti, SynWebConfig, MVC.LogUnit;
 
 var
   AppOpen: boolean;
@@ -25,6 +25,8 @@ type
     destructor Destroy; override;
   end;
 
+procedure InitApplication;
+
 implementation
 
 { TCrossWebApplication }
@@ -32,7 +34,7 @@ implementation
 constructor TCrossWebApplication.Create(AOwner: TComponent);
 begin
   inherited;
-  AppOpen := True;
+  AppOpen := False;
   AppRun := False;
   AppClose := false;
   self.MaxConnections := -1;
@@ -73,7 +75,7 @@ begin
 end;
 
 initialization
-  InitApplication;
+
 
 end.
 

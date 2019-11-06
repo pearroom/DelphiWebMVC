@@ -25,6 +25,8 @@ type
     destructor Destroy; override;
   end;
 
+procedure InitApplication;
+
 implementation
 
 uses
@@ -35,7 +37,7 @@ uses
 constructor TSynWebApplication.Create(AOwner: TComponent);
 begin
   inherited;
-  AppOpen := true;
+  AppOpen := False;
   AppRun := False;
   AppClose := false;
   self.MaxConnections := -1;
@@ -78,7 +80,7 @@ begin
 end;
 
 initialization
-  InitApplication;
+
 
 end.
 
