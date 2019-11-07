@@ -15,9 +15,8 @@ uses
   uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
   System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
   MVC.DBPool, XSuperJSON, System.Generics.Collections, IdURI, Web.WebReq,
-  {$IFDEF WINDOWS} Vcl.Forms, Winapi.Windows, {$IFDEF MORMOT}
-  SynWebApp, {$ELSE} CrossWebApp, {$ENDIF}  {$ELSE} CrossWebApp, {$ENDIF }
-  Web.WebBroker, MVC.Web;
+  {$IFDEF MSWINDOWS} Vcl.Forms, Winapi.Windows, SynWebApp, {$ELSE}  CrossWebApp, {$ENDIF}
+  MVC.Web;
 
 type
   TMVCFun = class
@@ -230,7 +229,7 @@ begin
   web.Response.ContentEncoding := Config.document_charset;
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
-  {$IFDEF MORMOT}
+  {$IFDEF MSWINDOWS}
   url := TIdURI.URLDecode(web.Request.PathInfo);
   {$ELSE}
   url := web.Request.PathInfo;
@@ -385,7 +384,7 @@ begin
     begin
 
       web.Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
-      {$IFDEF MORMOT}
+      {$IFDEF MSWINDOWS}
       web.Response.Content := WebApplicationDirectory + Config.__WebRoot__ + url;
       web.Response.ContentType := '!STATICFILE';
       {$ENDIF}
@@ -808,11 +807,12 @@ var
   hMutex: THandle;
 begin
   Result := False;
-	{$IFDEF WINDOWS}
+	{$IFDEF MSWINDOWS}
   hMutex := CreateMutex(nil, false, PChar(title));
   try
     if GetLastError = Error_Already_Exists then
     begin
+
       Application.MessageBox(PChar(title + '已经启动'), '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
       Result := True;
     end;
