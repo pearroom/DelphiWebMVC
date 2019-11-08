@@ -204,7 +204,7 @@ var
   Action: TObject;
   RTTIContext: TRttiContext;
   ActoinClass: TRttiType;
-  ActionMethod, SetParams, Interceptor, FreeDb: TRttiMethod;
+  ActionMethod, SetParams, Interceptor, FreeDb, ShowHTML: TRttiMethod;
   Response, Request, ActionPath, ActionRoule: TRttiProperty;
   url, url1: string;
   item: TRouleItem;
@@ -265,6 +265,7 @@ begin
       ActionMethod := ActoinClass.GetMethod(methodname);
       SetParams := ActoinClass.GetMethod('SetParams');
       FreeDb := ActoinClass.GetMethod('FreeDb');
+      ShowHTML := ActoinClass.GetMethod('ShowHTML');
       if item.Interceptor then
         Interceptor := ActoinClass.GetMethod('Interceptor');
       Request := ActoinClass.GetProperty('Request');
@@ -342,13 +343,19 @@ begin
               if (not ret.AsBoolean) then
               begin
                 ActionMethod.Invoke(Action, aValueArray);
+                if web.Response.ContentType = '' then      //默认输出html页面
+                  ShowHTML.Invoke(Action, [methodname]);
+              end
+              else
+              begin
+                Error404(web, url);
               end;
             end
             else
             begin
               ActionMethod.Invoke(Action, aValueArray);
-              if web.Response.ContentType = '' then
-                Error404(web, url);
+              if web.Response.ContentType = '' then      //默认输出html页面
+                ShowHTML.Invoke(Action, [methodname]);
             end;
           finally
             FreeDb.Invoke(Action, []);

@@ -76,10 +76,6 @@ object MVCMain: TMVCMain
     object ts3: TTabSheet
       Caption = #26085#24535
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pnl2: TPanel
         Left = 0
         Top = 0
@@ -92,9 +88,10 @@ object MVCMain: TMVCMain
           Left = 499
           Top = 0
           Width = 3
-          Height = 13
+          Height = 27
           Align = alRight
           Layout = tlCenter
+          ExplicitHeight = 13
         end
         object btnlogget: TButton
           Left = 0
@@ -120,10 +117,6 @@ object MVCMain: TMVCMain
     object ts1: TTabSheet
       Caption = #32531#23384
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 0
         Top = 0
@@ -186,10 +179,6 @@ object MVCMain: TMVCMain
     object ts2: TTabSheet
       Caption = #20851#20110
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pnl1: TPanel
         Left = 0
         Top = 0
@@ -324,8 +313,12 @@ object MVCMain: TMVCMain
     Cursor = crHandPoint
     Panels = <
       item
-        Text = #23448#32593':http://www.delphiwebmvc.com'
-        Width = 300
+        Text = #23448#32593':http://www.delphiwebmvc.com '
+        Width = 250
+      end
+      item
+        Text = #26080#27861#35775#38382#26102#35831#20351#29992#31649#29702#21592#26435#38480#36816#34892#26412#31243#24207
+        Width = 50
       end>
     OnClick = stat1Click
   end

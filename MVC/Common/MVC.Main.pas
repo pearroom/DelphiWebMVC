@@ -45,8 +45,6 @@ type
     procedure btndelallClick(Sender: TObject);
   private
     function readlog(var str: TMemo; var msg: string): boolean;
-
-
     { Private declarations }
   public
 
@@ -144,7 +142,6 @@ end;
 
 procedure TMVCMain.btnseachClick(Sender: TObject);
 var
-  i: Integer;
   key: string;
 begin
   for key in _PageCache.PageList.Keys do

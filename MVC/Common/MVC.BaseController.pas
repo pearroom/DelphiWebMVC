@@ -43,6 +43,7 @@ type
     function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function Interceptor: boolean;
     procedure SetParams(); virtual;
+    procedure ShowHTML(html:string);
     procedure FreeDb;
     function HttpGet(url: string; encode: TEncoding): string;
     constructor Create();
@@ -157,6 +158,11 @@ end;
 procedure TBaseController.SetResponse(const Value: TWebResponse);
 begin
   FResponse := Value;
+end;
+
+procedure TBaseController.ShowHTML(html: string);
+begin
+  View.ShowHTML(html);
 end;
 
 function TBaseController.URLDecode(Asrc: string; AByteEncoding: IIdtextEncoding): string;
