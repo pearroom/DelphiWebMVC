@@ -273,27 +273,25 @@ begin
       ActionPath := ActoinClass.GetProperty('ActionPath');
       ActionRoule := ActoinClass.GetProperty('ActionRoule');
       try
+        actionitem := _ActionList.Get(item.Action.ClassName);
+        if actionitem = nil then
+        begin
+          Action := item.Action.Create;
+          actionitem := _ActionList.Add(Action);
+        end
+        else
+        begin
+          Action := actionitem.Action;
+        end;
+          //  Action := item.Action.Create;
+        Request.SetValue(Action, web.Request);
+        Response.SetValue(Action, web.Response);
+        ActionPath.SetValue(Action, item.path);
+        ActionRoule.SetValue(Action, item.Name);
+        SetParams.Invoke(Action, []);
         if (ActionMethod <> nil) then
         begin
           try
-
-            actionitem := _ActionList.Get(item.Action.ClassName);
-            if actionitem = nil then
-            begin
-              Action := item.Action.Create;
-              actionitem := _ActionList.Add(Action);
-            end
-            else
-            begin
-              Action := actionitem.Action;
-            end;
-          //  Action := item.Action.Create;
-            Request.SetValue(Action, web.Request);
-            Response.SetValue(Action, web.Response);
-            ActionPath.SetValue(Action, item.path);
-            ActionRoule.SetValue(Action, item.Name);
-            SetParams.Invoke(Action, []);
-
             //--------------大量提供begin----------------------
             ActionMethonValues := ActionMethod.GetParameters;
             SetLength(aValueArray, Length(ActionMethonValues));
@@ -365,7 +363,9 @@ begin
         end
         else
         begin
-          Error404(web, url);
+          if web.Response.ContentType = '' then      //默认输出html页面
+            ShowHTML.Invoke(Action, [methodname]);
+         // Error404(web, url);
         end;
       finally
         Handled := true;
