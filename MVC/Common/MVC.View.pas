@@ -16,7 +16,7 @@ uses
   System.RegularExpressions;
 
 type
-  TView = class
+  TView = class(TPersistent)
   private
     RedisM: TRedisM;
     RedisItem: TRedisItem;
@@ -264,6 +264,8 @@ var
   webroot: string;
 begin
   DbItem := getDbFromPool;
+
+
   Db := DbItem.Db;
   htmlpars.Db := Db;
   self.ActionP := ActionPath;
@@ -489,7 +491,7 @@ var
   timerout: TDateTime;
 begin
 
-  sessionid := CookiesValue(SessionName);
+  sessionid := CookiesValue(_SessionName);
   if sessionid = '' then
   begin
     sessionid := GetGUID();
@@ -498,11 +500,11 @@ begin
   with Cookies do
   begin
     Path := '/';
-    Name := SessionName;
+    Name := _SessionName;
     value := sessionid;
     Expires := timerout;
   end;
-  SessionListMap.editTimerOut(sessionid, DateTimeToStr(timerout));
+  _SessionListMap.editTimerOut(sessionid, DateTimeToStr(timerout));
 end;
 
 function TView.GetGUID: string;
@@ -592,8 +594,8 @@ begin
       timerout := Now + (1 / 24 / 60) * Config.session_timer
     else
       timerout := Now + (1 / 24 / 60) * 60 * 24; //24小时过期
-    SessionListMap.setValueByKey(sessionid, '{}');
-    SessionListMap.setTimeroutByKey(sessionid, DateTimeToStr(timerout));
+    _SessionListMap.setValueByKey(sessionid, '{}');
+    _SessionListMap.setTimeroutByKey(sessionid, DateTimeToStr(timerout));
   end;
  // log('创建Session:' + sessionid);
 end;
@@ -629,7 +631,7 @@ begin
   end
   else
   begin
-    s := SessionListMap.getValueByKey(sessionid);
+    s := _SessionListMap.getValueByKey(sessionid);
   end;
   if (s = '') or (s = '{}') then
   begin
@@ -644,7 +646,7 @@ begin
   end
   else
   begin
-    SessionListMap.setValueByKey(sessionid, JsonToString(jo.AsJSON()));
+    _SessionListMap.setValueByKey(sessionid, JsonToString(jo.AsJSON()));
   end;
 end;
 
@@ -661,7 +663,7 @@ begin
   if _RedisList <> nil then
     Result := RedisGetKeyCount
   else
-    Result := SessionListMap.SessionLs_vlue.Count;
+    Result := _SessionListMap.SessionLs_vlue.Count;
 end;
 
 function TView.SessionDestroy: Boolean;
@@ -672,7 +674,7 @@ begin
     Result := RedisRemove(sessionid)
   else
   begin
-    Result := SessionListMap.deleteSession(sessionid);
+    Result := _SessionListMap.deleteSession(sessionid);
   end;
 end;
 
@@ -686,7 +688,7 @@ begin
   if _RedisList <> nil then
     s := JsonToString(RedisGetKeyJSON(sessionid).AsJSON())
   else
-    s := SessionListMap.getValueByKey(sessionid);
+    s := _SessionListMap.getValueByKey(sessionid);
   if s = '' then
   begin
     Result := '';
@@ -715,7 +717,7 @@ begin
     if _RedisList <> nil then
       s := JsonToString(RedisGetKeyJSON(sessionid).AsJSON())
     else
-      s := SessionListMap.getValueByKey(sessionid);
+      s := _SessionListMap.getValueByKey(sessionid);
     if s = '' then
     begin
       Result := false;
@@ -726,7 +728,7 @@ begin
     if _RedisList <> nil then
       RedisSetKeyJSON(sessionid, jo)
     else
-      SessionListMap.setValueByKey(sessionid, JsonToString(jo.AsJSON()));
+      _SessionListMap.setValueByKey(sessionid, JsonToString(jo.AsJSON()));
   except
     Result := false;
   end;

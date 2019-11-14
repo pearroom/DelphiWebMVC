@@ -10,7 +10,7 @@ unit MVC.DBOracle;
 interface
 
 uses
-  System.SysUtils, FireDAC.Comp.Client, XSuperObject, MVC.DBBase, Data.DB;
+  System.SysUtils, FireDAC.Comp.Client, XSuperObject, MVC.DBBase, Data.DB,MVC.LogUnit;
 
 type
   TDBOracle = class(TDBBase)
@@ -21,11 +21,13 @@ type
     function QueryPage(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): ISuperObject; override;
     function QueryPageT(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): string; override;
     procedure StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant); overload;
+
   end;
 
 implementation
 
 { TDBOracle }
+
 
 function TDBOracle.FindFirst(tablename: string; where: string = ''): ISuperObject;
 var

@@ -18,16 +18,16 @@ uses
   MVC.DBPool;
 
 type
-  TDBBase = class
+  TDBBase = class(TComponent)
   private
     DBType_: string;
     function getJSONWhere(JSONwhere: ISuperObject): string;
     procedure CreateStoredProc;
     { Private declarations }
   protected
+  public
     condb: TFDConnection;
     StoredProc: TFDStoredProc;
-  public
     TMP_CDS: TFDQuery;
     dataset: TFDQuery;
     Fields: string; // 用来设置查询时显示那些字段
@@ -75,7 +75,7 @@ type
     function Delete(tablename: string; where: string): Boolean; overload;
     function TryConnDB(): Boolean;
     function closeDB(): Boolean;
-    constructor Create(dbtype: string);
+    constructor Create(dbtype: string); virtual;
     destructor Destroy; override;
   end;
 
@@ -314,17 +314,24 @@ end;
 
 function TDBBase.TryConnDB: Boolean;
 begin
-  if condb = nil then
   begin
-//    condb := _DbPool.GetDb(DBType_);
-//    if condb = nil then
-//    begin
-      condb := TFDConnection.Create(nil);
-      condb.ConnectionDefName := DBType_;
-  //  end;
-    TMP_CDS := TFDQuery.Create(nil);
+    inherited;
+    try
+      if not Assigned(condb) then
+      begin
+        condb := TFDConnection.Create(Self);
+        condb.ConnectionDefName := DBType_;
+        TMP_CDS := TFDQuery.Create(Self);
   //  TMP_CDS.FetchOptions.Mode := fmAll;
    // TMP_CDS.FetchOptions.RecordCountMode := TFDRecordCountMode.cmTotal;
+      end;
+    except
+
+      on e: Exception do
+      begin
+        log('数据库连接失败:' + e.ToString);
+      end;
+    end;
   end;
   try
     try
@@ -356,7 +363,7 @@ begin
     Exit;
   if StoredProc = nil then
   begin
-    StoredProc := TFDStoredProc.Create(nil);
+    StoredProc := TFDStoredProc.Create(Self);
   end;
   StoredProc.Connection := condb;
 end;
@@ -420,7 +427,7 @@ destructor TDBBase.Destroy;
 var
   i: Integer;
 begin
-  if condb <> nil then
+  if Assigned(condb) then
   begin
     try
       if condb.Connected then
@@ -430,8 +437,8 @@ begin
       end;
     finally
       condb.Connected := False;
-      condb.Free;
-      TMP_CDS.Free;
+    //  condb.Free;
+    //  TMP_CDS.Free;
     end;
   end;
   if StoredProc <> nil then
@@ -440,6 +447,7 @@ begin
   end;
   inherited;
 end;
+
 
 function TDBBase.EditData(tablename, key: string; value: string): TFDQuery;
 var

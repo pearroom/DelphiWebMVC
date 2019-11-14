@@ -10,7 +10,7 @@ unit MVC.DBMySql;
 interface
 
 uses
-  System.SysUtils, FireDAC.Comp.Client, XSuperObject, MVC.DBBase, Data.DB;
+  System.SysUtils, FireDAC.Comp.Client, XSuperObject, MVC.DBBase, Data.DB,MVC.LogUnit;
 
 type
   TDBMySql = class(TDBBase)
@@ -21,12 +21,15 @@ type
     function QueryPage(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): ISuperObject; override;
     function QueryPageT(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): string; override;
     procedure StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant); overload;
+
   end;
 
 implementation
 
 
 { TDBSQLite }
+
+
 
 function TDBMySql.FindFirst(tablename: string; where: string = ''): ISuperObject;
 var
@@ -54,7 +57,7 @@ begin
     try
       sql := 'select count(1) as N from ' + from;
       sql := filterSQL(sql);
-      count :=condb.ExecSQLScalar(sql);
+      count := condb.ExecSQLScalar(sql);
       sql := 'select ' + Trim(select) + ' from ' + Trim(from) + ' ' + Trim(order) + ' limit ' + inttostr(pageindex * pagesize) + ',' + inttostr(pagesize);
       Result := Query(sql, dataset);
     except
@@ -63,16 +66,13 @@ begin
         DBlog(e.ToString);
         Result := False;
       end;
-
     end;
   finally
   //  CDS.Free;
   end;
-
 end;
 
 function TDBMySql.QueryPage(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): ISuperObject;
-
 begin
 
   try
@@ -88,7 +88,6 @@ begin
 end;
 
 function TDBMySql.QueryPageT(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): string;
-
 begin
 
   try

@@ -10,7 +10,7 @@ unit MVC.DBSQLite;
 interface
 
 uses
-  System.SysUtils, FireDAC.Comp.Client, XSuperObject, MVC.DBBase, Data.DB;
+  System.SysUtils, FireDAC.Comp.Client, XSuperObject, MVC.DBBase, Data.DB,MVC.LogUnit;
 
 type
   TDBSQLite = class(TDBBase)
@@ -21,12 +21,14 @@ type
     function QueryPage(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): ISuperObject; override;
     function QueryPageT(var count: Integer; select, from, order: string; pageindex, pagesize: Integer): string; override;
     procedure StoredProcAddParams(DisplayName_: string; DataType_: TFieldType; ParamType_: TParamType; Value_: Variant); overload;
+
   end;
 
 implementation
 
 
 { TDBSQLite }
+
 function TDBSQLite.FindFirst(tablename: string; where: string = ''): ISuperObject;
 var
   sql: string;

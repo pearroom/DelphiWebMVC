@@ -15,8 +15,8 @@ uses
   uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
   System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
   MVC.DBPool, XSuperJSON, System.Generics.Collections, IdURI, Web.WebReq,
-  {$IFDEF MSWINDOWS} Vcl.Forms, Winapi.Windows, SynWebApp, {$ELSE}  CrossWebApp, {$ENDIF}
-  MVC.Web;
+  {$IFDEF MSWINDOWS}MVC.Main, Vcl.Forms, Winapi.Windows, SynWebApp, {$ELSE}
+  CrossWebApp, {$ENDIF} MVC.Web;
 
 type
   TMVCFun = class
@@ -26,22 +26,22 @@ type
     procedure showpagelist();
   public
     function RunCommand(): Boolean;
-    function checkCreate(title: string): boolean;
+    procedure Run(title: string);
     constructor Create;
     destructor Destroy; override;
   end;
 
 var
   _MVCFun: TMVCFun;
-  RouleMap: TRouleMap = nil;
-  SessionListMap: TSessionList = nil;
-  SessionName: string;
-  rooturl: string;
+  _RouleMap: TRouleMap = nil;
+  _SessionListMap: TSessionList = nil;
+  _SessionName: string;
+  _rooturl: string;
   _Interceptor: TInterceptor;
   _RedisList: TRedisList;
   _PackageManager: TPackageManager = nil;
   _MIMEConfig: string;
-  directory_permission: TDictionary<string, Boolean>;
+  _directory_permission: TDictionary<string, Boolean>;
 
 function check_directory_permission(path: string): Boolean;
 
@@ -53,7 +53,7 @@ function OpenConfigFile(): ISuperObject;
 
 function OpenMIMEFile(): ISuperObject;
 
-procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
+procedure OpenRoule(web: TWebModule; RouleMap_: TRouleMap; var Handled: boolean);
 
 function DateTimeToGMT(const ADate: TDateTime): string;
 
@@ -67,6 +67,8 @@ function StrToParamTypeValue(AValue: string; AParamType: TTypeKind): TValue;
 
 procedure Error404(web: TWebModule; url: string);
 
+procedure CreateRouleMap();
+
 implementation
 
 uses
@@ -74,7 +76,13 @@ uses
   MVC.DBPoolClear, MVC.Config, MVC.Page;
 
 var
-  sessionclear: TThSessionClear;
+  _sessionclear: TThSessionClear;
+
+procedure CreateRouleMap();
+begin
+  if not Assigned(_RouleMap) then
+    _RouleMap := TRouleMap.Create;
+end;
 
 function check_directory_permission(path: string): Boolean;
 var
@@ -83,11 +91,11 @@ var
 begin
   Result := true;
   ret := true;
-  for key in directory_permission.Keys do
+  for key in _directory_permission.Keys do
   begin
     if copy(path, 0, length(key)) = key then
     begin
-      directory_permission.TryGetValue(key, ret);
+      _directory_permission.TryGetValue(key, ret);
       Result := ret;
       break;
     end;
@@ -187,7 +195,7 @@ begin
               jo := directory.O[i];
               path := jo.s['path'];
               permission := jo.B['permission'];
-              directory_permission.Add(path, permission);
+              _directory_permission.Add(path, permission);
             except
               log('directory参数错误,服务启动失败');
               break;
@@ -199,7 +207,7 @@ begin
   end;
 end;
 
-procedure OpenRoule(web: TWebModule; RouleMap: TRouleMap; var Handled: boolean);
+procedure OpenRoule(web: TWebModule; RouleMap_: TRouleMap; var Handled: boolean);
 var
   Action: TObject;
   RTTIContext: TRttiContext;
@@ -247,7 +255,7 @@ begin
   k := Pos('.', url);
   if k <= 0 then
   begin
-    item := RouleMap.GetRoule(url, url1, methodname);
+    item := RouleMap_.GetRoule(url, url1, methodname);
     if (item <> nil) then
     begin
       if (url.IndexOf('//') > -1) then
@@ -363,9 +371,20 @@ begin
         end
         else
         begin
-          if web.Response.ContentType = '' then      //默认输出html页面
-            ShowHTML.Invoke(Action, [methodname]);
-         // Error404(web, url);
+          if item.Interceptor then
+          begin
+            ret := Interceptor.Invoke(Action, []);
+            if (not ret.AsBoolean) then
+            begin
+              if web.Response.ContentType = '' then      //默认输出html页面
+                ShowHTML.Invoke(Action, [methodname]);
+            end;
+          end
+          else
+          begin
+            if web.Response.ContentType = '' then      //默认输出html页面
+              ShowHTML.Invoke(Action, [methodname]);
+          end;
         end;
       finally
         Handled := true;
@@ -395,7 +414,6 @@ begin
       web.Response.Content := WebApplicationDirectory + Config.__WebRoot__ + url;
       web.Response.ContentType := '!STATICFILE';
       {$ENDIF}
-
     end;
   end;
 end;
@@ -567,7 +585,7 @@ begin
   Config.package_config := 'resources/package.json';
   _LogList := TStringList.Create;
   _logThread := TLogTh.Create(false);
-  directory_permission := TDictionary<string, Boolean>.Create;
+  _directory_permission := TDictionary<string, Boolean>.Create;
   FPort := '0000';
   try
     try
@@ -582,7 +600,7 @@ begin
         syn_HTTPQueueLength := jo.O['Server'].i['HTTPQueueLength'];
         syn_ChildThreadCount := jo.O['Server'].i['ChildThreadCount'];
         ////////////////////////////////////////////////////
-        SessionName := Config.session_name;
+        _SessionName := Config.session_name;
         _RedisList := nil;
         if jo.O['Redis'] <> nil then
         begin
@@ -600,9 +618,9 @@ begin
         Global := TGlobal.Create;
         if Config.open_package then
           _PackageManager := TPackageManager.Create;
-        RouleMap := TRouleMap.Create;
-        SessionListMap := TSessionList.Create;
-        sessionclear := TThSessionClear.Create(false);
+        CreateRouleMap();
+        _SessionListMap := TSessionList.Create;
+        _sessionclear := TThSessionClear.Create(false);
         _Interceptor := TInterceptor.Create;
         _PageCache := TPageCache.Create;
 
@@ -623,7 +641,6 @@ begin
     end;
   finally
     Result := FPort;
-
   end;
 end;
 
@@ -632,15 +649,15 @@ begin
   AppClose := true;
   _MVCFun.Free;
 
-  directory_permission.Clear;
-  directory_permission.Free;
+  _directory_permission.Clear;
+  _directory_permission.Free;
   if _logThread <> nil then
   begin
     _logThread.Terminate;
   end;
-  if sessionclear <> nil then
+  if _sessionclear <> nil then
   begin
-    sessionclear.Terminate;
+    _sessionclear.Terminate;
   end;
   if Config.open_package and (_PackageManager <> nil) then
   begin
@@ -657,9 +674,9 @@ begin
   begin
     _logThread.Free;
   end;
-  if sessionclear <> nil then
+  if _sessionclear <> nil then
   begin
-    sessionclear.Free;
+    _sessionclear.Free;
   end;
   if Config.open_package and (_PackageManager <> nil) then
   begin
@@ -672,10 +689,9 @@ begin
   end;
   if _Interceptor <> nil then
     _Interceptor.Free;
-  if SessionListMap <> nil then
-    SessionListMap.Free;
-  if RouleMap <> nil then
-    RouleMap.Free;
+  if _SessionListMap <> nil then
+    _SessionListMap.Free;
+
   if MVCDM <> nil then
     MVCDM.Free;
   if _RedisList <> nil then
@@ -809,30 +825,48 @@ begin
     Writeln('PageCache is NULL');
 end;
 
-function TMVCFun.checkCreate(title: string): boolean;
+procedure TMVCFun.Run(title: string);
 var
   hMutex: THandle;
 begin
-  Result := False;
+	{$IFDEF CONSOLE}
+  {$IFDEF MSWINDOWS}
+  SetConsoleTitle(PChar(title));
+  {$ENDIF}
+  Writeln('Project:' + title);
+  StartServer();
+  while True do
+  begin
+    if not _MVCFun.RunCommand() then
+      Break;
+  end;
+  CloseServer();
+  {$ELSE}
 	{$IFDEF MSWINDOWS}
   hMutex := CreateMutex(nil, false, PChar(title));
   try
     if GetLastError = Error_Already_Exists then
     begin
-
       Application.MessageBox(PChar(title + '已经启动'), '提示', MB_OK + MB_ICONINFORMATION + MB_DEFBUTTON2);
-      Result := True;
+    end
+    else
+    begin
+      if not Assigned(MVCMain) then
+      begin
+        Application.CreateForm(TMVCMain, MVCMain);
+        Application.Run;
+      end;
     end;
   finally
     ReleaseMutex(hMutex);
   end;
+  {$ENDIF}
   {$ENDIF}
 end;
 
 constructor TMVCFun.Create;
 begin
   PageList := TStringList.Create;
-
 end;
 
 destructor TMVCFun.Destroy;
@@ -883,6 +917,13 @@ begin
     showpagelist();
   end;
 end;
+
+initialization
+  CreateRouleMap;
+
+finalization
+  if Assigned(_RouleMap) then
+    _RouleMap.Free;
 
 end.
 

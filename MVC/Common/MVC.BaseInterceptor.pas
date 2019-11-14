@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, MVC.Config;
 
 type
-  TBaseInterceptor = class
+  TBaseInterceptor = class(TPersistent)
   public
     url: string;
     constructor Create;

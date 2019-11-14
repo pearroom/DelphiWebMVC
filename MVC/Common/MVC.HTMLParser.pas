@@ -14,7 +14,7 @@ uses
   xsuperobject, MVC.Config, System.RegularExpressions, uDBConfig;
 
 type
-  THTMLParser = class
+  THTMLParser = class(TPersistent)
   private
     FDb: TDBConfig;
     procedure foreachother(var text: string);
@@ -91,6 +91,7 @@ begin
   where := where.Replace('lt', ' < ');
   where := where.Replace('==', ' = ');
   try
+    Db.Default.TryConnDB;
     Db.Default.TMP_CDS.Open('select ' + where + ' as sn');
     sn := Db.Default.TMP_CDS.FieldByName('sn').AsInteger;
     Result := sn = 1;
@@ -245,7 +246,7 @@ begin
 
     if not isok then
     begin
-      matchs := TRegEx.Matches(text, 'if(([\s\S])*?)</#if>');
+      matchs := TRegEx.Matches(text, 'if[\s\S]*?</#if>');
       for match in matchs do
       begin
         if match.Value.IndexOf('else') < 0 then
@@ -301,11 +302,11 @@ begin
   s := text;
   isok := false;
 
-  matchs := TRegEx.Matches(text, '<#if.*' + key + '[\s\S]*?>');
+  matchs := TRegEx.Matches(text, '<#if ' + key + '[\s\S]*?>');
   for match in matchs do
   begin
-    s := TRegEx.Replace(text, key, value);
-    text := s;
+    s := TRegEx.Replace(match.Value, key, value);
+    text := TRegEx.Replace(text, match.Value, s);
     isok := true;
   end;
   Result := text;
@@ -398,7 +399,6 @@ begin
       end;
       json.Next;
     end;
-
   end;
 
   Result := html;

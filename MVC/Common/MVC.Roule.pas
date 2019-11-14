@@ -14,11 +14,12 @@ uses
   System.SysUtils;
 
 type
-  TRoule = class
+  TRoule = class(TPersistent)
   private
     list: TObjectList<TRouleItem>;
     listkey: TStringList;
     function GetItem(roule: string): TRouleItem;
+    function finditem(name: string): Boolean;
   public
     procedure SetRoule(name: string; ACtion: TClass; path: string = ''; isInterceptor: Boolean = True);
     function GetRoule(url: string; var roule: string; var method: string): TRouleItem;
@@ -47,6 +48,22 @@ begin
   list.Free;
 end;
 
+function TRoule.finditem(name: string): Boolean;
+var
+  j: integer;
+  key: string;
+begin
+  for j := 0 to listkey.Count - 1 do
+  begin
+    key := listkey.Strings[j];
+    if UpperCase(key) = UpperCase(name) then
+    begin
+      Result := true;
+      break;
+    end;
+  end;
+end;
+
 function TRoule.GetItem(roule: string): TRouleItem;
 var
   I, j: Integer;
@@ -60,8 +77,7 @@ begin
   for j := 0 to listkey.Count - 1 do
   begin
     key := listkey.Strings[j];
-    if (UpperCase(key) = LeftStr(UpperCase(roule), Length(key)))
-      or (UpperCase(key) = LeftStr(UpperCase(roule + '/'), Length(key))) then
+    if (UpperCase(key) = LeftStr(UpperCase(roule), Length(key))) or (UpperCase(key) = LeftStr(UpperCase(roule + '/'), Length(key))) then
     begin
       isFind := true;
       break;
@@ -72,14 +88,12 @@ begin
     for I := 0 to list.Count - 1 do
     begin
       item := list.Items[I];
-      if ((key = item.Name) or ((key + '/') = item.Name))
-        and (Length(item.Name) > 1) then
+      if ((key = item.Name) or ((key + '/') = item.Name)) and (Length(item.Name) > 1) then
       begin
         Result := item;
         break;
       end
-      else if ((key = item.Name) or ((key + '/') = item.Name))
-        and (item.Name = '/') then
+      else if ((key = item.Name) or ((key + '/') = item.Name)) and (item.Name = '/') then
       begin
         defitem := item;
       end;
@@ -114,7 +128,6 @@ begin
   Result := item;
 end;
 
-
 function DescCompareStrings(List: TStringList; Index1, Index2: Integer): Integer;
 begin
   Result := -AnsiCompareText(List[Index1], List[Index2]);
@@ -132,15 +145,17 @@ begin
   begin
     name := '/' + Config.__APP__ + name;
   end;
-
-  item := TRouleItem.Create;
-  item.name := name;
-  item.Interceptor := isInterceptor;
-  item.ACtion := ACtion;
-  item.path := path;
-  List.Add(item);
-  listkey.Add(name);
-  listkey.CustomSort(DescCompareStrings);
+  if not finditem(name) then
+  begin
+    item := TRouleItem.Create;
+    item.name := name;
+    item.Interceptor := isInterceptor;
+    item.ACtion := ACtion;
+    item.path := path;
+    List.Add(item);
+    listkey.Add(name);
+    listkey.CustomSort(DescCompareStrings);
+  end;
 end;
 
 end.

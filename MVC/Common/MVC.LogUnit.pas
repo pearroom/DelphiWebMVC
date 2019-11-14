@@ -88,8 +88,8 @@ begin
     end;
     Writeln(tf, log);
     Flush(tf);
-    CloseFile(tf);
   finally
+    CloseFile(tf);
    //   CoUnInitialize;
   end;
 end;

@@ -8,10 +8,9 @@
 
 program WebMVC;
 {$APPTYPE GUI}
+
 uses
   Vcl.Forms,
-  Web.WebReq,
-  Winapi.Windows,
   uRouleMap in '..\Config\uRouleMap.pas',
   uTableMap in '..\Config\uTableMap.pas',
   uInterceptor in '..\Config\uInterceptor.pas',
@@ -81,10 +80,6 @@ begin
   ReportMemoryLeaksOnShutdown := True;
   Application.Initialize;
   Application.Title := 'WebMVC';
-  if not _MVCFun.checkCreate(Application.Title) then
-  begin
-    Application.CreateForm(TMVCMain, MVCMain);
-    Application.Run;
-  end;
+  _MVCFun.Run(Application.Title);
 end.
 

@@ -22,12 +22,14 @@ type
     procedure SetActionName(const Value: string);
     procedure SetUpDate(const Value: TDateTime);
     procedure SetisDead(const Value: integer);
+    procedure Setkey(const Value: string);
   public
     property isStop: Integer read FisStop write SetisStop;
     property Action: TObject read FAction write SetAction;
     property ActionName: string read FActionName write SetActionName;
     property UpDate: TDateTime read FUpDate write SetUpDate;
     property isDead: integer read FisDead write SetisDead;
+    property key: string read Fkey write Setkey;
   end;
 
 type
@@ -66,7 +68,6 @@ end;
 function TActionList.Add(Action: TObject): TActionItem;
 var
   item: TActionItem;
-  key: string;
 begin
   MonitorEnter(List);
   try
@@ -76,9 +77,9 @@ begin
     item.isDead := 0;
     item.ActionName := Action.ClassName;
     item.UpDate := Now + (1 / 24 / 60) * 1;
-    key := GetGUID;
+    item.key := GetGUID;
     try
-      List.AddOrSetValue(key, item);
+      List.AddOrSetValue(item.key, item);
     except
      // log('session error2');
     end;
@@ -103,36 +104,43 @@ begin
     MonitorExit(List);
   end;
   try
-    for key in List.Keys do
+  //  MonitorEnter(List);
+    for key in tmp_list.Keys do
     begin
       if isstop then
         break;
       List.TryGetValue(key, item);
-      if item <> nil then
+      if Assigned(item) then
       begin
         if (Now() > item.UpDate) then
         begin
-          if item.isDead = 0 then
-          begin
-            item.isDead := 1;
-          end
-          else if item.isStop = 1 then
-          begin
-            MonitorEnter(List);
-            try
+          MonitorEnter(List);
+          try
+            if item.isDead = 0 then
+            begin
+              item.isDead := 1;
+              item.isStop := 1;
+              List.AddOrSetValue(key, item);
+            end
+            else
+            begin
+
+              List.Remove(key);
               item.Action.Free;
               item.Free;
-              List.Remove(key);
-              //log('“∆≥˝Action-'+key);
-            finally
-              MonitorExit(List);
+             // log(' Õ∑≈Action:' + key);
             end;
+          finally
+            MonitorExit(List);
           end;
+
+          Break;
         end;
       end;
       Sleep(100);
     end;
   finally
+   //   MonitorExit(List);
     tmp_list.Clear;
     tmp_list.Free;
   end;
@@ -168,8 +176,11 @@ procedure TActionList.FreeAction(actionitem: TActionItem);
 begin
   MonitorEnter(List);
   try
-    if actionitem <> nil then
+    if Assigned(actionitem) then
+    begin
       actionitem.isStop := 1;
+      List.AddOrSetValue(actionitem.key, actionitem);
+    end;
   finally
     MonitorExit(List);
   end;
@@ -181,24 +192,31 @@ var
   item: TActionItem;
 begin
   Result := nil;
-  MonitorEnter(List);
+
   try
     for key in List.Keys do
     begin
       List.TryGetValue(key, item);
-      if item <> nil then
+      if Assigned(item) then
       begin
         if (item.isDead = 0) and (item.isStop = 1) and (item.ActionName = ActionName) then
         begin
-          item.isStop := 0;
-          item.UpDate := Now + (1 / 24 / 60) * 1;
+          MonitorEnter(List);
+          try
+            item.isStop := 0;
+            item.UpDate := Now + (1 / 24 / 60) * 1;
+            List.AddOrSetValue(key, item);
+          //  log('ªÒ»°Action:' + key);
+          finally
+            MonitorExit(List);
+          end;
           Result := item;
           break;
         end;
       end;
     end;
   finally
-    MonitorExit(List);
+
   end;
 end;
 
@@ -222,6 +240,11 @@ end;
 procedure TActionItem.SetisStop(const Value: Integer);
 begin
   FisStop := Value;
+end;
+
+procedure TActionItem.Setkey(const Value: string);
+begin
+  Fkey := Value;
 end;
 
 procedure TActionItem.SetUpDate(const Value: TDateTime);

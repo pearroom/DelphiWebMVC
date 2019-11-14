@@ -23,12 +23,14 @@ type
     procedure SetActionName(const Value: string);
     procedure SetUpDate(const Value: TDateTime);
     procedure SetisDead(const Value: integer);
+    procedure Setkey(const Value: string);
   public
     property isStop: Integer read FisStop write SetisStop;
     property Db: TDBConfig read FAction write SetAction;
     property ActionName: string read FActionName write SetActionName;
     property UpDate: TDateTime read FUpDate write SetUpDate;
     property isDead: integer read FisDead write SetisDead;
+    property key: string read Fkey write Setkey;
   end;
 
 type
@@ -71,7 +73,9 @@ function FreeDbToPool(DbItem: TDbItem): boolean;
 begin
   MonitorEnter(_DBPoolList.DBList);
   try
+
     DbItem.isStop := 1;
+    _DBPoolList.DBList.AddOrSetValue(DbItem.key, DbItem);
   finally
     MonitorExit(_DBPoolList.DBList);
   end;
@@ -92,7 +96,6 @@ end;
 function TDBPoolList.Add(Db: TDBConfig): TDbItem;
 var
   item: TDbItem;
-  key: string;
 begin
   MonitorEnter(DBList);
   try
@@ -102,8 +105,8 @@ begin
       item.isStop := 0;
       item.isDead := 0;
       item.UpDate := Now + (1 / 24 / 60) * 1;
-      key := GetGUID;
-      DBList.AddOrSetValue(key, item);
+      item.key := GetGUID;
+      DBList.AddOrSetValue(item.key, item);
     except
       item := nil;
     end;
@@ -123,42 +126,48 @@ var
 begin
   MonitorEnter(DBList);
   try
-    tmp_dblist := TDictionary<string, TDbItem>.Create(DBlist);
+    tmp_dblist := TDictionary<string, TDbItem>.Create(DBList);
   finally
     MonitorExit(DBList);
   end;
   try
+
+   // MonitorEnter(DBList);
     for key in tmp_dblist.Keys do
     begin
       if isstop then
         break;
-      DBList.TryGetValue(key, item);
-      if item <> nil then
+      DBlist.TryGetValue(key, item);
+      if Assigned(item) then
       begin
-        if (Now() > item.UpDate) then
-        begin
-          if item.isDead = 0 then
+        MonitorEnter(DBList);
+        try
+          if (Now() > item.UpDate) then
           begin
-            item.isDead := 1;
-          end
-          else
-          begin
+            if item.isDead = 0 then
+            begin
 
-            MonitorEnter(DBList);
-            try
+              item.isDead := 1;
+              DBList.AddOrSetValue(item.key, item);
+            end
+            else
+            begin
+              DBList.Remove(item.key);
               item.Db.Free;
               item.Free;
-              DBList.Remove(key);
-             // log('“∆≥˝Db-'+key);
-            finally
-              MonitorExit(DBList);
+             //   k:=DBList.Count;
+             // log(' Õ∑≈DB:' + key);
             end;
+
+            Break;
           end;
+        finally
+          MonitorExit(DBList);
         end;
-        Sleep(100);
       end;
+      Sleep(100);
     end;
-  finally
+  finally  // MonitorExit(DBList);
     tmp_dblist.Clear;
     tmp_dblist.Free;
   end;
@@ -202,16 +211,16 @@ begin
     for key in DBList.Keys do
     begin
       DBList.TryGetValue(key, item);
-      if item <> nil then
+      if Assigned(item) then
       begin
         if (item.isDead = 0) and (item.isStop = 1) then
         begin
 
           item.isStop := 0;
           item.UpDate := Now + (1 / 24 / 60) * 1;
-
+          DBList.AddOrSetValue(item.key, item);
           Result := item;
-
+          //log('ªÒ»°DB:' + key);
           break;
         end;
       end;
@@ -241,6 +250,11 @@ end;
 procedure TDbItem.SetisStop(const Value: Integer);
 begin
   FisStop := Value;
+end;
+
+procedure TDbItem.Setkey(const Value: string);
+begin
+  Fkey := Value;
 end;
 
 procedure TDbItem.SetUpDate(const Value: TDateTime);

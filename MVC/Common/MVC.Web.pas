@@ -29,7 +29,7 @@ var
   page: Tpage;
 begin
   try
-    OpenRoule(Self, RouleMap, Handled);
+    OpenRoule(Self, _RouleMap, Handled);
   except
     on e: Exception do
     begin

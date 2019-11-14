@@ -3,7 +3,7 @@ unit MVC.ActionClear;
 interface
 
 uses
-  System.Classes, System.SysUtils;
+  System.Classes, System.SysUtils,MVC.LogUnit;
 
 type
   TActionClear = class(TThread)
@@ -38,12 +38,21 @@ begin
   k := 0;
   while not Terminated do
   begin
-    Sleep(10);
-    Inc(k);
-    if k >= 1000 then
-    begin
-      k := 0;
-      Cleardata;
+
+    try
+      Inc(k);
+      if k >= 1000 then
+      begin
+        k := 0;
+        try
+          Cleardata;
+        except
+          on e: Exception do
+            log(e.Message);
+        end;
+      end;
+    finally
+      Sleep(10);
     end;
   end;
   _ActionList.isstop := true;

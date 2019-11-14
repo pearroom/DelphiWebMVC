@@ -33,16 +33,16 @@ var
   key, s: string;
 begin
   try
-    if SessionListMap <> nil then
+    if _SessionListMap <> nil then
     begin
-      for key in SessionListMap.SessionLs_timerout.Keys do
+      for key in _SessionListMap.SessionLs_timerout.Keys do
       begin
-        s := SessionListMap.SessionLs_timerout.Items[key];
+        s := _SessionListMap.SessionLs_timerout.Items[key];
         if s.Trim <> '' then
         begin
           if Now() >= StrToDateTime(s) then
           begin
-            if SessionListMap.deleteSession(key) then
+            if _SessionListMap.deleteSession(key) then
             begin
             //  log('«Â¿ÌSession-' + key);
               break;

@@ -12,10 +12,12 @@ interface
 uses
   System.Classes, System.SysUtils, Web.HTTPApp, MVC.View, System.Net.URLClient,
   System.Net.HttpClientComponent, IdURI, IdGlobal, MVC.RedisM, MVC.RedisList,
-  xsuperobject;
+  xsuperobject, MVC.command, MVC.Config;
+
+procedure SetRoule(name: string; ACtion: TClass; path: string = ''; isInterceptor: Boolean = True);
 
 type
-  TBaseController = class
+  TBaseController = class(TPersistent)
   private
     FRequest: TWebRequest;
     FResponse: TWebResponse;
@@ -43,7 +45,7 @@ type
     function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding = nil): string;
     function Interceptor: boolean;
     procedure SetParams(); virtual;
-    procedure ShowHTML(html:string);
+    procedure ShowHTML(html: string);
     procedure FreeDb;
     function HttpGet(url: string; encode: TEncoding): string;
     constructor Create();
@@ -57,8 +59,11 @@ type
 
 implementation
 
-uses
-  MVC.command, MVC.Config;
+procedure SetRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
+begin
+  CreateRouleMap();
+  _RouleMap.SetRoule(name, ACtion, path, isInterceptor);
+end;
 
 { TBaseController }
 function TBaseController.Interceptor: boolean;
@@ -183,7 +188,7 @@ end;
 
 function TBaseController.AppPath: string;
 begin
-  Result := WebApplicationDirectory;
+  Result := WebApplicationDirectory+Config.__WebRoot__+'/';
 end;
 
 constructor TBaseController.Create();
