@@ -15,8 +15,9 @@ uses
   uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
   System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
   MVC.DBPool, XSuperJSON, System.Generics.Collections, IdURI, Web.WebReq,
-  {$IFDEF MSWINDOWS}MVC.Main, Vcl.Forms, Winapi.Windows, SynWebApp, {$ELSE}
-  CrossWebApp, {$ENDIF} MVC.Web;
+  {$IFDEF MSWINDOWS} MVC.Main, Vcl.Forms, Winapi.Windows,
+  {$IFDEF CROSS} CrossWebApp, {$ELSE} SynWebApp, {$ENDIF}
+  {$ELSE} CrossWebApp, {$ENDIF} MVC.Web;
 
 type
   TMVCFun = class
@@ -238,7 +239,11 @@ begin
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
   {$IFDEF MSWINDOWS}
+  {$IFDEF CROSS}
+  url := web.Request.PathInfo;
+  {$ELSE}
   url := TIdURI.URLDecode(web.Request.PathInfo);
+  {$ENDIF}
   {$ELSE}
   url := web.Request.PathInfo;
   {$ENDIF }
@@ -261,12 +266,14 @@ begin
       if (url.IndexOf('//') > -1) then
       begin
         url := url.Replace('//', '/');
-        web.Response.SendRedirect(url + '/');
+        web.Response.Content := '<script>window.location.href=''' + url + ';</script>';
+        web.Response.SendResponse;
         exit;
       end;
       if (methodname = 'index') and (url.Substring(url.Length - 1) <> '/') then
       begin
-        web.Response.SendRedirect(url + '/');
+        web.Response.Content := '<script>window.location.href=''' + url + '/'';</script>';
+        web.Response.SendResponse;
         exit;
       end;
       ActoinClass := RTTIContext.GetType(item.Action);
