@@ -33,6 +33,7 @@ type
   end;
 
 var
+  _RTTIContext: TRttiContext;
   _MVCFun: TMVCFun;
   _RouleMap: TRouleMap = nil;
   _SessionListMap: TSessionList = nil;
@@ -211,7 +212,6 @@ end;
 procedure OpenRoule(web: TWebModule; RouleMap_: TRouleMap; var Handled: boolean);
 var
   Action: TObject;
-  RTTIContext: TRttiContext;
   ActoinClass: TRttiType;
   ActionMethod, SetParams, Interceptor, FreeDb, ShowHTML: TRttiMethod;
   Response, Request, ActionPath, ActionRoule: TRttiProperty;
@@ -266,19 +266,19 @@ begin
       if (url.IndexOf('//') > -1) then
       begin
         url := url.Replace('//', '/');
-      //  web.Response.Content := '<script>window.location.href=''' + url + ';</script>';
         web.Response.SendRedirect(url);
+        web.Response.Content:= ' ';
         web.Response.SendResponse;
         exit;
       end;
       if (methodname = 'index') and (url.Substring(url.Length - 1) <> '/') then
       begin
-       // web.Response.Content := '<script>window.location.href=''' + url + '/'';</script>';
         web.Response.SendRedirect(url + '/');
+        web.Response.Content:= ' ';
         web.Response.SendResponse;
         exit;
       end;
-      ActoinClass := RTTIContext.GetType(item.Action);
+      ActoinClass := _RTTIContext.GetType(item.Action);
       ActionMethod := ActoinClass.GetMethod(methodname);
       SetParams := ActoinClass.GetMethod('SetParams');
       FreeDb := ActoinClass.GetMethod('FreeDb');

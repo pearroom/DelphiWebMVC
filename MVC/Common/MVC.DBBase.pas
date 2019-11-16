@@ -336,8 +336,6 @@ begin
       condb := TFDConnection.Create(Self);
       condb.ConnectionDefName := DBType_;
       TMP_CDS := TFDQuery.Create(Self);
-     // TMP_CDS.FetchOptions.Mode := fmAll;
-    // TMP_CDS.FetchOptions.RecordCountMode := TFDRecordCountMode.cmTotal;
     end;
   except
 

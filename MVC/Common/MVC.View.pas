@@ -264,28 +264,26 @@ var
   webroot: string;
 begin
   DbItem := getDbFromPool;
-
-
   Db := DbItem.Db;
   htmlpars.Db := Db;
   self.ActionP := ActionPath;
   self.ActionR := ActionRoule;
   if (Trim(self.ActionP) <> '') then
   begin
-    {$IFDEF LINUX}
-    self.ActionP := self.ActionP + '/';
-    {$ELSE}
+    {$IFDEF MSWINDOWS}
     self.ActionP := self.ActionP + '\';
+    {$ELSE}
+    self.ActionP := self.ActionP + '/';
     {$ENDIF}
   end;
-  {$IFDEF LINUX}
-  if Config.__WebRoot__.Trim <> '' then
-    webroot := Config.__WebRoot__ + '/';
-  url := WebApplicationDirectory + webroot + Config.template + '/' + self.ActionP;
-  {$ELSE}
+  {$IFDEF MSWINDOWS}
   if Config.__WebRoot__.Trim <> '' then
     webroot := Config.__WebRoot__ + '\';
   url := WebApplicationDirectory + webroot + Config.template + '\' + self.ActionP;
+  {$ELSE}
+  if Config.__WebRoot__.Trim <> '' then
+    webroot := Config.__WebRoot__ + '/';
+  url := WebApplicationDirectory + webroot + Config.template + '/' + self.ActionP;
   {$ENDIF}
   self.Response := Response_;
   self.Request := Request_;

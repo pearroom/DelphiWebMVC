@@ -216,7 +216,6 @@ begin
       begin
         if (item.isDead = 0) and (item.isStop = 1) then
         begin
-
           item.isStop := 0;
           item.UpDate := Now + (1 / 24 / 60) * 1;
           DBList.AddOrSetValue(item.key, item);
@@ -227,6 +226,7 @@ begin
       end;
     end;
   finally
+
     MonitorExit(DBList);
   end;
 end;

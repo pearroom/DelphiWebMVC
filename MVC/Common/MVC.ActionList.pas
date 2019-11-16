@@ -122,7 +122,7 @@ begin
 
               List.AddOrSetValue(key, item);
             end
-            else  if item.isDead = 1 then
+            else if item.isDead = 1 then
             begin
 
               List.Remove(key);
@@ -191,7 +191,7 @@ var
   item: TActionItem;
 begin
   Result := nil;
-
+  MonitorEnter(List);
   try
     for key in List.Keys do
     begin
@@ -200,14 +200,14 @@ begin
       begin
         if (item.isDead = 0) and (item.isStop = 1) and (item.ActionName = ActionName) then
         begin
-          MonitorEnter(List);
+
           try
             item.isStop := 0;
             item.UpDate := Now + (1 / 24 / 60) * 1;
             List.AddOrSetValue(key, item);
           //  log('ªÒ»°Action:' + key);
           finally
-            MonitorExit(List);
+
           end;
           Result := item;
           break;
@@ -215,7 +215,7 @@ begin
       end;
     end;
   finally
-
+    MonitorExit(List);
   end;
 end;
 
