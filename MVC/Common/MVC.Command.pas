@@ -238,15 +238,15 @@ begin
   web.Response.ContentEncoding := Config.document_charset;
   web.Response.Server := 'IIS/6.0';
   web.Response.Date := Now;
-  {$IFDEF MSWINDOWS}
   {$IFDEF CROSS}
   url := web.Request.PathInfo;
   {$ELSE}
+  {$IFDEF MSWINDOWS}
   url := TIdURI.URLDecode(web.Request.PathInfo);
-  {$ENDIF}
   {$ELSE}
   url := web.Request.PathInfo;
   {$ENDIF }
+  {$ENDIF}
   if not check_directory_permission(url) then
   begin
     Error404(web, url);
@@ -266,13 +266,15 @@ begin
       if (url.IndexOf('//') > -1) then
       begin
         url := url.Replace('//', '/');
-        web.Response.Content := '<script>window.location.href=''' + url + ';</script>';
+      //  web.Response.Content := '<script>window.location.href=''' + url + ';</script>';
+        web.Response.SendRedirect(url);
         web.Response.SendResponse;
         exit;
       end;
       if (methodname = 'index') and (url.Substring(url.Length - 1) <> '/') then
       begin
-        web.Response.Content := '<script>window.location.href=''' + url + '/'';</script>';
+       // web.Response.Content := '<script>window.location.href=''' + url + '/'';</script>';
+        web.Response.SendRedirect(url + '/');
         web.Response.SendResponse;
         exit;
       end;
@@ -288,17 +290,17 @@ begin
       ActionPath := ActoinClass.GetProperty('ActionPath');
       ActionRoule := ActoinClass.GetProperty('ActionRoule');
       try
-        actionitem := _ActionList.Get(item.Action.ClassName);
-        if actionitem = nil then
-        begin
-          Action := item.Action.Create;
-          actionitem := _ActionList.Add(Action);
-        end
-        else
-        begin
-          Action := actionitem.Action;
-        end;
-          //  Action := item.Action.Create;
+//        actionitem := _ActionList.Get(item.Action.ClassName);
+//        if actionitem = nil then
+//        begin
+//          Action := item.Action.Create;
+//          actionitem := _ActionList.Add(Action);
+//        end
+//        else
+//        begin
+//          Action := actionitem.Action;
+//        end;
+        Action := item.Action.Create;
         Request.SetValue(Action, web.Request);
         Response.SetValue(Action, web.Response);
         ActionPath.SetValue(Action, item.path);
@@ -371,9 +373,7 @@ begin
                 ShowHTML.Invoke(Action, [methodname]);
             end;
           finally
-            FreeDb.Invoke(Action, []);
-            _ActionList.FreeAction(actionitem);
-           // Action.Free;
+
           end;
         end
         else
@@ -394,6 +394,9 @@ begin
           end;
         end;
       finally
+        FreeDb.Invoke(Action, []);
+          //  _ActionList.FreeAction(actionitem);
+        Action.Free;
         Handled := true;
       end;
     end
@@ -418,8 +421,10 @@ begin
 
       web.Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
       {$IFDEF MSWINDOWS}
+      {$IFNDEF CROSS}
       web.Response.Content := WebApplicationDirectory + Config.__WebRoot__ + url;
       web.Response.ContentType := '!STATICFILE';
+      {$ENDIF}
       {$ENDIF}
     end;
   end;
@@ -631,8 +636,8 @@ begin
         _Interceptor := TInterceptor.Create;
         _PageCache := TPageCache.Create;
 
-        _ActionList := TActionList.Create;
-        _ActoinClear := TActionClear.Create(False);
+      //  _ActionList := TActionList.Create;
+      //  _ActoinClear := TActionClear.Create(False);
         _DBPoolList := TDBPoolList.Create;
         _DBPoolClear := TDBPoolClear.Create(False);
         setDataBase(jo);
@@ -670,8 +675,8 @@ begin
   begin
     _PackageManager.isstop := true;
   end;
-  if _ActoinClear <> nil then
-    _ActoinClear.Terminate;
+ // if _ActoinClear <> nil then
+ //   _ActoinClear.Terminate;
   if _DBPoolClear <> nil then
     _DBPoolClear.Terminate;
 
@@ -709,10 +714,10 @@ begin
     _PageCache.Free;
   if _DbPool <> nil then
     _DbPool.Free;
-  if _ActoinClear <> nil then
-    _ActoinClear.Free;
-  if _ActionList <> nil then
-    _ActionList.Free;
+//  if _ActoinClear <> nil then
+ //   _ActoinClear.Free;
+//  if _ActionList <> nil then
+ //   _ActionList.Free;
   if _DBPoolList <> nil then
     _DBPoolList.Free;
   if _DBPoolClear <> nil then

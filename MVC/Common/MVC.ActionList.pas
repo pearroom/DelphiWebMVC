@@ -116,13 +116,13 @@ begin
         begin
           MonitorEnter(List);
           try
-            if item.isDead = 0 then
+            if (item.isDead = 0) and (item.isStop = 1) then
             begin
               item.isDead := 1;
-              item.isStop := 1;
+
               List.AddOrSetValue(key, item);
             end
-            else
+            else  if item.isDead = 1 then
             begin
 
               List.Remove(key);
@@ -139,8 +139,7 @@ begin
       end;
       Sleep(100);
     end;
-  finally
-   //   MonitorExit(List);
+  finally   //   MonitorExit(List);
     tmp_list.Clear;
     tmp_list.Free;
   end;
@@ -160,7 +159,7 @@ begin
   for key in List.Keys do
   begin
     List.TryGetValue(key, item);
-    if item <> nil then
+    if Assigned(item) then
     begin
       item.Action.Free;
       item.Free;

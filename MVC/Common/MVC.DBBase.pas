@@ -195,43 +195,52 @@ var
   i: Integer;
   ret, key: string;
   ftype: TFieldType;
+  s: string;
 begin
+  try
 
-  ja := SA;
-  ret := '';
-  with cds do
-  begin
-    First;
-    while not Eof do
+    ja := SA;
+    ret := '';
+    with cds do
     begin
-
-      jo := SO();
-      for i := 0 to Fields.Count - 1 do
+      First;
+      while not Eof do
       begin
-        ftype := Fields[i].DataType;
-        if Config.JsonToLower then
-          key := Fields[i].DisplayLabel.ToLower
-        else
-          key := Fields[i].DisplayLabel;
-        if (ftype = ftAutoInc) then
-          jo.I[key] := Fields[i].AsInteger
-        else if (ftype = ftInteger) then
-          jo.I[key] := Fields[i].AsInteger
-        else if (ftype = ftBoolean) then
-          jo.B[key] := Fields[i].AsBoolean
-        else
+
+        jo := SO();
+        for i := 0 to Fields.Count - 1 do
         begin
-          jo.S[key] := Fields[i].AsString;
+          ftype := Fields[i].DataType;
+          if Config.JsonToLower then
+            key := Fields[i].DisplayLabel.ToLower
+          else
+            key := Fields[i].DisplayLabel;
+          if (ftype = ftAutoInc) then
+            jo.I[key] := Fields[i].AsInteger
+          else if (ftype = ftInteger) then
+            jo.I[key] := Fields[i].AsInteger
+          else if (ftype = ftBoolean) then
+            jo.B[key] := Fields[i].AsBoolean
+          else
+          begin
+            jo.S[key] := Fields[i].AsString;
+          end;
         end;
+        ja.Add(jo);
+        if isfirst then
+          break
+        else
+          Next;
       end;
-      ja.Add(jo);
-      if isfirst then
-        break
-      else
-        Next;
+    end;
+    Result := ja.AsObject;
+  except
+    on e: Exception do
+    begin
+      s := e.Message;
+      log(s);
     end;
   end;
-  Result := ja.AsObject;
 end;
 
 function TDBBase.CDSToJSONObject(cds: TFDQuery): ISuperObject;
@@ -253,46 +262,53 @@ var
   json, item, key, value: string;
 begin
   ret := '';
+  try
 
-  json := '[';
-  with cds do
-  begin
-    First;
-
-    while not Eof do
+    json := '[';
+    with cds do
     begin
-      item := '{';
-      for i := 0 to Fields.Count - 1 do
+      First;
+
+      while not Eof do
       begin
-        if Config.JsonToLower then
-          key := Fields[i].DisplayLabel.ToLower
-        else
-          key := Fields[i].DisplayLabel;
-        ftype := Fields[i].DataType;
-        if (ftype = ftAutoInc) then
-          value := Fields[i].AsString
-        else if (ftype = ftInteger) then
-          value := Fields[i].AsString
-        else if (ftype = ftBoolean) then
-          value := Fields[i].AsString
-        else
+        item := '{';
+        for i := 0 to Fields.Count - 1 do
         begin
-          value := '"' + Fields[i].AsString + '"';
+          if Config.JsonToLower then
+            key := Fields[i].DisplayLabel.ToLower
+          else
+            key := Fields[i].DisplayLabel;
+          ftype := Fields[i].DataType;
+          if (ftype = ftAutoInc) then
+            value := Fields[i].AsString
+          else if (ftype = ftInteger) then
+            value := Fields[i].AsString
+          else if (ftype = ftBoolean) then
+            value := Fields[i].AsString
+          else
+          begin
+            value := '"' + Fields[i].AsString + '"';
+          end;
+          if value = '' then
+            value := '0';
+          item := item + '"' + key + '"' + ':' + value + ',';
         end;
-        if value = '' then
-          value := '0';
-        item := item + '"' + key + '"' + ':' + value + ',';
+        item := copy(item, 1, item.Length - 1);
+        item := item + '},';
+        json := json + item;
+        Next;
       end;
-      item := copy(item, 1, item.Length - 1);
-      item := item + '},';
-      json := json + item;
-      Next;
+    end;
+    if json.Length > 1 then
+      json := copy(json, 1, json.Length - 1);
+    json := json + ']';
+    Result := json;
+  except
+    on e: Exception do
+    begin
+      log(e.Message);
     end;
   end;
-  if json.Length > 1 then
-    json := copy(json, 1, json.Length - 1);
-  json := json + ']';
-  Result := json;
 end;
 
 function TDBBase.closeDB: Boolean;
@@ -314,23 +330,20 @@ end;
 
 function TDBBase.TryConnDB: Boolean;
 begin
-  begin
-    inherited;
-    try
-      if not Assigned(condb) then
-      begin
-        condb := TFDConnection.Create(Self);
-        condb.ConnectionDefName := DBType_;
-        TMP_CDS := TFDQuery.Create(Self);
-  //  TMP_CDS.FetchOptions.Mode := fmAll;
-   // TMP_CDS.FetchOptions.RecordCountMode := TFDRecordCountMode.cmTotal;
-      end;
-    except
+  try
+    if not Assigned(condb) then
+    begin
+      condb := TFDConnection.Create(Self);
+      condb.ConnectionDefName := DBType_;
+      TMP_CDS := TFDQuery.Create(Self);
+     // TMP_CDS.FetchOptions.Mode := fmAll;
+    // TMP_CDS.FetchOptions.RecordCountMode := TFDRecordCountMode.cmTotal;
+    end;
+  except
 
-      on e: Exception do
-      begin
-        log('数据库连接失败:' + e.ToString);
-      end;
+    on e: Exception do
+    begin
+      log('数据库连接失败:' + e.ToString);
     end;
   end;
   try
@@ -447,7 +460,6 @@ begin
   end;
   inherited;
 end;
-
 
 function TDBBase.EditData(tablename, key: string; value: string): TFDQuery;
 var

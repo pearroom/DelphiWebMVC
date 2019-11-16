@@ -75,6 +75,7 @@ begin
   try
 
     DbItem.isStop := 1;
+
     _DBPoolList.DBList.AddOrSetValue(DbItem.key, DbItem);
   finally
     MonitorExit(_DBPoolList.DBList);
@@ -144,13 +145,13 @@ begin
         try
           if (Now() > item.UpDate) then
           begin
-            if item.isDead = 0 then
+            if (item.isDead = 0) and (item.isStop = 1) then
             begin
 
               item.isDead := 1;
               DBList.AddOrSetValue(item.key, item);
             end
-            else
+            else if item.isDead = 1 then
             begin
               DBList.Remove(item.key);
               item.Db.Free;
@@ -188,7 +189,7 @@ begin
   for key in DBList.Keys do
   begin
     DBList.TryGetValue(key, item);
-    if item <> nil then
+    if Assigned(item) then
     begin
       item.Db.Free;
       item.Free;
