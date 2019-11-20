@@ -66,7 +66,7 @@
         <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
         <Icon_MainIcon>favicon.ico</Icon_MainIcon>
         <DCC_ExeOutput>..\Publish</DCC_ExeOutput>
-        <DCC_UnitSearchPath>..\Plugin;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>D:\GitHub\DelphiWebMVC\MVC\Common;D:\GitHub\DelphiWebMVC\MVC\Net;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_DcuOutput>..\Temp</DCC_DcuOutput>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
@@ -110,12 +110,6 @@
         <DCCReference Include="..\Config\uDBConfig.pas"/>
         <DCCReference Include="..\Config\uGlobal.pas"/>
         <DCCReference Include="..\Config\uPlugin.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebApp.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebConfig.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebEnv.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebReqRes.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebServer.pas"/>
-        <DCCReference Include="..\MVC\Net\SynWebUtils.pas"/>
         <DCCReference Include="..\Controller\IndexController.pas"/>
         <DCCReference Include="..\Controller\MainController.pas"/>
         <DCCReference Include="..\Controller\PayController.pas"/>
@@ -126,53 +120,6 @@
         <DCCReference Include="..\Plugin\Plugin.Tool.pas"/>
         <DCCReference Include="..\Service\RoleService.pas"/>
         <DCCReference Include="..\Service\UsersService.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.ActionClear.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.ActionList.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.BaseController.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.BaseInterceptor.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.BasePackage.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.BaseService.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.Command.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.Config.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBBase.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBFirebird.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBMSSQL.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBMSSQL08.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBMSSQL12.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBMySql.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBOracle.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBPool.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBPoolClear.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBPoolList.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DBSQLite.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DES.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.DM.pas">
-            <Form>MVCDM</Form>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="..\MVC\Common\MVC.HTMLParser.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.Interceptor.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.LogUnit.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.Main.pas">
-            <Form>MVCMain</Form>
-        </DCCReference>
-        <DCCReference Include="..\MVC\Common\MVC.PackageManager.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.Page.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.PageCache.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.RedisClear.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.RedisList.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.RedisM.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.Roule.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.RouleItem.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.SessionList.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.ThSessionClear.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.View.pas"/>
-        <DCCReference Include="..\MVC\Common\MVC.Web.pas">
-            <Form>MVCWeb</Form>
-            <DesignClass>TWebModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="..\MVC\Common\XSuperJSON.pas"/>
-        <DCCReference Include="..\MVC\Common\XSuperObject.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -195,14 +142,14 @@
                 </Source>
                 <Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\DataExplorerDBXPluginEnt260.bpl">DBExpress Enterprise Data Explorer Integration</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\bcboffice2k260.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\bcbofficexp260.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="\DelphiMVC.exe" Configuration="Release" Class="ProjectOutput"/>
+                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Login.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Check.htm" Configuration="Release" Class="ProjectFile"/>
                 <DeployFile LocalName="View\Login\Login.css" Configuration="Release" Class="ProjectFile"/>
@@ -213,7 +160,7 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="Untitled1.htm" Configuration="Release" Class="ProjectFile"/>
-                <DeployFile LocalName="View\Login\Login.js" Configuration="Release" Class="ProjectFile"/>
+                <DeployFile LocalName="\DelphiMVC.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>
