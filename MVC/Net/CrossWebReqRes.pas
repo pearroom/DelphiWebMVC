@@ -383,6 +383,7 @@ end;
 procedure TCrossWebResponse.SendRedirect(const URI: WBString);
 begin
   Env.Redirect(URI);
+  Env.OutContent:=' ';
   FSent := True;
 end;
 

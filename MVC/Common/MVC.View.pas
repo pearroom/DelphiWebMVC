@@ -332,7 +332,15 @@ begin
   Response.ContentType := 'text/html; charset=' + Config.document_charset;
   if (Trim(html) <> '') then
   begin
-    S := url + html + Config.template_type;
+    html := html.Replace('/', '\');
+    if (html[1] = '/') or (html[1] = '\') then
+    begin
+      S := WebApplicationDirectory + config.__WebRoot__ + '\' + Config.template + html + Config.template_type;
+    end
+    else
+    begin
+      S := url + html + Config.template_type;
+    end;
     if _PageCache.PageList.ContainsKey(S) then
     begin
       _PageCache.PageList.TryGetValue(S, htmlcontent);
@@ -359,7 +367,6 @@ begin
           S := S + '<div><h1>Error 404</h1></div>';
           S := S + '<hr><div>[ ' + html + Config.template_type + ' ] Not Find Page';
           S := S + '</div></div></body></html>';
-
         end;
         log('Error 404 [ ' + html + Config.template_type + ' ] Not Find Page');
         Response.Content := S;

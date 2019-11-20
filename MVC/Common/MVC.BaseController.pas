@@ -61,7 +61,7 @@ implementation
 
 procedure SetRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
 begin
-  CreateRouleMap();
+   CreateRouleMap();
   _RouleMap.SetRoule(name, ACtion, path, isInterceptor);
 end;
 

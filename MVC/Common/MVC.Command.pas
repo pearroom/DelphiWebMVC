@@ -267,14 +267,12 @@ begin
       begin
         url := url.Replace('//', '/');
         web.Response.SendRedirect(url);
-        web.Response.Content:= ' ';
         web.Response.SendResponse;
         exit;
       end;
       if (methodname = 'index') and (url.Substring(url.Length - 1) <> '/') then
       begin
         web.Response.SendRedirect(url + '/');
-        web.Response.Content:= ' ';
         web.Response.SendResponse;
         exit;
       end;
@@ -585,16 +583,19 @@ var
   FPort: string;
   jo: ISuperObject;
 begin
+  if config.config = '' then
+    Config.config := 'resources/config.json';
+  if config.mime = '' then
+    Config.mime := 'resources/mime.json';
+  if config.package_config = '' then
+    Config.package_config := 'resources/package.json';
+
+  //////////////////////////////////////////////////////////
   InitApplication; //启动服务
   if WebRequestHandler <> nil then
     WebRequestHandler.WebModuleClass := WebModuleClass;
   ////////////////////顺序不可更换//////////////////////////
   AppOpen := True;
-  _MVCFun := TMVCFun.Create;
-
-  Config.config := 'resources/config.json';
-  Config.mime := 'resources/mime.json';
-  Config.package_config := 'resources/package.json';
   _LogList := TStringList.Create;
   _logThread := TLogTh.Create(false);
   _directory_permission := TDictionary<string, Boolean>.Create;
@@ -659,8 +660,6 @@ end;
 procedure CloseServer();
 begin
   AppClose := true;
-  _MVCFun.Free;
-
   _directory_permission.Clear;
   _directory_permission.Free;
   if _logThread <> nil then
@@ -855,6 +854,8 @@ begin
   CloseServer();
   {$ELSE}
 	{$IFDEF MSWINDOWS}
+  Application.Initialize;
+  Application.Title := title;
   hMutex := CreateMutex(nil, false, PChar(title));
   try
     if GetLastError = Error_Already_Exists then
@@ -931,9 +932,11 @@ begin
 end;
 
 initialization
+  _MVCFun := TMVCFun.Create;
   CreateRouleMap;
 
 finalization
+  _MVCFun.Free;
   if Assigned(_RouleMap) then
     _RouleMap.Free;
 

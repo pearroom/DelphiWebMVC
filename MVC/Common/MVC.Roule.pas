@@ -137,7 +137,7 @@ procedure TRoule.SetRoule(name: string; ACtion: TClass; path: string; isIntercep
 var
   item: TRouleItem;
 begin
-  if name.Trim <> '' then
+  if (name.Trim <> '') and (name.Trim <> '/') then
     name := '/' + name + '/'
   else
     name := '/';
@@ -145,6 +145,7 @@ begin
   begin
     name := '/' + Config.__APP__ + name;
   end;
+  name := name.Replace('///', '/').Replace('//', '/');
   if not finditem(name) then
   begin
     item := TRouleItem.Create;

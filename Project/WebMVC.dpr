@@ -10,7 +10,6 @@ program WebMVC;
 {$APPTYPE GUI}
 
 uses
-  Vcl.Forms,
   uRouleMap in '..\Config\uRouleMap.pas',
   uTableMap in '..\Config\uTableMap.pas',
   uInterceptor in '..\Config\uInterceptor.pas',
@@ -76,10 +75,8 @@ uses
 {$R *.res}
 
 begin
-  Config.password_key := '';   //配置文件解密秘钥
   ReportMemoryLeaksOnShutdown := True;
-  Application.Initialize;
-  Application.Title := 'WebMVC';
-  _MVCFun.Run(Application.Title);
+  Config.password_key := '';   //配置文件解密秘钥
+  _MVCFun.Run('WebMVC');
 end.
 

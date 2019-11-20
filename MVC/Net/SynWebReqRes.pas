@@ -373,6 +373,7 @@ end;
 procedure TSynWebResponse.SendRedirect(const URI: WBString);
 begin
   Env.Redirect(URI);
+  Env.Context.OutContent:=' ';
   FSent := True;
 end;
 
