@@ -32,7 +32,6 @@ uses
 {$R *.res}
 
 begin
-  ReportMemoryLeaksOnShutdown := True;
   Config.password_key := '';   //ÅäÖÃÎÄ¼ş½âÃÜÃØÔ¿
   _MVCFun.Run('WebMVC');
 end.

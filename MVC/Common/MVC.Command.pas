@@ -583,12 +583,7 @@ var
   FPort: string;
   jo: ISuperObject;
 begin
-  if config.config = '' then
-    Config.config := 'resources/config.json';
-  if config.mime = '' then
-    Config.mime := 'resources/mime.json';
-  if config.package_config = '' then
-    Config.package_config := 'resources/package.json';
+
 
   //////////////////////////////////////////////////////////
   InitApplication; //Æô¶¯·þÎñ
@@ -840,6 +835,15 @@ procedure TMVCFun.Run(title: string);
 var
   hMutex: THandle;
 begin
+
+  if config.config = '' then
+    Config.config := 'resources/config.json';
+  if config.mime = '' then
+    Config.mime := 'resources/mime.json';
+  if config.package_config = '' then
+    Config.package_config := 'resources/package.json';
+  //////////////////////////
+  ReportMemoryLeaksOnShutdown := True;
 	{$IFDEF CONSOLE}
   {$IFDEF MSWINDOWS}
   SetConsoleTitle(PChar(title));
@@ -854,6 +858,7 @@ begin
   CloseServer();
   {$ELSE}
 	{$IFDEF MSWINDOWS}
+
   Application.Initialize;
   Application.Title := title;
   hMutex := CreateMutex(nil, false, PChar(title));
