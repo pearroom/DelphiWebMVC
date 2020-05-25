@@ -3,20 +3,27 @@ unit Plugin.Tool;
 interface
 
 uses
-  System.SysUtils, System.Classes,Vcl.Imaging.jpeg, Vcl.Graphics,IdURI, IdGlobal,IdCoderMIME,EncdDecd;
+  System.SysUtils, System.Classes, Vcl.Imaging.jpeg, Vcl.Graphics, IdURI,
+  IdGlobal, IdCoderMIME, EncdDecd;
+
+
 
 type
   TTool = class
+  private
   public
+
     function URLDecode(Asrc: string; AByteEncoding: IIdtextEncoding): string;
     function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding): string;
     function Base64Decode(S: string): string;
     function Base64Encode(S: string): string;
-    function BitmapToString(img:TBitmap):string;
-    function StringToBitmap(imgStr: string): TBitmap;
+    function BitmapToString(img: TBitmap): string;
+    function StringToBitmap(imgStr: string; var bitmap: TBitmap): boolean;
   end;
 
 implementation
+
+
 
 function TTool.URLDecode(Asrc: string; AByteEncoding: IIdtextEncoding): string;
 begin
@@ -33,6 +40,7 @@ begin
   else
     Result := TIdURI.URLEncode(Asrc);
 end;
+
 function TTool.Base64Encode(S: string): string;
 var
   base64: TIdEncoderMIME;
@@ -49,37 +57,45 @@ begin
   end;
 end;
 ///将base64字符串转化为Bitmap位图
-function TTool.StringToBitmap(imgStr:string):TBitmap;
-var ss:TStringStream;
-    ms:TMemoryStream;
-    bitmap:TBitmap;
+
+function TTool.StringToBitmap(imgStr: string; var bitmap: TBitmap): Boolean;
+var
+  ss: TStringStream;
+  ms: TMemoryStream;
 begin
-    ss := TStringStream.Create(imgStr);
-    ms := TMemoryStream.Create;
-    DecodeStream(ss,ms);//将base64字符流还原为内存流
-    ms.Position:=0;
-    bitmap := TBitmap.Create;
-    bitmap.LoadFromStream(ms);
+  ss := TStringStream.Create(imgStr);
+  ms := TMemoryStream.Create;
+  try
+    try
+      DecodeStream(ss, ms); //将base64字符流还原为内存流
+      ms.Position := 0;
+      bitmap.LoadFromStream(ms);
+      result := True;
+    except
+      Result := false;
+    end;
+  finally
     ss.Free;
     ms.Free;
-    result :=bitmap;
+  end;
 end;
 ///将Bitmap位图转化为base64字符串
-function TTool.BitmapToString(img:TBitmap): string;
+
+function TTool.BitmapToString(img: TBitmap): string;
 var
-  ms:TMemoryStream;
-  ss:TStringStream;
-  s:string;
+  ms: TMemoryStream;
+  ss: TStringStream;
+  s: string;
 begin
-    ms := TMemoryStream.Create;
-    img.SaveToStream(ms);
-    ss := TStringStream.Create('');
-    ms.Position:=0;
-    EncodeStream(ms,ss);//将内存流编码为base64字符流
-    s:=ss.DataString;
-    ms.Free;
-    ss.Free;
-    result:=s;
+  ms := TMemoryStream.Create;
+  img.SaveToStream(ms);
+  ss := TStringStream.Create('');
+  ms.Position := 0;
+  EncodeStream(ms, ss); //将内存流编码为base64字符流
+  s := ss.DataString;
+  ms.Free;
+  ss.Free;
+  result := s;
 end;
 
 function TTool.Base64Decode(S: string): string;
@@ -98,5 +114,6 @@ begin
     base64.Free;
   end;
 end;
+
 end.
 

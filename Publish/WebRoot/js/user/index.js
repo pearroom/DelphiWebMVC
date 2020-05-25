@@ -47,7 +47,7 @@ layui.use(['table', 'form'], function() {
 	});
 	table.on('tool(tbuser)', function(obj) {
 		var data = obj.data;
-		if (obj.event === 'edit') {
+		if (obj.event === 'edit') {			
 			edit(data);
 		} else if (obj.event === 'del') {
 			del(data.id);
@@ -87,77 +87,34 @@ function del(id) {
 }
 $("#btnadd").click(function() {
 	add();
-	form.render();
 });
 $("#btnsearch").click(function() {
 	reload();
 });
 $("#btnprint").click(function() {
-	$.get("../user/print", {roleid: $("#role").val()}, function(ret) {
-		layer.open({
-			type: 1,
-			title: '新增',
-			id: 'layer1', //防止重复弹出
-			area: ['400px', '400px'],
-			content: ret,
-			btn: ['取消'],
-			btnAlign: 'c', //按钮居中
 
-
-			yes: function() {
-				layer.closeAll();
-			},
-			btn2: function() {
-				layer.closeAll();
-			}
-		});
-	}, 'html');
-});
-function add() {
-	$.get("../user/add", {}, function(ret) {
-		layer.open({
-			type: 1,
+			layer.open({
+			type: 2,
 			title: '新增',
 			id: 'layer1', //防止重复弹出
 			area: ['450px', '400px'],
-			content: ret,
-			btn: ['确定', '取消'],
-			btnAlign: 'c', //按钮居中
-
-
-			yes: function() {
-
-				var username = $("#username").val();
-				var realname = $("#realname").val();
-				var roleid = $("#roleid").val();
-				var pwd = $("#pwd").val();
-				if (username == '') {
-					layer.msg("请输入用户名称");
-				} else {
-					$.post("../user/save", {
-						username: username,
-						roleid: roleid,
-						pwd: pwd,
-						realname: realname,
-					}, function(ret) {
-						if (ret.code == 0) {
-							layer.closeAll();
-							reload();
-						}
-						layer.msg(ret.message);
-					}, "json");
-				}
-			},
-			btn2: function() {
-				layer.closeAll();
-			}
+			content: ['/user/print/roleid/'+$("#role").val(),'no'],
+		});	
+});
+function add() {
+		var body;
+		layer.open({
+			type: 2,
+			title: '新增',
+			id: 'layer1', //防止重复弹出
+			area: ['450px', '400px'],
+			content: ['/user/add','no'],
 		});
-	}, 'html');
 }
 
 function edit(data) {
-	$.get("../user/edit", {}, function(ret) {
-		layer.open({
+	$.get("/user/edit", {}, function(ret) {
+		layui.layer.open({
 			type: 1,
 			title: '修改',
 			id: 'layer1', //防止重复弹出
@@ -169,6 +126,7 @@ function edit(data) {
 				$("#username").val(data.username);
 				$("#roleid").val(data.roleid);
 				$("#realname").val(data.realname);
+				$("#pwd").val(data.pwd);
 				$("#id").val(data.id);
 				form.render();
 			},
@@ -181,7 +139,7 @@ function edit(data) {
 				if (username == '') {
 					layer.msg("请输入用户名称");
 				} else {
-					$.post("../user/save", {
+					$.post("/user/save", {
 						id: data.id,
 						username: username,
 						roleid: roleid,

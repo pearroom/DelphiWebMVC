@@ -1,68 +1,98 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<title>DelphiWebMVC</title>
-	
-		<link rel="stylesheet" href="__APP__/assets/css/layui.css">
-		<link rel="stylesheet" href="__APP__/assets/css/main.css">
-		<script src="__APP__/assets/layui.all.js"></script>
-		<script src="__APP__/assets/echarts.min.js"></script>
 
-	</head>
+<head>
+	<meta charset="utf-8">
+	<title>DelphiWebMVC</title>
+	<#include file="/include.html" />
+	<script src="__APP__/js/index.js"></script>
 
-	<body class="layui-layout-body">
-		<div class="layui-layout layui-layout-admin">
-			<div class="layui-header" style="background-color: teal;">
-				<div class="layui-logo" style="background-color: teal;color:cornsilk;border-bottom:1px solid #FFF">DelphiWebMVC</div>
-				<!-- 头部区域（可配合layui已有的水平导航） -->
+</head>
 
-				<ul class="layui-nav layui-layout-right">
-					<li class="layui-nav-item">
-						<a href="javascript:;">		
-								<i class="layui-icon layui-icon-username"></i>					
-							#{realname}
-						</a>
-						
-					</li>
-					<li class="layui-nav-item"><a href="https://www.delphiwebmvc.com/doc/help.html">
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+		<div class="layui-header" style="background-color: teal;">
+			<div class="layui-logo" style="background-color: teal;color:cornsilk;border-bottom:1px solid #FFF">
+				DelphiWebMVC</div>
+			<!-- 头部区域（可配合layui已有的水平导航） -->
+
+			<ul class="layui-nav layui-layout-right">
+				<li class="layui-nav-item">
+					<a href="javascript:;">
+						<i class="layui-icon layui-icon-username"></i>
+						#{realname}
+					</a>
+
+				</li>
+				<li class="layui-nav-item"><a href="https://www.delphiwebmvc.com/doc/help.html">
 						<i class="layui-icon layui-icon-help"></i>
 						开发手册</a></li>
-					<li class="layui-nav-item"><a href="__APP__/">
+				<li class="layui-nav-item"><a href="__APP__/">
 						<i class="layui-icon layui-icon-close-fill"></i>退出</a></li>
+			</ul>
+		</div>
+
+		<div class="layui-side" style="background-color: teal;">
+			<div class="layui-side-scroll">
+				<!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+				<ul class="layui-nav layui-nav-tree" lay-filter="test" style="background-color: teal;">
+					<#list data=menuls item=i>
+
+						<li class="layui-nav-item">
+
+							<a id="#{i.id}" href="javascript:;" tag="__APP__#{i.url}" onclick="load(this.id)">
+								<i class="layui-icon layui-icon-app"></i>
+								<cite id="menu_name_#{i.id}">#{i.menuname}</cite>
+							</a>
+						</li>
+					</#list>
+
 				</ul>
 			</div>
+		</div>
 
-			<div class="layui-side" style="background-color: teal;">
-				<div class="layui-side-scroll">
-					<!-- 左侧导航区域（可配合layui已有的垂直导航） -->
-					<ul class="layui-nav layui-nav-tree" lay-filter="test" style="background-color: teal;">
-						<#list data=menuls item=i>
-						
-							<li class="layui-nav-item">
-							
-							<a id="__APP__#{i.url}" href="javascript:;" onclick="load(this.id)">
-							<i class="layui-icon layui-icon-app"></i>
-							<cite>#{i.menuname}</cite>
-							</a>
-							</li>
-						</#list>
-
-					</ul>
-				</div>
-			</div>
-
-			<div class="layui-body">
-				<!-- 内容主体区域 -->
-				<div style="padding: 10px;" id="_content_">
+		<div id="body" class="layui-body" style="padding: 2px;">
+			<!-- 内容主体区域 -->
+			<div class="layui-tab" lay-filter="tab" lay-allowClose="true" style="margin: 1px;">
+				<ul class="layui-tab-title">
+					<li class="layui-this">首页</li>
+				</ul>
+				<div class="layui-tab-content">
+					<div class="layui-tab-item layui-show"></div>
 
 				</div>
 			</div>
 
 		</div>
-		<script src="__APP__/js/index.js"></script>
-		<script src="__APP__/assets/js/jquery-1.11.0.min.js"></script>	
-	</body>
+
+	</div>
+
+	<script>
+
+
+		layui.use('element', function () {
+			var element = layui.element;
+			element.render();
+		});
+		function load(id) {
+			var li = $("li[lay-id=tab_"+id+"]").length;
+			url = $("#"+id).attr("tag");
+			if (li==0) {
+				title = $("#menu_name_" + id).html();
+				var h = document.getElementById("body").offsetHeight - 70;
+				html = '<iframe style="width:100%;height:' + h + 'px;" frameborder="0" scrolling="no" src="' + url + '"> </iframe>';
+				tab_id="tab_"+id;
+				layui.element.tabAdd('tab', {title: title,content: html,id: tab_id});
+			}else{
+				tab_id = "tab_"+id;
+			}
+			layui.element.tabChange('tab', tab_id);
+			layui.element.render();
+		}
+
+
+
+	</script>
+</body>
 
 </html>

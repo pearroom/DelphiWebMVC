@@ -8,31 +8,34 @@
 
 program WebMVC;
 {$APPTYPE GUI}
+//{$APPTYPE CONSOLE}
 
 uses
   MVC.Command,
   MVC.Config,
-  uTableMap in '..\Config\uTableMap.pas',
-  uInterceptor in '..\Config\uInterceptor.pas',
-  uDBConfig in '..\Config\uDBConfig.pas',
-  uGlobal in '..\Config\uGlobal.pas',
-  uPlugin in '..\Config\uPlugin.pas',
   IndexController in '..\Controller\IndexController.pas',
   MainController in '..\Controller\MainController.pas',
-  PayController in '..\Controller\PayController.pas',
   RoleController in '..\Controller\RoleController.pas',
   UserController in '..\Controller\UserController.pas',
-  VIPController in '..\Controller\VIPController.pas',
-  Plugin.Layui in '..\Plugin\Plugin.Layui.pas',
-  Plugin.Tool in '..\Plugin\Plugin.Tool.pas',
   RoleService in '..\Service\RoleService.pas',
   UsersService in '..\Service\UsersService.pas',
+  VIPController in '..\Controller\VIPController.pas',
+  PayController in '..\Controller\PayController.pas',
+  Plugin.Layui in '..\Plugin\Plugin.Layui.pas',
+  Plugin.Tool in '..\Plugin\Plugin.Tool.pas',
+  QRCodeController in '..\Controller\QRCodeController.pas',
+  JwtController in '..\Controller\JwtController.pas',
+  uDBConfig in '..\Config\uDBConfig.pas',
+  uGlobal in '..\Config\uGlobal.pas',
+  uInterceptor in '..\Config\uInterceptor.pas',
+  uPlugin in '..\Config\uPlugin.pas',
+  uTableMap in '..\Config\uTableMap.pas',
   uRouteMap in '..\Config\uRouteMap.pas';
 
 {$R *.res}
-
 begin
   Config.password_key := '';   //≈‰÷√Œƒº˛Ω‚√‹√ÿ‘ø
-  _MVCFun.Run('WebMVC');
+  _MVCFun.Run();
+
 end.
 

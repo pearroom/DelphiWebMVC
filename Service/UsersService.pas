@@ -21,12 +21,12 @@ implementation
 
 function TUsersService.checkuser(map: ISuperObject): ISuperObject;
 begin
-  Result := Db.Default.FindFirst(tb_users, map);
+  Result := Db.use('sqlite').FindFirst(tb_users, map);
 end;
 
 function TUsersService.delById(id: string): Boolean;
 begin
-  Result := Db.Default.DeleteByKey(tb_users, 'id', id);
+  Result := Db.use('sqlite').DeleteByKey(tb_users, 'id', id);
 end;
 
 function TUsersService.getAlldata(map: ISuperObject): ISuperObject;
@@ -35,7 +35,7 @@ var
 begin
   if map.S['roleid'] <> '' then
     sql := 'and roleid= ' + Q(map.S['roleid']);
-  Result := Db.Default.Find(tb_users, sql);
+  Result := Db.use('sqlite').Find(tb_users, sql);
 end;
 
 function TUsersService.getdata(var con: Integer; map: ISuperObject): ISuperObject;
@@ -46,7 +46,7 @@ begin
   if map.S['roleid'] <> '' then
     sql := 'and roleid= ' + Q(map.S['roleid']);
 
-  list := Db.Default.FindPage(con, tb_users, sql, 'id', map.I['page'] - 1, map.I['limit']);
+  list := Db.use('sqlite').FindPage(con, tb_users, sql, 'id', map.I['page'] - 1, map.I['limit']);
   Result := list;
 end;
 
@@ -60,7 +60,7 @@ begin
   if id = '' then
   begin
    // map.Delete('id');
-    ret := Db.Default.FindFirst(tb_users, map);
+    ret := Db.use('sqlite').FindFirst(tb_users, map);
     if ret = nil then
     begin
       with Db.Default.AddData(tb_users) do

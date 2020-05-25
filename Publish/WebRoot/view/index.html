@@ -7,8 +7,6 @@
 </head>
 
 <body style="background-color: #F2F2F2">
-
-	
 	<form class="layui-form">
 		<div style="height: 100px;"></div>
 		<div style="margin-left: auto; margin-right: auto; width: 350px;">
@@ -96,13 +94,10 @@
 		function changevcode() {
 			//console.log("刷新验证码");
 			var randomnum = Math.random();
-			// $.get("verifycode?d=" + randomnum,function(ret){
-			// 	var img = document.getElementById("imgid");
-			// 	img.src = ret;
-			// });
-			$.get("index",{name:"你好"},function(ret){
-				alert(ret);
-			})
+			$.get("verifycode?d=" + randomnum,function(ret){
+				var img = document.getElementById("imgid");
+				img.src = ret;
+			});
 			
 
 		}

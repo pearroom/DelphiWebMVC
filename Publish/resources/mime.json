@@ -27,9 +27,17 @@
 		"MimeType": "image/gif"
 	},
 	{
+		"Extensions": "bmp",
+		"MimeType": "image/bmp"
+	},	
+	{
 		"Extensions": "xml",
 		"MimeType": "text/xml"
 	},
+	{
+		"Extensions": "json",
+		"MimeType": "text/json"
+	},	
 	{
 		"Extensions": "svg",
 		"MimeType": "image/svg+xml"

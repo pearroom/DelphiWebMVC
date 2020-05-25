@@ -1,4 +1,5 @@
-{
+﻿{	
+	"AppTitle":"MVC普通项目",
 	"Server": {
 		"Port": "8004",
 		"Compress":"deflate",
@@ -20,9 +21,9 @@
 		"template_type":".html",
 		"document_charset":"utf-8",
 		"sessoin_name":"__guid_session",
-		"roule_suffix":"",
+		"route_suffix":"",
 		"session_start":true,
-		"session_timer":60,
+		"session_timer":30,
 		"bpl_Reload_timer":5,
 		"bpl_unload_timer":10,
 		"open_package":false,
@@ -32,9 +33,14 @@
 		"open_interceptor":true,
 		"show_sql":false,
 		"open_debug":true,
-		"Error404":"4041.html",
+		"Error404":"404.html",
 		"Error500":"500.html",
-		"JsonToLower":true,
+		"Corss_Origin":{
+			"Allow_Origin":"*",
+			"Allow_Headers":"*",
+			"Allow_Method":"*",
+			"Allow_Credentials":true
+		},
 		"directory":[
 			{
 				"path":"/view/data/",

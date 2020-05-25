@@ -130,7 +130,7 @@ begin
   begin
     role := role_service.getAlldata();
     setAttrJSON('role', role);
-    ShowHTML('index');
+   // ShowHTML('index');
   end;
 end;
 

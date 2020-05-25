@@ -14,10 +14,13 @@ type
   public
     procedure home(value1, value2, value3, value4, value5: string);
     procedure Index;
-    procedure login;
+    procedure Login;
     procedure check;
     procedure verifycode;
     procedure setdata;
+    //设置showxml方法拦截器 不管控制器拦截器是否设置，
+    //如果方法拦截器设定为true就会进行拦截操作
+    [TInterceptOfMethod(true)]
     procedure showxml;
     procedure showxml1;
     procedure createview; override;
@@ -27,10 +30,11 @@ type
 implementation
 
 uses
-  uTableMap, XSuperJSON;
+  uTableMap, XSuperJSON, uGlobal;
 
 
 { TIndexController }
+
 procedure TIndexController.createview;
 begin
   inherited;
@@ -68,12 +72,11 @@ begin
   with view do
   begin
     map := SO();
+    s := Input('username');
     map.S['username'] := Input('username');
     map.S['pwd'] := Input('pwd');
-  //  code := Input('vcode');
-  //  if code.ToLower = SessionGet('vcode').ToLower then
- //   if code='1234' then
-
+    code := Input('vcode');
+    if code.ToLower = SessionGet('vcode').ToLower then
     begin
 
       ret := user_service.checkuser(map);
@@ -86,11 +89,11 @@ begin
       begin
         Fail(-1, '登录失败,请检查用户名密码');
       end;
+    end
+    else
+    begin
+      Fail(-1, '验证码错误');
     end;
-//    else
-//    begin
-//      Fail(-1, '验证码错误');
-//    end;
   end;
 end;
 
@@ -116,8 +119,7 @@ begin
     else
     begin
       s := ShowVerifyCode(code);
-      Response.ContentType:='text';
-      Response.Content := 'data:image/jpeg;base64,' + s;
+      ShowText('data:image/jpeg;base64,' + s);
     end;
   end;
 end;
@@ -150,6 +152,7 @@ begin
     FreeAndNil(bmp_t);
   end;
 end;
+//
 
 procedure TIndexController.Index;
 var
@@ -158,21 +161,24 @@ var
 begin
   with View do
   begin
+    s := Request.QueryFields.Text;
     s := Input('name');
     SessionSet('name', '你好');
-    ShowHTML('login');
-    //ShowText('hello');
+    setAttr('name', 'MVC');
   end;
 end;
 
-procedure TIndexController.login;
+procedure TIndexController.Login;
 var
   s: string;
+  jo1, jo: ISuperObject;
 begin
   with View do
   begin
-
-    SessionRemove('user');
+   // s := Request.QueryFields.Text;
+    s := Input('name');
+    SessionSet('name', '你好');
+    setAttr('name', 'MVC');
     ShowHTML('login');
   end;
 end;
@@ -188,8 +194,8 @@ procedure TIndexController.showxml;
 begin
   with view do
   begin
-
-    ShowJSON(db.Default.FindT(tb_users, ''));
+    ShowText('xml');
+   // ShowJSON(db.Default.Find(tb_users, ''));
   end;
 end;
 
@@ -198,7 +204,7 @@ begin
   with view do
   begin
 
-    ShowJSON(db.Default.Find(tb_users, ''));
+    ShowJSON(db.MYSQL.FindT(tb_users, ''));
   end;
 end;
 
