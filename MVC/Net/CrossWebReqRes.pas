@@ -7,8 +7,9 @@ unit CrossWebReqRes;
 
 interface
 
-uses SysUtils, Classes, HTTPApp, CrossCommon, CrossWebEnv,
-    Net.CrossHttpServer, Net.CrossHttpParams,Net.CrossSocket.Base;
+uses
+  SysUtils, Classes, HTTPApp, CrossCommon, CrossWebEnv, IdURI,
+  Net.CrossHttpServer, Net.CrossHttpParams, Net.CrossSocket.Base;
 
 const
   // Request Header String
@@ -66,10 +67,12 @@ const
 
   // Ver 0.0.0.2 +
   // CompilerVersion<Delphi2009 or CompilerVersion>Delphi 10 Seattle
+
 type
 {$IF (CompilerVersion<20.0) OR (CompilerVersion>=30.0) }
   WBString = string;
 {$ELSE}
+
   WBString = AnsiString;
 {$IFEND}
 
@@ -104,8 +107,7 @@ type
     // Write WBString contents back to client
     function WriteString(const AString: WBString): Boolean; override;
     // Write HTTP header WBString
-    function WriteHeaders(StatusCode: Integer;
-      const ReasonString, Headers: WBString): Boolean; override;
+    function WriteHeaders(StatusCode: Integer; const ReasonString, Headers: WBString): Boolean; override;
     function GetFieldByName(const Name: WBString): WBString; override;
   end;
 
@@ -121,7 +123,7 @@ type
     procedure SetDateVariable(Index: Integer; const Value: TDateTime); override;
     function GetIntegerVariable(Index: Integer): Integer; override;
     procedure SetIntegerVariable(Index: Integer; Value: Integer); override;
-    function  GetContent: WBString; override;
+    function GetContent: WBString; override;
     procedure SetContent(const Value: WBString); override;
     procedure SetContentStream(Value: TStream); override;
     function GetStatusCode: Integer; override;
@@ -141,6 +143,7 @@ type
 
   // Ver 0.0.0.2 +
 function UTF8ToWBString(const AVal: RawUTF8): WBString;
+
 function WBStringToUTF8(const AVal: WBString): RawUTF8;
 
 implementation
@@ -190,8 +193,10 @@ function TCrossWebRequest.GetIntegerVariable(Index: Integer): Integer;
 begin
   if Index = cstInContentLength then
     Result := StrToIntDef(UTF8ToString(FEnv.GetHeader('CONTENT-LENGTH')), 0)
-  else if Index = cstInHeaderServerPort then Result := 80
-  else Result := 0;
+  else if Index = cstInHeaderServerPort then
+    Result := 80
+  else
+    Result := 0;
 end;
 
 function TCrossWebRequest.GetInternalPathInfo: WBString;
@@ -209,78 +214,154 @@ end;
 function TCrossWebRequest.GetRemoteIP: string;
 begin
   //Result := UTF8ToString(FEnv.GetHeader('REMOTEIP'));
-  Result:=FEnv.RemoteIP;end;
+  Result := FEnv.RemoteIP;
+end;
 {$ENDIF}
 
 {$IF CompilerVersion>=30.0}
 
 function TCrossWebRequest.GetRawContent: TBytes;
 var
-  AContent:AnsiString;
+  AContent, AContent2: AnsiString;
+  k: integer;
 begin
-  Result := Env.GetRawContent;
+  if ContentType.StartsWith('multipart/form-data') then
+  begin
+    Result := Env.GetRawContent;
+  end
+  else
+  begin
+    AContent := TIdURI.URLDecode(EncodingGetString(ContentType, Env.GetRawContent));
+    if (Pos('{', AContent) > 0) and (Pos('}', AContent) > 0) then
+    begin
+      Result := Env.GetRawContent;
+    end
+    else
+    begin
+      k := TEncoding.UTF8.GetCharCount(BytesOf(AContent));
+      if k > 0 then
+        AContent2 := EncodingGetString(ContentType, BytesOf(AContent))
+      else
+        AContent2 := AContent;
+
+      if AContent = AContent2 then
+        Result := Env.GetRawContent
+      else
+      begin
+        AContent := StringReplaceAll(TIdURI.URLEncode('http://api/?' + AContent2), 'http://api/?', '');
+        Result := BytesOf(AContent);
+      end;
+    end;
+  end;
 end;
 {$IFEND}
 
 function TCrossWebRequest.GetStringVariable(Index: Integer): WBString;
 var
-  vInContent:TBytes;
+  vInContent: TBytes;
 begin
-  if Index = cstInHeaderMethod then begin
+  if Index = cstInHeaderMethod then
+  begin
     Result := UTF8ToWBString(FEnv.Method);
-  end else if Index = cstInHeaderProtocolVersion then begin
+  end
+  else if Index = cstInHeaderProtocolVersion then
+  begin
     Result := '';
-  end else if Index = cstInHeaderURL then begin
+  end
+  else if Index = cstInHeaderURL then
+  begin
     Result := UTF8ToWBString(FEnv.URL);
-  end else if Index = cstInHeaderQuery then begin
-    Result := UTF8ToWBString(URLDecode(PUTF8Char(FEnv.QueryString)));
-  end else if Index = cstInHeaderPathInfo then begin
+  end
+  else if Index = cstInHeaderQuery then
+  begin
+    Result := UTF8ToWBString(FEnv.QueryString);
+  end
+  else if Index = cstInHeaderPathInfo then
+  begin
     Result := UTF8ToWBString(FEnv.PathInfo);
-  end else if Index = cstInHeaderPathTranslated then begin
+  end
+  else if Index = cstInHeaderPathTranslated then
+  begin
     Result := UTF8ToWBString(FEnv.PathInfo);
-  end else if Index = cstInHeaderCacheControl then begin
+  end
+  else if Index = cstInHeaderCacheControl then
+  begin
     Result := '';
-  end else if Index = cstInHeaderAccept then begin
+  end
+  else if Index = cstInHeaderAccept then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('ACCEPT'));
-  end else if Index = cstInHeaderFrom then begin
+  end
+  else if Index = cstInHeaderFrom then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('FROM'));
-  end else if Index = cstInHeaderHost then begin
+  end
+  else if Index = cstInHeaderHost then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('HOST'));
-  end else if Index = cstInHeaderReferer then begin
+  end
+  else if Index = cstInHeaderReferer then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('REFERER'));
-  end else if Index = cstInHeaderUserAgent then begin
+  end
+  else if Index = cstInHeaderUserAgent then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('USER-AGENT'));
-  end else if Index = cstInContentEncoding then begin
+  end
+  else if Index = cstInContentEncoding then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('CONTENT-ENCODING'));
-  end else if Index = cstInContentType then begin
+  end
+  else if Index = cstInContentType then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('CONTENT-TYPE'));
-  end else if Index = cstInContentVersion then begin
+  end
+  else if Index = cstInContentVersion then
+  begin
     Result := '';
-  end else if Index = cstInHeaderDerivedFrom then begin
+  end
+  else if Index = cstInHeaderDerivedFrom then
+  begin
     Result := '';
-  end else if Index = cstInHeaderTitle then begin
+  end
+  else if Index = cstInHeaderTitle then
+  begin
     Result := '';
-  end else if Index = cstInHeaderRemoteAddr then begin
+  end
+  else if Index = cstInHeaderRemoteAddr then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('REMOTEIP'));
-  end else if Index = cstInHeaderRemoteHost then begin
+  end
+  else if Index = cstInHeaderRemoteHost then
+  begin
     Result := '';
-  end else if Index = cstInHeaderScriptName then begin
+  end
+  else if Index = cstInHeaderScriptName then
+  begin
     Result := '';
 {$IF CompilerVersion<30.0} //Delphi 10.2 move this to function RawContent
-  end else if Index = cstInContent then begin
+  end
+  else if Index = cstInContent then
+  begin
     begin
       vInContent := GetRawContent;
-      if vInContent <> nil then       
-      Result := TEncoding.UTF8.GetString(GetRawContent);
+      if vInContent <> nil then
+        Result := TEncoding.UTF8.GetString(GetRawContent);
     end;
-    
+
 {$IFEND}
-  end else if Index = cstInHeaderConnection then begin
+  end
+  else if Index = cstInHeaderConnection then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('CONNECTION'));
-  end else if Index = cstInHeaderCookie then begin
-    Result := UTF8ToWBString(URLDecode(PUTF8Char(FEnv.GetHeader('COOKIE'))));
-  end else if Index = cstInHeaderAuthorization then begin
-    Result := '';
+  end
+  else if Index = cstInHeaderCookie then
+  begin
+    Result := UTF8ToWBString(FEnv.GetHeader('COOKIE'));
+  end
+  else if Index = cstInHeaderAuthorization then
+  begin
+    Result := UTF8ToWBString(FEnv.GetHeader('Authorization'));
   end;
 end;
 
@@ -304,8 +385,7 @@ begin
   Result := 0;
 end;
 
-function TCrossWebRequest.WriteHeaders(StatusCode: Integer;
-  const ReasonString, Headers: WBString): Boolean;
+function TCrossWebRequest.WriteHeaders(StatusCode: Integer; const ReasonString, Headers: WBString): Boolean;
 begin
   Result := False;
 end;
@@ -324,8 +404,8 @@ end;
 
 constructor TCrossWebResponse.Create(HTTPRequest: TWebRequest);
 begin
-  Inherited Create(HTTPRequest);
-  FSent:=False;
+  inherited Create(HTTPRequest);
+  FSent := False;
 end;
 
 function TCrossWebResponse.GetContent: WBString;
@@ -383,34 +463,34 @@ end;
 procedure TCrossWebResponse.SendRedirect(const URI: WBString);
 begin
   Env.Redirect(URI);
-  Env.OutContent:=' ';
+  Env.OutContent := ' ';
   FSent := True;
 end;
 
 procedure TCrossWebResponse.SendResponse;
 var
-  vSendbyte:TBytes;
-  vSendType:string;
-  vSendTream:TStream;
+  vSendbyte: TBytes;
+  vSendType: string;
+  vSendTream: TStream;
 begin
   OutCookiesAndCustomHeaders;
   Response.StatusCode := Env.StatusCode;
-  if Length(Env.OutContent)>0 then
-    begin
-      Response.Send(Env.OutContent);
-    end;
+  if Length(Env.OutContent) > 0 then
+  begin
+    Response.Send(Env.OutContent);
+  end;
 
   if Assigned(env.OutPutstream) then
-    begin
-      vSendTream := Env.OutPutstream;
-      vSendTream.Position := 0;
+  begin
+    vSendTream := Env.OutPutstream;
+    vSendTream.Position := 0;
 //      vSendTream.CopyFrom(Env.OutPutstream,Env.OutPutstream.Size);
-      Response.Send(vSendTream,
-                  procedure(AConnection: ICrossConnection; ASuccess: Boolean)
-                  begin
-                    vSendTream.Free;
-                  end  );
-    end;
+    Response.Send(vSendTream,
+      procedure(AConnection: ICrossConnection; ASuccess: Boolean)
+      begin
+        vSendTream.Free;
+      end);
+  end;
   FSent := True;
 end;
 
@@ -435,8 +515,7 @@ begin
   SendStream(Value);
 end;
 
-procedure TCrossWebResponse.SetDateVariable(Index: Integer;
-  const Value: TDateTime);
+procedure TCrossWebResponse.SetDateVariable(Index: Integer; const Value: TDateTime);
 begin
 
 end;
@@ -456,8 +535,7 @@ begin
   Env.StatusCode := Value;
 end;
 
-procedure TCrossWebResponse.SetStringVariable(Index: Integer;
-  const Value: WBString);
+procedure TCrossWebResponse.SetStringVariable(Index: Integer; const Value: WBString);
 begin
   if Index = cstOutHeaderContentType then
     Response.ContentType := Value;
@@ -465,6 +543,8 @@ end;
 
 initialization
   //RegisterContentParser(TContentParser);
+
+
 
 end.
 

@@ -13,7 +13,7 @@ uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
   XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin,
   MVC.RedisM, MVC.RedisList, MVC.PageCache, MVC.DBPoolList,
-  System.RegularExpressions;
+  System.RegularExpressions, MVC.JWT;
 
 type
   TView = class(TPersistent)
@@ -29,6 +29,7 @@ type
     procedure CreateSession(); // 创建获取session
     procedure makeSession;
   public
+    JWT: TJWT;
     DbItem: TDbItem;
     Db: TDBConfig;
     Plugin: TPlugin;
@@ -73,8 +74,8 @@ type
     procedure Success(code: Integer = 0; msg: string = '');
     procedure Fail(code: Integer = -1; msg: string = '');
     function CDSToJSONText(cds: TFDQuery): string;
-    procedure setData(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
-    constructor Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
+    procedure setData(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoute: string);
+    constructor Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoute: string);
     destructor Destroy; override;
   end;
 
@@ -259,7 +260,7 @@ begin
     setAttr(key, (json.AsJSON()));
 end;
 
-procedure TView.setData(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
+procedure TView.setData(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoute: string);
 var
   webroot: string;
 begin
@@ -267,7 +268,7 @@ begin
   Db := DbItem.Db;
   htmlpars.Db := Db;
   self.ActionP := ActionPath;
-  self.ActionR := ActionRoule;
+  self.ActionR := ActionRoute;
   if (Trim(self.ActionP) <> '') then
   begin
     {$IFDEF MSWINDOWS}
@@ -400,6 +401,22 @@ var
   match: TMatch;
 begin
   Response.ContentType := 'application/json; charset=' + Config.document_charset;
+  S := Config.Corss_Origin.Allow_Origin;
+  if S <> '' then
+  begin
+    Response.SetCustomHeader('Access-Control-Allow-Origin', S);
+    S := Config.Corss_Origin.Allow_Headers;
+    if S <> '' then
+      Response.SetCustomHeader('Access-Control-Allow-Headers', S);
+    S := Config.Corss_Origin.Allow_Method;
+    if S <> '' then
+      Response.SetCustomHeader('Access-Control-Allow-Method', S);
+    if Config.Corss_Origin.Allow_Credentials then
+      Response.SetCustomHeader('Access-Control-Allow-Method', 'true')
+    else
+      Response.SetCustomHeader('Access-Control-Allow-Method', 'false');
+  end;
+
   Response.Content := json;
   Response.SendResponse;
 end;
@@ -452,16 +469,16 @@ begin
   result := Request.CookieFields.Values[key];
 end;
 
-constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoule: string);
+constructor TView.Create(Response_: TWebResponse; Request_: TWebRequest; ActionPath, ActionRoute: string);
 begin
-
+  JWT := TJWT.Create;
   Plugin := TPlugin.Create;
   params := TStringList.Create;
 //  Db := TDBConfig.Create();
 //  DbItem:= getDbFromPool;
 //  Db:=DbItem.Db;
   htmlpars := THTMLParser.Create();
-  setData(Response_, Request_, ActionPath, ActionRoule);
+  setData(Response_, Request_, ActionPath, ActionRoute);
 end;
 
 function TView.InputByIndex(index: Integer): string;
@@ -534,6 +551,7 @@ begin
   htmlpars.Free;
   params.Free;
   Plugin.Free;
+  JWT.Free;
  // Db.Free;
   inherited;
 end;
@@ -545,7 +563,7 @@ begin
   jo := SO();
   jo.I['code'] := code;
   if Trim(msg) = '' then
-    msg := '操作成功';
+    msg := '操作失败';
   jo.S['message'] := msg;
   ShowJSON(jo);
 end;

@@ -10,14 +10,14 @@ unit MVC.Command;
 interface
 
 uses
-  System.SysUtils, System.Variants, MVC.RouleItem, System.Rtti, System.Classes,
+  System.SysUtils, System.Variants, MVC.RouteItem, System.Rtti, System.Classes,
   Web.HTTPApp, System.DateUtils, MVC.SessionList, XSuperObject, SynWebConfig,
-  uInterceptor, uRouleMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
-  System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, MVC.ActionList,
-  MVC.DBPool, XSuperJSON, System.Generics.Collections, IdURI, Web.WebReq,
+  uInterceptor, uRouteMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
+  System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, XSuperJSON,
+  System.Generics.Collections, Web.WebReq,
   {$IFDEF MSWINDOWS} MVC.Main, Vcl.Forms, Winapi.Windows,
   {$IFDEF CROSS} CrossWebApp, {$ELSE} SynWebApp, {$ENDIF}
-  {$ELSE} CrossWebApp, {$ENDIF} MVC.Web;
+  {$ELSE} CrossWebApp, {$ENDIF}IdURI, MVC.JWT;
 
 type
   TMVCFun = class
@@ -27,15 +27,15 @@ type
     procedure showpagelist();
   public
     function RunCommand(): Boolean;
-    procedure Run(title: string);
+    procedure Run(title: string = '');
     constructor Create;
     destructor Destroy; override;
   end;
 
 var
-  _RTTIContext: TRttiContext;
+ // _RTTIContext: TRttiContext;
   _MVCFun: TMVCFun;
-  _RouleMap: TRouleMap = nil;
+  _RouteMap: TRouteMap = nil;
   _SessionListMap: TSessionList = nil;
   _SessionName: string;
   _rooturl: string;
@@ -44,6 +44,8 @@ var
   _PackageManager: TPackageManager = nil;
   _MIMEConfig: string;
   _directory_permission: TDictionary<string, Boolean>;
+  _ConfigJSON: ISuperObject;
+  _mime: TDictionary<string, string>;
 
 function check_directory_permission(path: string): Boolean;
 
@@ -55,7 +57,7 @@ function OpenConfigFile(): ISuperObject;
 
 function OpenMIMEFile(): ISuperObject;
 
-procedure OpenRoule(web: TWebModule; RouleMap_: TRouleMap; var Handled: boolean);
+procedure OpenRoute(_Request: TWebRequest; _Response: TWebResponse; RouteMap_: TRouteMap; var Handled: boolean);
 
 function DateTimeToGMT(const ADate: TDateTime): string;
 
@@ -67,23 +69,21 @@ procedure setDataBase(jo: ISuperObject);
 
 function StrToParamTypeValue(AValue: string; AParamType: TTypeKind): TValue;
 
-procedure Error404(web: TWebModule; url: string);
+procedure Error404(Response: TWebResponse; url: string);
 
-procedure CreateRouleMap();
+procedure CreateRouteMap();
+
+function getMimeType(extension: string): string;
 
 implementation
 
 uses
-  MVC.DES, MVC.ThSessionClear, MVC.RedisM, MVC.ActionClear, MVC.DBPoolList,
-  MVC.DBPoolClear, MVC.Config, MVC.Page;
+  MVC.DES, MVC.RedisM, MVC.DBPoolList, MVC.Config, MVC.Page, MVC.BaseController;
 
-var
-  _sessionclear: TThSessionClear;
-
-procedure CreateRouleMap();
+procedure CreateRouteMap();
 begin
-  if not Assigned(_RouleMap) then
-    _RouleMap := TRouleMap.Create;
+  if not Assigned(_RouteMap) then
+    _RouteMap := TRouteMap.Create;
 end;
 
 function check_directory_permission(path: string): Boolean;
@@ -93,20 +93,25 @@ var
 begin
   Result := true;
   ret := true;
-  for key in _directory_permission.Keys do
-  begin
-    if copy(path, 0, length(key)) = key then
+  MonitorEnter(_directory_permission);
+  try
+    for key in _directory_permission.Keys do
     begin
-      _directory_permission.TryGetValue(key, ret);
-      Result := ret;
-      break;
+      if copy(path, 0, length(key)) = key then
+      begin
+        _directory_permission.TryGetValue(key, ret);
+        Result := ret;
+        break;
+      end;
     end;
+  finally
+    MonitorExit(_directory_permission);
   end;
 end;
 
 procedure SetConfig(param: ISuperObject);
 var
-  jo: ISuperObject;
+  jo, jo_tmp: ISuperObject;
   s: string;
   directory: ISuperArray;
   i: integer;
@@ -119,7 +124,7 @@ begin
     __WebRoot__ := '.';
     template := 'view';                        // 模板根目录
     template_type := '.html';                  // 模板文件类型
-    roule_suffix := '';                     // 伪静态后缀文件名
+    route_suffix := '';                     // 伪静态后缀文件名
     session_start := true;                     // 启用session
     session_timer := 30;                        // session过期时间分钟
     bpl_Reload_timer := 5;                                     // bpl包检测时间间隔 默认5秒
@@ -136,6 +141,11 @@ begin
     Error500 := '';
     JsonToLower := false;
     session_name := '__guid_session';
+    Corss_Origin.Allow_Origin := '';											//跨域访问默认关闭
+    Corss_Origin.Allow_Headers := '';											//跨域 头信息 Origin, X-Requested-With
+    Corss_Origin.Allow_Method := '';											//跨域 方法 get, post
+    Corss_Origin.Allow_Credentials := false;
+
   end;
   jo := param.O['Config'];
   if (jo.Count > 0) then
@@ -148,8 +158,8 @@ begin
       Config.template := jo['template'].AsString;
     if jo['template_type'] <> nil then
       Config.template_type := jo['template_type'].AsString;
-    if jo['roule_suffix'] <> nil then
-      Config.roule_suffix := jo['roule_suffix'].AsString;
+    if jo['route_suffix'] <> nil then
+      Config.route_suffix := jo['route_suffix'].AsString;
     if jo['session_start'] <> nil then
       Config.session_start := jo['session_start'].AsBoolean;
     if jo['session_timer'] <> nil then
@@ -184,6 +194,20 @@ begin
     if jo['Error500'] <> nil then
       if jo['Error500'].AsString.Trim <> '' then
         Config.Error500 := Config.__WebRoot__ + '/' + jo['Error500'].AsString;
+    if (jo['Corss_Origin']<>nil) then
+    if (jo['Corss_Origin'].DataType = dtObject) then
+    begin
+      jo_tmp := jo['Corss_Origin'].AsObject;
+      if (jo_tmp['Allow_Origin'] <> nil) then
+        Config.Corss_Origin.Allow_Origin := jo_tmp['Allow_Origin'].AsString;
+      if (jo_tmp['Allow_Headers'] <> nil) then
+        Config.Corss_Origin.Allow_Headers := jo_tmp['Allow_Headers'].AsString;
+      if (jo_tmp['Allow_Method'] <> nil) then
+        Config.Corss_Origin.Allow_Method := jo_tmp['Allow_Method'].AsString;
+      if (jo_tmp['Allow_Credentials'] <> nil) then
+        Config.Corss_Origin.Allow_Credentials := jo_tmp['Allow_Credentials'].AsBoolean;
+    end;
+
     //获取访问路径权限
     directory := jo.A['directory'];
     if (directory.Length > 0) then
@@ -209,20 +233,22 @@ begin
   end;
 end;
 
-procedure OpenRoule(web: TWebModule; RouleMap_: TRouleMap; var Handled: boolean);
+procedure OpenRoute(_Request: TWebRequest; _Response: TWebResponse; RouteMap_: TRouteMap; var Handled: boolean);
 var
   Action: TObject;
+  Attribute: TCustomAttribute;
   ActoinClass: TRttiType;
   ActionMethod, SetParams, Interceptor, FreeDb, ShowHTML: TRttiMethod;
-  Response, Request, ActionPath, ActionRoule: TRttiProperty;
+  Response, Request, ActionPath, ActionRoute: TRttiProperty;
   url, url1: string;
-  item: TRouleItem;
+  item: TRouteItem;
   tmp: string;
   methodname: string;
   k: integer;
   ret: TValue;
   s, s1: string;
   sessionid: string;
+  InterceptorMethod: Boolean;
   //--------大量提供begin------------
   i: integer;
   ActionMethonValue: TRttiParameter;
@@ -232,77 +258,88 @@ var
   sValue: string;
   //-------大量提供end--------------
   params: TStringList;
-  actionitem: TActionItem;
+  assets: TMemoryStream;
+  assetsfile: string;
+  extension: string;
 begin
+  Handled := true;
 
-  web.Response.ContentEncoding := Config.document_charset;
-  web.Response.Server := 'IIS/6.0';
-  web.Response.Date := Now;
+  _Response.ContentEncoding := Config.document_charset;
+  _Response.Server := 'IIS/6.0';
+  _Response.Date := Now;
   {$IFDEF CROSS}
-  url := web.Request.PathInfo;
+  url := _Request.PathInfo;
   {$ELSE}
   {$IFDEF MSWINDOWS}
-  url := TIdURI.URLDecode(web.Request.PathInfo);
+  url := TIdURI.URLDecode(_Request.PathInfo);
   {$ELSE}
-  url := web.Request.PathInfo;
+  url := _Request.PathInfo;
   {$ENDIF }
   {$ENDIF}
+
+  if Config.__APP__ <> '' then
+  begin
+    url := url.Replace(Config.__APP__, '').Replace('//', '/');
+  end;
+
   if not check_directory_permission(url) then
   begin
-    Error404(web, url);
+    Error404(_Response, url);
     exit;
   end;
-  if Config.roule_suffix.Trim <> '' then
+  if Config.route_suffix.Trim <> '' then
   begin
-    if RightStr(url, Length(Config.roule_suffix)) = Config.roule_suffix then
-      url := url.Replace(Config.roule_suffix, '');
+    if RightStr(url, Length(Config.route_suffix)) = Config.route_suffix then
+      url := url.Replace(Config.route_suffix, '');
   end;
+
   k := Pos('.', url);
   if k <= 0 then
   begin
-    item := RouleMap_.GetRoule(url, url1, methodname);
+    item := RouteMap_.GetRoute(url, url1, methodname);
     if (item <> nil) then
     begin
       if (url.IndexOf('//') > -1) then
       begin
         url := url.Replace('//', '/');
-        web.Response.SendRedirect(url);
-        web.Response.SendResponse;
+        _Response.SendRedirect(url);
+        _Response.SendResponse;
         exit;
       end;
-      if (methodname = 'index') and (url.Substring(url.Length - 1) <> '/') then
+      if (item.Name <> '/') and (methodname = 'index') and (url.Substring(url.Length - 1) <> '/') then
       begin
-        web.Response.SendRedirect(url + '/');
-        web.Response.SendResponse;
+        _Response.SendRedirect(url + '/');
+        _Response.SendResponse;
         exit;
       end;
-      ActoinClass := _RTTIContext.GetType(item.Action);
-      ActionMethod := ActoinClass.GetMethod(methodname);
-      SetParams := ActoinClass.GetMethod('SetParams');
-      FreeDb := ActoinClass.GetMethod('FreeDb');
-      ShowHTML := ActoinClass.GetMethod('ShowHTML');
-      if item.Interceptor then
-        Interceptor := ActoinClass.GetMethod('Interceptor');
-      Request := ActoinClass.GetProperty('Request');
-      Response := ActoinClass.GetProperty('Response');
-      ActionPath := ActoinClass.GetProperty('ActionPath');
-      ActionRoule := ActoinClass.GetProperty('ActionRoule');
+      InterceptorMethod := item.isInterceptor;
+      ActoinClass := item.ActoinClass; // _RTTIContext.GetType(item.Action);
+      ActionMethod := item.ActionMethod(methodname); //ActoinClass.GetMethod(methodname);
+      if ActionMethod <> nil then
+      begin
+        for Attribute in ActionMethod.GetAttributes do
+        begin
+          if Attribute is TInterceptOfMethod then
+          begin
+            InterceptorMethod := (TInterceptOfMethod(Attribute)).isInterceptor;
+          end;
+        end;
+      end;
+      SetParams := item.SetParams; // ActoinClass.GetMethod('SetParams');
+      FreeDb := item.FreeDb; // ActoinClass.GetMethod('FreeDb');
+      ShowHTML := item.ShowHTML; // ActoinClass.GetMethod('ShowHTML');
+
+      Interceptor := item.Interceptor; // ActoinClass.GetMethod('Interceptor');
+      Request := item.Request; // ActoinClass.GetProperty('Request');
+      Response := item.Response; // ActoinClass.GetProperty('Response');
+      ActionPath := item.ActionPath; // ActoinClass.GetProperty('ActionPath');
+      ActionRoute := item.ActionRoute; // ActoinClass.GetProperty('ActionRoute');
       try
-//        actionitem := _ActionList.Get(item.Action.ClassName);
-//        if actionitem = nil then
-//        begin
-//          Action := item.Action.Create;
-//          actionitem := _ActionList.Add(Action);
-//        end
-//        else
-//        begin
-//          Action := actionitem.Action;
-//        end;
         Action := item.Action.Create;
-        Request.SetValue(Action, web.Request);
-        Response.SetValue(Action, web.Response);
+        Request.SetValue(Action, _Request);
+        Response.SetValue(Action, _Response);
         ActionPath.SetValue(Action, item.path);
-        ActionRoule.SetValue(Action, item.Name);
+        ActionRoute.SetValue(Action, item.Name);
         SetParams.Invoke(Action, []);
         if (ActionMethod <> nil) then
         begin
@@ -316,13 +353,13 @@ begin
               begin
                 ActionMethonValue := ActionMethonValues[i];
                 sParameters := ActionMethonValue.Name;   //参数名
-                if web.Request.MethodType = mtGet then  //从web.GET中提取值
-                  sValue := web.Request.QueryFields.Values[sParameters]
+                if _Request.MethodType = mtGet then  //从web.GET中提取值
+                  sValue := _Request.QueryFields.Values[sParameters]
                 else
                 begin
-                  sValue := web.Request.ContentFields.Values[sParameters]; //从web.POST中提取值
+                  sValue := _Request.ContentFields.Values[sParameters]; //从web.POST中提取值
                   if sValue = '' then
-                    sValue := web.Request.QueryFields.Values[sParameters];
+                    sValue := _Request.QueryFields.Values[sParameters];
                 end;
                 aValueArray[i] := StrToParamTypeValue(sValue, ActionMethonValue.ParamType.TypeKind); //根据参数数据类型，转换值，只传常量
               end;
@@ -350,24 +387,28 @@ begin
             end;
 
             //-----------------大量提供end------------------------
-            if item.Interceptor then
+            if InterceptorMethod then
             begin
               ret := Interceptor.Invoke(Action, []);
               if (not ret.AsBoolean) then
               begin
                 ActionMethod.Invoke(Action, aValueArray);
-                if web.Response.ContentType = '' then      //默认输出html页面
+                if _Response.ContentType = '' then      //默认输出html页面
                   ShowHTML.Invoke(Action, [methodname]);
               end
               else
               begin
-                Error404(web, url);
+                if _Response.Content = '' then
+                begin
+                  Error404(_Response, url);
+                end;
+                _Response.SendResponse;
               end;
             end
             else
             begin
               ActionMethod.Invoke(Action, aValueArray);
-              if web.Response.ContentType = '' then      //默认输出html页面
+              if _Response.ContentType = '' then      //默认输出html页面
                 ShowHTML.Invoke(Action, [methodname]);
             end;
           finally
@@ -376,65 +417,111 @@ begin
         end
         else
         begin
-          if item.Interceptor then
+          if InterceptorMethod then
           begin
             ret := Interceptor.Invoke(Action, []);
             if (not ret.AsBoolean) then
             begin
-              if web.Response.ContentType = '' then      //默认输出html页面
+              if _Response.ContentType = '' then      //默认输出html页面
                 ShowHTML.Invoke(Action, [methodname]);
+            end
+            else
+            begin
+              if _Response.Content = '' then
+              begin
+                Error404(_Response, url);
+              end;
             end;
           end
           else
           begin
-            if web.Response.ContentType = '' then      //默认输出html页面
+            if _Response.ContentType = '' then      //默认输出html页面
               ShowHTML.Invoke(Action, [methodname]);
           end;
         end;
       finally
         FreeDb.Invoke(Action, []);
-          //  _ActionList.FreeAction(actionitem);
         Action.Free;
-        Handled := true;
       end;
     end
     else
     begin
-      Error404(web, url);
+      Error404(_Response, url);
     end;
   end
   else
   begin
-    if (not Config.open_debug) and Config.open_cache then
+    if (not Config.open_debug) and Config.open_cache then   //开启缓存
     begin
-      web.Response.SetCustomHeader('Cache-Control', 'max-age=' + Config.cache_max_age);
-      web.Response.SetCustomHeader('Pragma', 'Pragma');
+      _Response.SetCustomHeader('Cache-Control', 'max-age=' + Config.cache_max_age);
+      _Response.SetCustomHeader('Pragma', 'Pragma');
       tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(now()));
-      web.Response.SetCustomHeader('Last-Modified', tmp);
+      _Response.SetCustomHeader('Last-Modified', tmp);
       tmp := DateTimeToGMT(TTimeZone.local.ToUniversalTime(IncHour(now(), 24)));
-      web.Response.SetCustomHeader('Expires', tmp);
+      _Response.SetCustomHeader('Expires', tmp);
     end
     else
     begin
-
-      web.Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
-      {$IFDEF MSWINDOWS}
-      {$IFNDEF CROSS}
-      web.Response.Content := WebApplicationDirectory + Config.__WebRoot__ + url;
-      web.Response.ContentType := '!STATICFILE';
-      {$ENDIF}
-      {$ENDIF}
+      _Response.SetCustomHeader('Cache-Control', 'no-cache,no-store'); //不使用缓存
+    end;
+    assetsfile := WebApplicationDirectory + Config.__WebRoot__ + url;
+    if FileExists(assetsfile) then
+    begin
+      assets := TMemoryStream.Create;
+      if Pos('?', assetsfile) > 0 then
+      begin
+        assetsfile := assetsfile.Substring(0, Pos('?', assetsfile));
+      end;
+      try
+        try
+          extension := ExtractFileExt(assetsfile).Replace('.', '');
+          assets.LoadFromFile(assetsfile);
+          _Response.ContentType := getMimeType(extension);
+          if _Response.ContentType <> '' then
+          begin
+            _Response.SendStream(assets);
+            _Response.SendResponse;
+          end
+          else
+          begin
+            Error404(_Response, url);
+          end;
+        except
+          Error404(_Response, url);
+        end;
+      finally
+        assets.Free;
+      end;
+    end
+    else
+    begin
+      Error404(_Response, url);
     end;
   end;
 end;
 
-procedure Error404(web: TWebModule; url: string);
+function getMimeType(extension: string): string;
+var
+  MimeType: string;
+begin
+  MonitorEnter(_mime);
+  try
+    if _mime.TryGetValue(extension, MimeType) then
+      Result := MimeType + '; charset=' + Config.document_charset
+    else
+      Result := '';
+  finally
+    MonitorExit(_mime);
+  end;
+end;
+
+procedure Error404(Response: TWebResponse; url: string);
 var
   s: string;
   page: Tpage;
 begin
-  web.Response.StatusCode := 404;
-  web.Response.ContentType := 'text/html; charset=' + Config.document_charset;
+  Response.StatusCode := 404;
+  Response.ContentType := 'text/html; charset=' + Config.document_charset;
   s := '<html><body><div style="text-align: left;">';
   s := s + '<div><h1>Error 404</h1></div>';
   s := s + '<hr><div>[ ' + url + ' ] Not Find Page' + '</div></div></body></html>';
@@ -451,8 +538,8 @@ begin
     end;
   end;
   log('Error 404 [ ' + url + ' ] Not Find Page');
-  web.Response.Content := s;
-  web.Response.SendResponse;
+  Response.Content := s;
+  Response.SendResponse;
 end;
 
 function StrToParamTypeValue(AValue: string; AParamType: TTypeKind): TValue;
@@ -515,7 +602,7 @@ begin
   f := TStringList.Create;
   try
     try
-      f.LoadFromFile(WebApplicationDirectory + Config.config);
+      f.LoadFromFile(WebApplicationDirectory + Config.config, TEncoding.UTF8);
       txt := f.Text.Trim;
       if Trim(key) = '' then
       begin
@@ -526,9 +613,6 @@ begin
         txt := DeCryptStr(txt, key);
       end;
       jo := SO(txt);
-      txt := jo.AsJSON();
-      jo.O['Server'].s['Port'];
-      SetConfig(jo);
     except
       log(Config.config + '无法加载配置文件');
       jo := nil;
@@ -543,15 +627,47 @@ end;
 function OpenMIMEFile(): ISuperObject;
 var
   f: TStringList;
-  jo: ISuperObject;
+  Extensions, MimeType: string;
+  json, jo: ISuperObject;
+  ja: ISuperArray;
+  i, j: integer;
   txt: string;
+  sp: TStringList;
 begin
   f := TStringList.Create;
   try
     try
       f.LoadFromFile(WebApplicationDirectory + Config.mime);
       txt := f.Text.Trim;
-      jo := SO(txt);
+      json := SO(txt);
+      if json.DataType = TDataType.dtArray then
+      begin
+        ja := json.AsArray;
+        for i := 0 to ja.Length - 1 do
+        begin
+
+          try
+            jo := ja.O[i];
+            Extensions := jo.s['Extensions'];
+            MimeType := jo.s['MimeType'];
+            sp := TStringList.Create;
+            try
+              sp.Delimiter := ';';
+              sp.DelimitedText := Extensions;
+              for j := 0 to sp.Count - 1 do
+              begin
+                if trim(sp[j]) <> '' then
+                  _mime.AddOrSetValue(sp[j], MimeType);
+              end;
+            finally
+              sp.Free;
+            end;
+          except
+            log('MIME配置文件错误,服务启动失败');
+            break;
+          end;
+        end;
+      end;
     except
       log(Config.mime + '无法加载配置文件');
       jo := nil;
@@ -587,20 +703,22 @@ begin
 
   //////////////////////////////////////////////////////////
   InitApplication; //启动服务
-  if WebRequestHandler <> nil then
-    WebRequestHandler.WebModuleClass := WebModuleClass;
+ // if WebRequestHandler <> nil then
+ //   WebRequestHandler.WebModuleClass := WebModuleClass;
   ////////////////////顺序不可更换//////////////////////////
   AppOpen := True;
   _LogList := TStringList.Create;
   _logThread := TLogTh.Create(false);
+  _mime := TDictionary<string, string>.Create;
   _directory_permission := TDictionary<string, Boolean>.Create;
   FPort := '0000';
   try
     try
       _MIMEConfig := OpenMIMEFile.AsJSON();
-      jo := OpenConfigFile();
+      jo := _ConfigJSON;
       if jo <> nil then
       begin
+        SetConfig(jo);
         FPort := jo.O['Server'].s['Port'];
       //////////////////////////////////////////
         syn_Port := FPort;
@@ -624,18 +742,15 @@ begin
           end;
         end;
         Global := TGlobal.Create;
+        JWT_Init; //JWT模块初始化
         if Config.open_package then
           _PackageManager := TPackageManager.Create;
-        CreateRouleMap();
+        CreateRouteMap();
         _SessionListMap := TSessionList.Create;
-        _sessionclear := TThSessionClear.Create(false);
+
         _Interceptor := TInterceptor.Create;
         _PageCache := TPageCache.Create;
-
-      //  _ActionList := TActionList.Create;
-      //  _ActoinClear := TActionClear.Create(False);
         _DBPoolList := TDBPoolList.Create;
-        _DBPoolClear := TDBPoolClear.Create(False);
         setDataBase(jo);
         log('StartService Port:' + FPort);
         AppRun := True;
@@ -657,32 +772,27 @@ begin
   AppClose := true;
   _directory_permission.Clear;
   _directory_permission.Free;
+  _mime.Free;
   if _logThread <> nil then
   begin
     _logThread.Terminate;
   end;
-  if _sessionclear <> nil then
+  if _SessionListMap <> nil then
   begin
-    _sessionclear.Terminate;
+    _SessionListMap.Terminate;
   end;
   if Config.open_package and (_PackageManager <> nil) then
   begin
     _PackageManager.isstop := true;
   end;
- // if _ActoinClear <> nil then
- //   _ActoinClear.Terminate;
-  if _DBPoolClear <> nil then
-    _DBPoolClear.Terminate;
+  if _DBPoolList <> nil then
+    _DBPoolList.Terminate;
 
   Sleep(200);
 
   if _logThread <> nil then
   begin
     _logThread.Free;
-  end;
-  if _sessionclear <> nil then
-  begin
-    _sessionclear.Free;
   end;
   if Config.open_package and (_PackageManager <> nil) then
   begin
@@ -706,16 +816,8 @@ begin
     Global.Free;
   if _PageCache <> nil then
     _PageCache.Free;
-  if _DbPool <> nil then
-    _DbPool.Free;
-//  if _ActoinClear <> nil then
- //   _ActoinClear.Free;
-//  if _ActionList <> nil then
- //   _ActionList.Free;
   if _DBPoolList <> nil then
     _DBPoolList.Free;
-  if _DBPoolClear <> nil then
-    _DBPoolClear.Free;
 end;
 
 function OpenPackageConfigFile(): ISuperObject;
@@ -760,7 +862,6 @@ var
   PoolSize: string;
 begin
   MVCDM := TMVCDM.Create(nil);
-  _DbPool := TDBPool.Create;
   MVCDM.DBManager.Active := false;
   try
     try
@@ -796,8 +897,6 @@ begin
           end;
 
           MVCDM.DBManager.AddConnectionDef(dbjo.CurrentKey, DriverID, oParams);
-//          if PoolSize <> '' then
-//            _DbPool.AddDb(1, dbjo.CurrentKey);
           if Config.open_debug then
             log('数据库配置:' + oParams.Text);
           oParams.Free;
@@ -834,14 +933,28 @@ end;
 procedure TMVCFun.Run(title: string);
 var
   hMutex: THandle;
+  appTitle: string;
 begin
-
+  appTitle := '';
   if config.config = '' then
     Config.config := 'resources/config.json';
   if config.mime = '' then
     Config.mime := 'resources/mime.json';
   if config.package_config = '' then
     Config.package_config := 'resources/package.json';
+  //////////////////////////////////////////////////
+  _ConfigJSON := OpenConfigFile();
+  if _ConfigJSON <> nil then
+  begin
+    if (_ConfigJSON['AppTitle'] <> nil) and (_ConfigJSON['AppTitle'].AsString <> '') then
+    begin
+      appTitle := _ConfigJSON['AppTitle'].AsString;
+    end;
+  end;
+  if appTitle <> '' then
+    title := appTitle;
+  if (appTitle = '') and (title = '') then
+    title := ExtractFileName(Application.ExeName).Replace('.exe', '');
   //////////////////////////
   ReportMemoryLeaksOnShutdown := True;
 	{$IFDEF CONSOLE}
@@ -938,12 +1051,12 @@ end;
 
 initialization
   _MVCFun := TMVCFun.Create;
-  CreateRouleMap;
+  CreateRouteMap;
 
 finalization
   _MVCFun.Free;
-  if Assigned(_RouleMap) then
-    _RouleMap.Free;
+  if Assigned(_RouteMap) then
+    _RouteMap.Free;
 
 end.
 

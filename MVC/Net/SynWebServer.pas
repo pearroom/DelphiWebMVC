@@ -9,7 +9,7 @@ interface
 
 uses
   SysUtils, Classes, IniFiles, HTTPApp, Contnrs, WebReq, SynCommons, SynCrtSock,
-  SynWebEnv, SynWebConfig;
+  SynWebEnv, SynWebConfig,MVC.Page;
 
 type
   TSynWebRequestHandler = class(TWebRequestHandler);
@@ -25,7 +25,6 @@ type
     function WebBrokerDispatch(const AEnv: TSynWebEnv): Boolean;
   protected
     FHttpServer: THttpApiServer;
-
   public
     procedure Start();
     property Active: Boolean read FActive;
@@ -110,25 +109,17 @@ function TSynWebServer.Process(AContext: THttpServerRequest): cardinal;
 var
   LEnv: TSynWebEnv;
 begin
+
+  LEnv := TSynWebEnv.Create(AContext);
   try
-    LEnv := TSynWebEnv.Create(AContext);
-    try
-      if WebBrokerDispatch(LEnv) then
-        Result := LEnv.StatusCode
-      else
-        Result := 404;
-    finally
-      LEnv.Free;
-    end;
-  except
-    on e: Exception do
-    begin
-      log(e.Message);
-      AContext.OutContent := StringTOUTF8('<HTML><BODY>' + '<H1>服务器运行出错</H1>' + '<P>' + UTF8ToString(AContext.Method + ' ' + AContext.URL) + '</P>' + '<P>' + e.Message + '</P>' + '</HTML></BODY>');
-      AContext.OutContentType := HTML_CONTENT_TYPE;
+    if WebBrokerDispatch(LEnv) then
+      Result := LEnv.StatusCode
+    else
       Result := 500;
-    end;
+  finally
+    LEnv.Free;
   end;
+
 end;
 
 procedure TSynWebServer.Start;
@@ -140,12 +131,43 @@ function TSynWebServer.WebBrokerDispatch(const AEnv: TSynWebEnv): Boolean;
 var
   HTTPRequest: TSynWebRequest;
   HTTPResponse: TSynWebResponse;
+  handled: Boolean;
+  s: string;
+  page: Tpage;
 begin
   HTTPRequest := TSynWebRequest.Create(AEnv);
   try
     HTTPResponse := TSynWebResponse.Create(HTTPRequest);
     try
-      Result := TSynWebRequestHandler(FReqHandler).HandleRequest(HTTPRequest, HTTPResponse);
+      try
+        OpenRoute(HTTPRequest, HTTPResponse, _RouteMap, handled);
+        Result := handled;
+      except
+        on e: Exception do
+        begin
+          log(HTTPRequest.PathInfo + ':' + e.Message);
+          s := '<html><body><div style="text-align: left;"><div><h1> Error 500 </h1></div>';
+          s := s + '<hr><div>' + e.Message + '</div></div></body></html>';
+          if Trim(Config.Error500) <> '' then
+          begin
+            if FileExists(Config.Error500) then
+            begin
+              page := TPage.Create(Config.Error500, nil, '');
+              try
+                s := page.HTML;
+              finally
+                page.Free;
+              end;
+            end;
+          end;
+          HTTPResponse.ContentType := 'text/html; charset=' + Config.document_charset;
+          HTTPResponse.Content := s;
+          HTTPResponse.SendResponse;
+          Result := false;
+        end;
+
+      end;
+    //  Result := TSynWebRequestHandler(FReqHandler).HandleRequest(HTTPRequest, HTTPResponse);
     finally
       HTTPResponse.Free;
     end;

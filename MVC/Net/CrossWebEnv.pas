@@ -291,7 +291,8 @@ begin
   FResponse := AResponse;
   FHost := GetHeader('HOST');
  // FRemoteIP := UTF8ToString(GetHeader('REMOTEIP'));
-  FRemoteIP:=ARequest.Connection.PeerAddr;  FMethod := StringToUTF8(FRequest.Method);
+  FRemoteIP:=ARequest.Connection.PeerAddr;
+  FMethod := StringToUTF8(FRequest.Method);
   FURL := PrepareURL;
   nAPos := Pos('#', FURL);
   nQPos := Pos('?', FURL);

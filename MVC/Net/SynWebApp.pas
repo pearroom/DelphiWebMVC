@@ -40,8 +40,8 @@ begin
   AppOpen := False;
   AppRun := False;
   AppClose := false;
-  self.MaxConnections := -1;
-  self.CacheConnections := true;
+ // self.MaxConnections := -1;
+ // self.CacheConnections := true;
 
   TThread.CreateAnonymousThread(
     procedure

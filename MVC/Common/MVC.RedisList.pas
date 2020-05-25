@@ -2,7 +2,7 @@
 {                                                       }
 {       DelphiWebMVC                                    }
 {       E-Mail:pearroom@yeah.net                        }
-{       版权所有 (C) 2019 苏兴迎(PRSoft)                }
+{       版权所�?(C) 2019 苏兴�?PRSoft)                }
 {                                                       }
 {*******************************************************}
 unit MVC.RedisList;
@@ -10,8 +10,7 @@ unit MVC.RedisList;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Generics.Collections, MVC.RedisM,
-  MVC.RedisClear;
+  System.SysUtils, System.Classes, System.Generics.Collections, MVC.RedisM;
 
 type
   TRedisItem = class
@@ -24,6 +23,7 @@ type
     procedure Setguid(const Value: string);
     procedure Settimerout(const Value: TDateTime);
     procedure Setisdel(const Value: Boolean);
+
   public
     item: TRedisM;
     property isdel: Boolean read Fisdel write Setisdel;
@@ -35,13 +35,14 @@ type
   end;
 
 type
-  TRedisList = class
+  TRedisList = class(TThread)
   private
-    _RedisClear: TRedisClear;
     initSize: integer;
     list: Tlist<TRedisItem>;
     function GetGUID: string;
     function additem(): TRedisItem;
+  protected
+    procedure Execute; override;
   public
     isclose: Boolean;
     procedure RunClear();
@@ -101,7 +102,7 @@ constructor TRedisList.Create(size: integer);
 var
   i: integer;
 begin
-  _RedisClear := TRedisClear.Create;
+  inherited Create(False);
   initSize := size;
   list := TList<TRedisItem>.Create();
   for i := 0 to size - 1 do
@@ -114,7 +115,6 @@ destructor TRedisList.Destroy;
 var
   i: Integer;
 begin
-  _RedisClear.Free;
   for i := 0 to list.Count - 1 do
   begin
     list[i].Free;
@@ -125,6 +125,26 @@ begin
 
   inherited;
 end;
+
+procedure TRedisList.Execute;
+var
+  k: Integer;
+begin
+  k := 0;
+  while not Terminated do
+  begin
+    Sleep(100);
+    Inc(k);
+    if k >= 100 then
+    begin
+      k := 0;
+      RunClear;
+
+    end;
+
+  end;
+end;
+
 
 function TRedisList.OpenRedis: TRedisItem;
 var
@@ -206,6 +226,7 @@ begin
   item.Free;
   inherited;
 end;
+
 
 procedure TRedisItem.Setguid(const Value: string);
 begin

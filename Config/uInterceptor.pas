@@ -3,7 +3,7 @@ unit uInterceptor;
 interface
 
 uses
-  System.SysUtils, MVC.View, System.Classes, MVC.BaseInterceptor;
+  System.SysUtils, System.Classes, MVC.View, MVC.BaseInterceptor;
 
 type
   TInterceptor = class(TBaseInterceptor)
@@ -25,11 +25,10 @@ begin
     if (SessionGet('user') = '') then
     begin
       Result := true;
-      Response.Content := '<script>window.location.href=''' + url + ''';</script>';
-     // Response.SendRedirect(url);
+    //  Response.Content := '<script>window.location.href=''' + url + ''';</script>';
+      Response.SendRedirect(url);
       Response.SendResponse;
     end;
-
   end;
 end;
 

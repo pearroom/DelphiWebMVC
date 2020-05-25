@@ -10,7 +10,7 @@ interface
 uses
   SysUtils, Classes, IniFiles, HTTPApp, WebBroker, Contnrs, WebReq,
   CrossWebReqRes, CrossWebEnv, Rtti, Net.CrossHttpServer, Net.CrossHttpParams,
-  Net.CrossSocket.Base, SynWebConfig, Web.HTTPProd, Web.ReqMulti, MVC.LogUnit;
+  Net.CrossSocket.Base, SynWebConfig, Web.HTTPProd, Web.ReqMulti, MVC.LogUnit,MVC.Page;
 
 var
   _LContext: TRttiContext;
@@ -47,6 +47,9 @@ type
   end;
 
 implementation
+
+uses
+  MVC.Command, MVC.Config;
 
 var
   RequestHandler: TWebRequestHandler = nil;
@@ -126,26 +129,15 @@ procedure TCrossWebServer.ONCrossHttpRequest(Sender: TObject; ARequest: ICrossHt
 var
   LEnv: TCrossWebEnv;
 begin
+
+  LEnv := TCrossWebEnv.Create(ARequest, AResponse);
   try
-    LEnv := TCrossWebEnv.Create(ARequest, AResponse);
-    try
-      if WebBrokerDispatch(LEnv) then
-        AResponse.StatusCode := LEnv.StatusCode
-      else
-      begin
-        AResponse.StatusCode := 404;
-      end;
-    finally
-      LEnv.Free;
-    end;
-  except
-    on e: Exception do
-    begin
-      log(e.Message);
-      AResponse.ContentType := 'text/html; charset=UTF-8';
+    if WebBrokerDispatch(LEnv) then
+      AResponse.StatusCode := LEnv.StatusCode
+    else
       AResponse.StatusCode := 500;
-      AResponse.Send(('<HTML><BODY>' + '<H1>服务器运行出错</H1>' + '<P>' + (ARequest.Method + ' ' + ARequest.RawPathAndParams) + '</P>' + '<P>' + e.Message + '</P>' + '</HTML></BODY>'));
-    end;
+  finally
+    LEnv.Free;
   end;
 end;
 
@@ -163,12 +155,43 @@ function TCrossWebServer.WebBrokerDispatch(const AEnv: TCrossWebEnv): Boolean;
 var
   HTTPRequest: TCrossWebRequest;
   HTTPResponse: TCrossWebResponse;
+  Handled: Boolean;
+  s: string;
+  page: Tpage;
 begin
   HTTPRequest := TCrossWebRequest.Create(AEnv);
   try
     HTTPResponse := TCrossWebResponse.Create(HTTPRequest);
     try
-      Result := TCrossWebRequestHandler(FReqHandler).HandleRequest(HTTPRequest, HTTPResponse);
+      try
+        OpenRoute(HTTPRequest, HTTPResponse, _RouteMap, Handled);
+        Result := Handled;
+      except
+        on e: Exception do
+        begin
+          log(HTTPRequest.PathInfo + ':' + e.Message);
+          s := '<html><body><div style="text-align: left;"><div><h1> Error 500 </h1></div>';
+          s := s + '<hr><div>' + e.Message + '</div></div></body></html>';
+          if Trim(Config.Error500) <> '' then
+          begin
+            if FileExists(Config.Error500) then
+            begin
+              page := TPage.Create(Config.Error500, nil, '');
+              try
+                s := page.HTML;
+              finally
+                page.Free;
+              end;
+            end;
+          end;
+          HTTPResponse.ContentType := 'text/html; charset=' + Config.document_charset;
+          HTTPResponse.Content := s;
+          HTTPResponse.SendResponse;
+          Result := false;
+        end;
+
+      end;
+    //  Result := TCrossWebRequestHandler(FReqHandler).HandleRequest(HTTPRequest, HTTPResponse);
     finally
       HTTPResponse.Free;
     end;

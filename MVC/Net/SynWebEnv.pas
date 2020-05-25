@@ -234,13 +234,28 @@ function TSynWebEnv.GetHeader(const AUpKey: RawUTF8; const ASource: RawUTF8 = ''
 var
   P, pUpKey, pSource: PUTF8Char;
   cVal: RawUTF8;
+  text:string;
+  headls:TStringList;
+  key:string;
 begin
-  pUpKey := PUTF8Char(AUpKey);
-  if ASource = '' then pSource := PUTF8Char(FContext.InHeaders)
-  else pSource := PUTF8Char(ASource);
-  P := StrPosI(pUpKey, pSource);
-  if IdemPCharAndGetNextItem(P, pUpKey, cVal, Sep) then Result := Trim(cVal)
-  else Result := '';
+  key:=AUpKey;
+  key:=key.Replace(':','');
+  headls:=TStringList.Create;
+  try
+    text:=FContext.InHeaders;
+    headls.Text:= text.Replace(': ','=');
+    Result:= headls.Values[key];
+  finally
+    headls.Free;
+  end;
+
+
+//  pUpKey := PUTF8Char(AUpKey);
+//  if ASource = '' then pSource := PUTF8Char(FContext.InHeaders)
+//  else pSource := PUTF8Char(ASource);
+//  P := StrPosI(pUpKey, pSource);
+//  if IdemPCharAndGetNextItem(P, pUpKey, cVal, Sep) then Result := Trim(cVal)
+//  else Result := '';
 end;
 
 constructor TSynWebEnv.Create(const AContext: THttpServerRequest);

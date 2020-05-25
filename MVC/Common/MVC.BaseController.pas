@@ -12,9 +12,16 @@ interface
 uses
   System.Classes, System.SysUtils, Web.HTTPApp, MVC.View, System.Net.URLClient,
   System.Net.HttpClientComponent, IdURI, IdGlobal, MVC.RedisM, MVC.RedisList,
-  xsuperobject, MVC.command, MVC.Config;
+  xsuperobject, MVC.command, MVC.Config, Web.ReqMulti;
 
-procedure SetRoule(name: string; ACtion: TClass; path: string = ''; isInterceptor: Boolean = True);
+procedure SetRoute(name: string; ACtion: TClass; path: string = ''; isInterceptor: Boolean = True);
+
+type
+  TInterceptOfMethod = class(TCustomAttribute)
+  public
+    isInterceptor: Boolean;
+    constructor Create(const Interceptor: Boolean);
+  end;
 
 type
   TBaseController = class(TPersistent)
@@ -22,11 +29,11 @@ type
     FRequest: TWebRequest;
     FResponse: TWebResponse;
     FActionPath: string;
-    FActionRoule: string;
+    FActionRoute: string;
     procedure SetRequest(const Value: TWebRequest);
     procedure SetResponse(const Value: TWebResponse);
     procedure SetActionPath(const Value: string);
-    procedure SetActionRoule(const Value: string);
+    procedure SetActionRoute(const Value: string);
   protected
     procedure CreateView(); virtual;
   public
@@ -54,15 +61,15 @@ type
     property Request: TWebRequest read FRequest write SetRequest;
     property Response: TWebResponse read FResponse write SetResponse;
     property ActionPath: string read FActionPath write SetActionPath;
-    property ActionRoule: string read FActionRoule write SetActionRoule;
+    property ActionRoute: string read FActionRoute write SetActionRoute;
   end;
 
 implementation
 
-procedure SetRoule(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
+procedure SetRoute(name: string; ACtion: TClass; path: string; isInterceptor: Boolean);
 begin
-   CreateRouleMap();
-  _RouleMap.SetRoule(name, ACtion, path, isInterceptor);
+  CreateRouteMap();
+  _RouteMap.SetRoute(name, ACtion, path, isInterceptor);
 end;
 
 { TBaseController }
@@ -131,9 +138,9 @@ begin
   FActionPath := Value;
 end;
 
-procedure TBaseController.SetActionRoule(const Value: string);
+procedure TBaseController.SetActionRoute(const Value: string);
 begin
-  FActionRoule := Value;
+  FActionRoute := Value;
 end;
 
 procedure TBaseController.SetParams;
@@ -141,11 +148,11 @@ begin
   try
     if View = nil then
     begin
-      View := TView.Create(Response, Request, ActionPath, ActionRoule);
+      View := TView.Create(Response, Request, ActionPath, ActionRoute);
       CreateView;
     end
     else
-      View.setData(Response, Request, ActionPath, ActionRoule);
+      View.setData(Response, Request, ActionPath, ActionRoute);
   except
     on e: Exception do
     begin
@@ -188,13 +195,14 @@ end;
 
 function TBaseController.AppPath: string;
 begin
-  Result := WebApplicationDirectory+Config.__WebRoot__+'/';
+  Result := WebApplicationDirectory + Config.__WebRoot__ + '/';
 end;
 
 constructor TBaseController.Create();
 begin
   View := nil;
   ActionPath := '';
+
 end;
 
 procedure TBaseController.CreateView;
@@ -239,6 +247,13 @@ begin
     end;
   end;
   Result := ret;
+end;
+
+{ TInterceptorMethod }
+
+constructor TInterceptOfMethod.Create(const Interceptor: Boolean);
+begin
+  isInterceptor := Interceptor;
 end;
 
 end.

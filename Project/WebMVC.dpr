@@ -12,7 +12,6 @@ program WebMVC;
 uses
   MVC.Command,
   MVC.Config,
-  uRouleMap in '..\Config\uRouleMap.pas',
   uTableMap in '..\Config\uTableMap.pas',
   uInterceptor in '..\Config\uInterceptor.pas',
   uDBConfig in '..\Config\uDBConfig.pas',
@@ -27,7 +26,8 @@ uses
   Plugin.Layui in '..\Plugin\Plugin.Layui.pas',
   Plugin.Tool in '..\Plugin\Plugin.Tool.pas',
   RoleService in '..\Service\RoleService.pas',
-  UsersService in '..\Service\UsersService.pas';
+  UsersService in '..\Service\UsersService.pas',
+  uRouteMap in '..\Config\uRouteMap.pas';
 
 {$R *.res}
 

@@ -3,13 +3,13 @@ unit uPlugin;
 interface
 
 uses
-  Plugin.Layui,Plugin.Tool;
+  Plugin.Layui, Plugin.Tool;
 
 type
   TPlugin = class
   public
     Layui: TLayui;
-    Tool:TTool;
+    Tool: TTool;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -21,7 +21,7 @@ implementation
 constructor TPlugin.Create;
 begin
   Layui := TLayui.Create;
-  Tool:=TTool.Create;
+  Tool := TTool.Create;
 end;
 
 destructor TPlugin.Destroy;

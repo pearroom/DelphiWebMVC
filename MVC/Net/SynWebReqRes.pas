@@ -7,7 +7,8 @@ unit SynWebReqRes;
 
 interface
 
-uses SysUtils, Classes, HTTPApp, SynCommons, SynCrtSock, SynWebEnv;
+uses
+  SysUtils, Classes, HTTPApp, SynCommons, SynCrtSock, SynWebEnv, IdURI;
 
 const
   // Request Header String
@@ -65,10 +66,12 @@ const
 
   // Ver 0.0.0.2 +
   // CompilerVersion<Delphi2009 or CompilerVersion>Delphi 10 Seattle
+
 type
 {$IF (CompilerVersion<20.0) OR (CompilerVersion>=30.0) }
   WBString = string;
 {$ELSE}
+
   WBString = AnsiString;
 {$IFEND}
 
@@ -103,8 +106,7 @@ type
     // Write WBString contents back to client
     function WriteString(const AString: WBString): Boolean; override;
     // Write HTTP header WBString
-    function WriteHeaders(StatusCode: Integer;
-      const ReasonString, Headers: WBString): Boolean; override;
+    function WriteHeaders(StatusCode: Integer; const ReasonString, Headers: WBString): Boolean; override;
     function GetFieldByName(const Name: WBString): WBString; override;
   end;
 
@@ -140,6 +142,7 @@ type
 
   // Ver 0.0.0.2 +
 function UTF8ToWBString(const AVal: RawUTF8): WBString;
+
 function WBStringToUTF8(const AVal: WBString): RawUTF8;
 
 implementation
@@ -189,8 +192,10 @@ function TSynWebRequest.GetIntegerVariable(Index: Integer): Integer;
 begin
   if Index = cstInContentLength then
     Result := StrToIntDef(UTF8ToString(FEnv.GetHeader('CONTENT-LENGTH:')), 0)
-  else if Index = cstInHeaderServerPort then Result := 80
-  else Result := 0;
+  else if Index = cstInHeaderServerPort then
+    Result := 80
+  else
+    Result := 0;
 end;
 
 function TSynWebRequest.GetInternalPathInfo: WBString;
@@ -214,63 +219,136 @@ end;
 {$IF CompilerVersion>=30.0}
 
 function TSynWebRequest.GetRawContent: TBytes;
+var
+  AContent, AContent2: AnsiString;
+  k: Integer;
 begin
-  RawByteStringToBytes(Context.InContent, Result);
+  if ContentType.StartsWith('multipart/form-data') then
+  begin
+    RawByteStringToBytes(Context.InContent, Result);
+  end
+  else
+  begin
+    if (Pos('{', Context.InContent) > 0) and (Pos('}', Context.InContent) > 0) then
+    begin
+      AContent := Context.InContent;
+    end
+    else
+    begin
+      k := TEncoding.UTF8.GetCharCount(BytesOf(Context.InContent));
+      if (k > 0) then
+      begin
+        AContent := EncodingGetString(ContentType, BytesOf(Context.InContent));
+        if (Context.InContent <> AContent) then
+          AContent := StringReplaceAll(TIdURI.URLEncode('http://api/?' + AContent), 'http://api/?', '');
+      end
+      else
+        AContent := Context.InContent;
+    end;
+    RawByteStringToBytes(AContent, Result);
+  end;
 end;
 {$IFEND}
 
 function TSynWebRequest.GetStringVariable(Index: Integer): WBString;
 begin
-  if Index = cstInHeaderMethod then begin
+  if Index = cstInHeaderMethod then
+  begin
     Result := UTF8ToWBString(FEnv.Method);
-  end else if Index = cstInHeaderProtocolVersion then begin
+  end
+  else if Index = cstInHeaderProtocolVersion then
+  begin
     Result := '';
-  end else if Index = cstInHeaderURL then begin
+  end
+  else if Index = cstInHeaderURL then
+  begin
     Result := UTF8ToWBString(FEnv.URL);
-  end else if Index = cstInHeaderQuery then begin
-    Result := UTF8ToWBString(URLDecode(FEnv.QueryString));
-  end else if Index = cstInHeaderPathInfo then begin
+  end
+  else if Index = cstInHeaderQuery then
+  begin
+    Result := UTF8ToWBString((FEnv.QueryString));
+  end
+  else if Index = cstInHeaderPathInfo then
+  begin
     Result := UTF8ToWBString(FEnv.PathInfo);
-  end else if Index = cstInHeaderPathTranslated then begin
+  end
+  else if Index = cstInHeaderPathTranslated then
+  begin
     Result := UTF8ToWBString(FEnv.PathInfo);
-  end else if Index = cstInHeaderCacheControl then begin
+  end
+  else if Index = cstInHeaderCacheControl then
+  begin
     Result := '';
-  end else if Index = cstInHeaderAccept then begin
+  end
+  else if Index = cstInHeaderAccept then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('ACCEPT:'));
-  end else if Index = cstInHeaderFrom then begin
+  end
+  else if Index = cstInHeaderFrom then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('FROM:'));
-  end else if Index = cstInHeaderHost then begin
+  end
+  else if Index = cstInHeaderHost then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('HOST:'));
-  end else if Index = cstInHeaderReferer then begin
+  end
+  else if Index = cstInHeaderReferer then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('REFERER:'));
-  end else if Index = cstInHeaderUserAgent then begin
+  end
+  else if Index = cstInHeaderUserAgent then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('USER-AGENT:'));
-  end else if Index = cstInContentEncoding then begin
+  end
+  else if Index = cstInContentEncoding then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('CONTENT-ENCODING:'));
-  end else if Index = cstInContentType then begin
+  end
+  else if Index = cstInContentType then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('CONTENT-TYPE:'));
-  end else if Index = cstInContentVersion then begin
+  end
+  else if Index = cstInContentVersion then
+  begin
     Result := '';
-  end else if Index = cstInHeaderDerivedFrom then begin
+  end
+  else if Index = cstInHeaderDerivedFrom then
+  begin
     Result := '';
-  end else if Index = cstInHeaderTitle then begin
+  end
+  else if Index = cstInHeaderTitle then
+  begin
     Result := '';
-  end else if Index = cstInHeaderRemoteAddr then begin
+  end
+  else if Index = cstInHeaderRemoteAddr then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('REMOTEIP:'));
-  end else if Index = cstInHeaderRemoteHost then begin
+  end
+  else if Index = cstInHeaderRemoteHost then
+  begin
     Result := '';
-  end else if Index = cstInHeaderScriptName then begin
+  end
+  else if Index = cstInHeaderScriptName then
+  begin
     Result := '';
 {$IF CompilerVersion<30.0} //Delphi 10.2 move this to function RawContent
-  end else if Index = cstInContent then begin
+  end
+  else if Index = cstInContent then
+  begin
     Result := Context.InContent;
 {$IFEND}
-  end else if Index = cstInHeaderConnection then begin
+  end
+  else if Index = cstInHeaderConnection then
+  begin
     Result := UTF8ToWBString(FEnv.GetHeader('CONNECTION:'));
-  end else if Index = cstInHeaderCookie then begin
-    Result := UTF8ToWBString(URLDecode(FEnv.GetHeader('COOKIE:')));
-  end else if Index = cstInHeaderAuthorization then begin
-    Result := '';
+  end
+  else if Index = cstInHeaderCookie then
+  begin
+    Result := UTF8ToWBString((FEnv.GetHeader('COOKIE:')));
+  end
+  else if Index = cstInHeaderAuthorization then
+  begin
+    Result := UTF8ToWBString(FEnv.GetHeader('Authorization:'));
   end;
 end;
 
@@ -294,8 +372,7 @@ begin
   Result := 0;
 end;
 
-function TSynWebRequest.WriteHeaders(StatusCode: Integer;
-  const ReasonString, Headers: WBString): Boolean;
+function TSynWebRequest.WriteHeaders(StatusCode: Integer; const ReasonString, Headers: WBString): Boolean;
 begin
   Result := False;
 end;
@@ -314,8 +391,8 @@ end;
 
 constructor TSynWebResponse.Create(HTTPRequest: TWebRequest);
 begin
-  Inherited Create(HTTPRequest);
-  FSent:=False;
+  inherited Create(HTTPRequest);
+  FSent := False;
 end;
 
 function TSynWebResponse.GetContent: WBString;
@@ -373,7 +450,7 @@ end;
 procedure TSynWebResponse.SendRedirect(const URI: WBString);
 begin
   Env.Redirect(URI);
-  Env.Context.OutContent:=' ';
+  Env.Context.OutContent := ' ';
   FSent := True;
 end;
 
@@ -404,8 +481,7 @@ begin
   SendStream(Value);
 end;
 
-procedure TSynWebResponse.SetDateVariable(Index: Integer;
-  const Value: TDateTime);
+procedure TSynWebResponse.SetDateVariable(Index: Integer; const Value: TDateTime);
 begin
 
 end;
@@ -425,8 +501,7 @@ begin
   Env.StatusCode := Value;
 end;
 
-procedure TSynWebResponse.SetStringVariable(Index: Integer;
-  const Value: WBString);
+procedure TSynWebResponse.SetStringVariable(Index: Integer; const Value: WBString);
 begin
   if Index = cstOutHeaderContentType then
     Context.OutContentType := WBStringToUTF8(Value);
@@ -434,6 +509,8 @@ end;
 
 initialization
   //RegisterContentParser(TContentParser);
+
+
 
 end.
 

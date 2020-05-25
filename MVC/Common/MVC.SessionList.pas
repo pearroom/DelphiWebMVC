@@ -13,9 +13,13 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections, MVC.LogUnit;
 
 type
-  TSessionList = class
+  TSessionList = class(TThread)
     SessionLs_vlue: TDictionary<string, string>;
     SessionLs_timerout: TDictionary<string, string>;
+  private
+    procedure clearMap;
+  protected
+    procedure Execute; override;
   public
     function getValueByKey(sessionid: string): string;
     function getTimeroutByKey(sessionid: string): string;
@@ -32,10 +36,52 @@ implementation
 
 
 { TSessionList2 }
+procedure TSessionList.Execute;
+var
+  k: Integer;
+begin
+  k := 0;
+  while not Terminated do
+  begin
+    Sleep(10);
+    Inc(k);
+    if k >= 1000 then
+    begin
+      k := 0;
+      clearMap;
 
+    end;
+
+  end;
+end;
+ procedure TSessionList.clearMap();
+var
+  key, s: string;
+begin
+  try
+      for key in SessionLs_timerout.Keys do
+      begin
+        s := SessionLs_timerout.Items[key];
+        if s.Trim <> '' then
+        begin
+          if Now() >= StrToDateTime(s) then
+          begin
+            if deleteSession(key) then
+            begin
+            //  log('«Â¿ÌSession-' + key);
+              break;
+            end;
+
+          end;
+        end;
+      end;
+  except
+    Exit;
+  end;
+end;
 constructor TSessionList.Create();
 begin
-
+  inherited Create(False);
   SessionLs_vlue := TDictionary<string, string>.Create;
   SessionLs_timerout := TDictionary<string, string>.Create;
 end;

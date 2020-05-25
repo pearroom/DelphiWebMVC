@@ -34,10 +34,14 @@ type
   end;
 
 type
-  TDBPoolList = class
+  TDBPoolList = class(TThread)
   private
     DBList: TDictionary<string, TDbItem>;
     function GetGUID: string;
+    procedure Cleardata();
+    { Private declarations }
+  protected
+    procedure Execute; override;
   public
     isstop: boolean;
     function Add(Db: TDBConfig): TDbItem;
@@ -174,8 +178,14 @@ begin
   end;
 end;
 
+procedure TDBPoolList.Cleardata;
+begin
+ ClearAction;
+end;
+
 constructor TDBPoolList.Create;
 begin
+  inherited Create(False);
   isstop := false;
   DBList := TDictionary<string, TDbItem>.Create;
 end;
@@ -199,6 +209,34 @@ begin
   DBList.Free;
 
   inherited;
+end;
+
+procedure TDBPoolList.Execute;
+var
+  k: Integer;
+begin
+  k := 0;
+  while not Terminated do
+  begin
+
+    try
+      Inc(k);
+      if k >= 1000 then
+      begin
+        k := 0;
+        try
+          Cleardata;
+        except
+          on e: Exception do
+            log(e.Message);
+        end;
+      end;
+    finally
+      Sleep(10);
+    end;
+  end;
+  _DBPoolList.isstop := true;
+  Sleep(200);
 end;
 
 function TDBPoolList.Get(): TDbItem;
