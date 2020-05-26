@@ -1,19 +1,15 @@
 # DelphiWebMVC使用说明:
-	版本:1.0
 	运行时使用管理员权限。
-	项目用到mORMot代码库 https://github.com/synopse/mORMot
-	项目主页：http://www.delphiwebmvc.com
+	我的博客：https://my.oschina.net/delphimvc
+	相关视频：https://my.oschina.net/delphimvc/blog/4291418
+	开发手册: http://129.211.87.47/doc/help.html
 	讨论QQ群: 685072623
-
-	开发工具:delphi xe10.2 
+	开发工具:delphi xe10.3
 	注意:win10系统以管理员权限运行
-	数据库支持MySQL,SQLite,MSSQL,Oracle,其它数据库可自行进行添加。
+	数据库支持MySQL,SQLite,MSSQL,Oracle
 	
 	Controller  : 控制器类存放目录
-	Common 		: 框架相关代码
 	Config 		: 项目配置相关代码
-	Module 		: 数据库引擎及webbroker服务代码
-	Syn 		: https.sys相关类库
 	Publish 	: 视图页面js,css,html,数据库配置相关资源
 	Project 	: 工程文件
 	
@@ -35,6 +31,32 @@
 		"TimeOut":60,
 		"ReadTimeOut":10
 	},
+	"Config":{
+		"__APP__":"",
+		"__WebRoot__":"WebRoot",
+		"template":"view",
+		"template_type":".html",
+		"document_charset":"utf-8",
+		"sessoin_name":"__guid_session",
+		"Route_suffix":"",
+		"session_start":true,
+		"session_timer":30,
+		"bpl_Reload_timer":5,
+		"bpl_unload_timer":10,
+		"open_package":false,
+		"open_log":false,
+		"open_cache":true,
+		"cache_max_age":"315360000",
+		"open_interceptor":true,
+		"show_sql":false,
+		"open_debug":true,
+		"directory":[
+			{
+				"path":"/view/data/",
+				"permission":false
+			}
+		]
+	},	
 	"DBConfig":{
 		"MYSQL": {
 			"DriverID": "MySQL",
@@ -85,80 +107,24 @@
 			"POOL_MaximumItems": "50"
 		}
 	}
-}
-
-	框架各项参数设置：
-	unit uConfig;
-
-	interface
-
-	const
-	  __APP__='Admin';            				// 应用名称 ,可当做虚拟目录使用
-	  template = 'view';                        // 模板根目录
-	  template_type = '.html';                  // 模板文件类型
-	  session_start = true;                     // 启用session
-	  session_timer = 0;                        // session过期时间分钟  0 不过期
-	  config = 'resources/config.json';         // 配置文件地址
-	  mime = 'resources/mime.json';             // mime配置文件地址
-	  open_log = true;                          // 开启日志;open_debug=true并开启日志将在UI显示
-	  open_cache = true;                        // 开启缓存模式open_debug=false时有效
-	  open_interceptor = true;                  // 开启拦截器
-	  default_charset = 'utf-8';                // 字符集
-	  password_key = '';                        // 配置文件秘钥设置,为空时不启用秘钥,结合加密工具使用.
-	  open_debug = false;                        // 开发者模式缓存功能将会失效,开启前先清理浏览器缓存
-
-	implementation
-
-	end.
 	
-	数据库引用
-	unit uDBConfig;
 
-	interface
+	
 
-	uses
-	  DBSQLite, DBMySql;
 
-	type
-	  TDBConfig = class
-	  public
-		Default: TDBSQLite;   //必须有Default成员变量名
-		MYSQL: TDBMySql;
-		constructor Create;
-		destructor Destroy; override;
-	  end;
-
-	implementation
-
-	{ TDBConfig }
-
-	constructor TDBConfig.Create;
-	begin
-	  Default := TDBSQLite.Create('SQLite');
-	  MYSQL := TDBMySql.Create('MYSQL');
-	end;
-
-	destructor TDBConfig.Destroy;
-	begin
-	  Default.Free;
-	  MYSQL.Free;
-	  inherited;
-	end;
-
-	end.
 
 	路由配置：
-	Config/uRouleMap.pas配置相关路由
+	Config/uRouteMap.pas配置相关路由
 	例:
-	unit uRouleMap;
+	unit uRouteMap;
 
 	interface
 
 	uses
-	  Roule;
+	  Route;
 
 	type
-	  TRouleMap = class(TRoule)
+	  TRouteMap = class(TRoute)
 	  public
 		constructor Create(); override;
 	  end;
@@ -168,14 +134,14 @@
 	uses
 	  MainController, CaiWuController, FirstController, IndexController, KuCunController, LoginController, UsersController, XiaoShouController;
 
-	constructor TRouleMap.Create;
+	constructor TRouteMap.Create;
 	begin
 	  inherited;
 	//路径,控制器,视图目录,是否拦截
-	  SetRoule(name: string; ACtion: TClass; path: string = '';isInterceptor:Boolean=True);
-	  SetRoule('', TLoginController, 'login');
-	  SetRoule('Main', TMainController, 'main');
-	  SetRoule('Users', TUsersController, 'users');
+	//SetRoute(name: string; ACtion: TClass; path: string = '';isInterceptor:Boolean=True);
+	  SetRoute('', TLoginController, 'login');
+	  SetRoute('Main', TMainController, 'main');
+	  SetRoute('Users', TUsersController, 'users');
 	end;
 
 	end.
