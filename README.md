@@ -1,11 +1,11 @@
 # DelphiWebMVC介绍:
-	我的博客：https://my.oschina.net/delphimvc
-	相关视频：https://my.oschina.net/delphimvc/blog/4291418
-	开发手册: http://129.211.87.47/doc/help.html
-	讨论QQ群: 685072623
-	开发工具:delphi xe10.3
-	注意:win10系统以管理员权限运行
-	数据库支持MySQL,SQLite,MSSQL,Oracle
+我的博客：https://my.oschina.net/delphimvc<BR>
+相关视频：https://my.oschina.net/delphimvc/blog/4291418<BR>
+开发手册：http://129.211.87.47/doc/help.html<BR>
+讨论QQ群: 685072623<BR>
+开发工具:delphi xe10.3<BR>
+注意:win10系统以管理员权限运行<BR>
+数据库支持MySQL,SQLite,MSSQL,Oracle<BR>
 	
 	Controller  : 控制器类存放目录
 	Config 		: 项目配置相关代码
