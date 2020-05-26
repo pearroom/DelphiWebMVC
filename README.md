@@ -1,4 +1,5 @@
 # DelphiWebMVC介绍:
+安装指南：https://my.oschina.net/delphimvc/blog/1581715<BR>
 我的博客：https://my.oschina.net/delphimvc<BR>
 相关视频：https://my.oschina.net/delphimvc/blog/4291418<BR>
 开发手册：http://129.211.87.47/doc/help.html<BR>
