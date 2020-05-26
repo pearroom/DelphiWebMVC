@@ -6,4 +6,4 @@
 开发工具:delphi xe10.3<BR>
 注意:win10系统以管理员权限运行<BR>
 数据库支持MySQL,SQLite,MSSQL,Oracle<BR>
-[![asciicast](视频介绍)](http://129.211.87.47/mp4/play.mp4)
+[视频介绍](http://129.211.87.47/mp4/play.mp4)
