@@ -1,5 +1,4 @@
-# DelphiWebMVC使用说明:
-	运行时使用管理员权限。
+# DelphiWebMVC介绍:
 	我的博客：https://my.oschina.net/delphimvc
 	相关视频：https://my.oschina.net/delphimvc/blog/4291418
 	开发手册: http://129.211.87.47/doc/help.html
