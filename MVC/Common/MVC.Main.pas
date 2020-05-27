@@ -283,7 +283,7 @@ end;
 
 procedure TMVCMain.stat1Click(Sender: TObject);
 begin
-  ShellExecute(0, nil, PChar('https://github.com/pearroom/DelphiWebMVC'), nil, nil, SW_SHOWNOACTIVATE);
+  ShellExecute(0, nil, PChar('https://my.oschina.net/delphimvc'), nil, nil, SW_SHOWNOACTIVATE);
 end;
 
 procedure TMVCMain.FormClose(Sender: TObject; var Action: TCloseAction);

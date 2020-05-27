@@ -78,7 +78,7 @@ object MVCMain: TMVCMain
     Top = 33
     Width = 510
     Height = 353
-    ActivePage = ts3
+    ActivePage = ts5
     Align = alClient
     MultiLine = True
     Style = tsFlatButtons
@@ -481,7 +481,7 @@ object MVCMain: TMVCMain
     Cursor = crHandPoint
     Panels = <
       item
-        Text = 'https://github.com/pearroom/DelphiWebMVC'
+        Text = 'https://my.oschina.net/delphimvc'
         Width = 370
       end
       item
