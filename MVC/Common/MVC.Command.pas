@@ -12,9 +12,9 @@ interface
 uses
   System.SysUtils, System.Variants, MVC.RouteItem, System.Rtti, System.Classes,
   Web.HTTPApp, System.DateUtils, MVC.SessionList, XSuperObject, SynWebConfig,
-  uInterceptor, uRouteMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin,
-  System.StrUtils, MVC.PackageManager, MVC.PageCache, MVC.DM, XSuperJSON,
-  System.Generics.Collections, Web.WebReq,
+  uInterceptor, uRouteMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin, System.StrUtils,
+  MVC.PackageManager, MVC.PageCache, MVC.DM, XSuperJSON, System.Generics.Collections,
+  Web.WebReq,
   {$IFDEF MSWINDOWS} MVC.Main, Vcl.Forms, Winapi.Windows,
   {$IFDEF CROSS} CrossWebApp, {$ELSE} SynWebApp, {$ENDIF}
   {$ELSE} CrossWebApp, {$ENDIF}IdURI, MVC.JWT;
@@ -25,6 +25,8 @@ type
     isShow: boolean;
     PageList: TStringList;
     procedure showpagelist();
+    procedure CreateConfig;
+    procedure CreateMIME;
   public
     function RunCommand(): Boolean;
     procedure Run(title: string = '');
@@ -121,7 +123,7 @@ begin
   with Config do
   begin
     __APP__ := '';                               // 应用名称 ,可当做虚拟目录使用
-    __WebRoot__ := '.';
+    __WebRoot__ := 'WebRoot';
     template := 'view';                        // 模板根目录
     template_type := '.html';                  // 模板文件类型
     route_suffix := '';                     // 伪静态后缀文件名
@@ -150,63 +152,63 @@ begin
   jo := param.O['Config'];
   if (jo.Count > 0) then
   begin
-    if jo['__APP__'] <> nil then
+    if jo.Check('__APP__') then
       Config.__APP__ := jo['__APP__'].AsString;
-    if jo['__WebRoot__'] <> nil then
+    if jo.Check('__WebRoot__') then
       Config.__WebRoot__ := jo['__WebRoot__'].AsString;
-    if jo['template'] <> nil then
+    if jo.Check('template') then
       Config.template := jo['template'].AsString;
-    if jo['template_type'] <> nil then
+    if jo.Check('template_type') then
       Config.template_type := jo['template_type'].AsString;
-    if jo['route_suffix'] <> nil then
+    if jo.Check('route_suffix') then
       Config.route_suffix := jo['route_suffix'].AsString;
-    if jo['session_start'] <> nil then
+    if jo.Check('session_start') then
       Config.session_start := jo['session_start'].AsBoolean;
-    if jo['session_timer'] <> nil then
+    if jo.Check('session_timer') then
       Config.session_timer := jo['session_timer'].AsInteger;
-    if jo['bpl_Reload_timer'] <> nil then
+    if jo.Check('bpl_Reload_timer') then
       Config.bpl_Reload_timer := jo['bpl_Reload_timer'].AsInteger;
-    if jo['bpl_unload_timer'] <> nil then
+    if jo.Check('bpl_unload_timer') then
       Config.bpl_unload_timer := jo['bpl_unload_timer'].AsInteger;
-    if jo['open_package'] <> nil then
+    if jo.Check('open_package') then
       Config.open_package := jo['open_package'].AsBoolean;
-    if jo['open_log'] <> nil then
+    if jo.Check('open_log') then
       Config.open_log := jo['open_log'].AsBoolean;
-    if jo['open_cache'] <> nil then
+    if jo.Check('open_cache') then
       Config.open_cache := jo['open_cache'].AsBoolean;
-    if jo['cache_max_age'] <> nil then
+    if jo.Check('cache_max_age') then
       Config.cache_max_age := jo['cache_max_age'].AsString;
-    if jo['open_interceptor'] <> nil then
+    if jo.Check('open_interceptor') then
       Config.open_interceptor := jo['open_interceptor'].AsBoolean;
-    if jo['document_charset'] <> nil then
+    if jo.Check('document_charset') then
       Config.document_charset := jo['document_charset'].AsString;
-    if jo['show_sql'] <> nil then
+    if jo.Check('show_sql') then
       Config.show_sql := jo['show_sql'].AsBoolean;
-    if jo['open_debug'] <> nil then
+    if jo.Check('open_debug') then
       Config.open_debug := jo['open_debug'].AsBoolean;
-    if jo['sessoin_name'] <> nil then
+    if jo.Check('sessoin_name') then
       Config.session_name := jo['sessoin_name'].AsString;
-    if jo['JsonToLower'] <> nil then
+    if jo.Check('JsonToLower') then
       Config.JsonToLower := jo['JsonToLower'].AsBoolean;
-    if jo['Error404'] <> nil then
+    if jo.Check('Error404') then
       if jo['Error404'].AsString.Trim <> '' then
         Config.Error404 := Config.__WebRoot__ + '/' + jo['Error404'].AsString;
-    if jo['Error500'] <> nil then
+    if jo.Check('Error500') then
       if jo['Error500'].AsString.Trim <> '' then
         Config.Error500 := Config.__WebRoot__ + '/' + jo['Error500'].AsString;
-    if (jo['Corss_Origin']<>nil) then
-    if (jo['Corss_Origin'].DataType = dtObject) then
-    begin
-      jo_tmp := jo['Corss_Origin'].AsObject;
-      if (jo_tmp['Allow_Origin'] <> nil) then
-        Config.Corss_Origin.Allow_Origin := jo_tmp['Allow_Origin'].AsString;
-      if (jo_tmp['Allow_Headers'] <> nil) then
-        Config.Corss_Origin.Allow_Headers := jo_tmp['Allow_Headers'].AsString;
-      if (jo_tmp['Allow_Method'] <> nil) then
-        Config.Corss_Origin.Allow_Method := jo_tmp['Allow_Method'].AsString;
-      if (jo_tmp['Allow_Credentials'] <> nil) then
-        Config.Corss_Origin.Allow_Credentials := jo_tmp['Allow_Credentials'].AsBoolean;
-    end;
+    if (jo.Check('Corss_Origin')) then
+      if (jo['Corss_Origin'].DataType = dtObject) then
+      begin
+        jo_tmp := jo['Corss_Origin'].AsObject;
+        if (jo_tmp.Check('Allow_Origin')) then
+          Config.Corss_Origin.Allow_Origin := jo_tmp['Allow_Origin'].AsString;
+        if (jo_tmp.Check('Allow_Headers')) then
+          Config.Corss_Origin.Allow_Headers := jo_tmp['Allow_Headers'].AsString;
+        if (jo_tmp.Check('Allow_Method')) then
+          Config.Corss_Origin.Allow_Method := jo_tmp['Allow_Method'].AsString;
+        if (jo_tmp.Check('Allow_Credentials')) then
+          Config.Corss_Origin.Allow_Credentials := jo_tmp['Allow_Credentials'].AsBoolean;
+      end;
 
     //获取访问路径权限
     directory := jo.A['directory'];
@@ -770,9 +772,12 @@ end;
 procedure CloseServer();
 begin
   AppClose := true;
+
   _directory_permission.Clear;
   _directory_permission.Free;
+  _directory_permission := nil;
   _mime.Free;
+  _mime := nil;
   if _logThread <> nil then
   begin
     _logThread.Terminate;
@@ -793,31 +798,56 @@ begin
   if _logThread <> nil then
   begin
     _logThread.Free;
+    _logThread := nil;
   end;
   if Config.open_package and (_PackageManager <> nil) then
   begin
     _PackageManager.Free;
+    _PackageManager := nil;
   end;
   if _LogList <> nil then
   begin
     _LogList.Clear;
     _LogList.Free;
+    _LogList := nil;
   end;
   if _Interceptor <> nil then
+  begin
     _Interceptor.Free;
+    _Interceptor := nil;
+  end;
   if _SessionListMap <> nil then
+  begin
     _SessionListMap.Free;
+    _SessionListMap := nil;
+  end;
 
   if MVCDM <> nil then
+  begin
     MVCDM.Free;
+    MVCDM := nil;
+  end;
   if _RedisList <> nil then
+  begin
     _RedisList.Free;
+    _RedisList := nil;
+  end;
   if Global <> nil then
+  begin
     Global.Free;
+    Global := nil;
+  end;
   if _PageCache <> nil then
+  begin
     _PageCache.Free;
+    _PageCache := nil;
+  end;
   if _DBPoolList <> nil then
+  begin
     _DBPoolList.Free;
+    _DBPoolList := nil;
+  end;
+  FreeApplication;
 end;
 
 function OpenPackageConfigFile(): ISuperObject;
@@ -935,13 +965,36 @@ var
   hMutex: THandle;
   appTitle: string;
 begin
+
   appTitle := '';
+
   if config.config = '' then
     Config.config := 'resources/config.json';
   if config.mime = '' then
     Config.mime := 'resources/mime.json';
   if config.package_config = '' then
     Config.package_config := 'resources/package.json';
+
+  if (not DirectoryExists('resources')) then
+  begin
+    CreateDir('resources');
+  end;
+  if (not DirectoryExists('WebRoot')) then
+  begin
+    CreateDir('WebRoot');
+  end;
+  if (not DirectoryExists('WebRoot/view')) then
+  begin
+    CreateDir('WebRoot/view');
+  end;
+  if not FileExists(config.config) then
+  begin
+    CreateConfig;
+  end;
+  if not FileExists(config.mime) then
+  begin
+    CreateMIME;
+  end;
   //////////////////////////////////////////////////
   _ConfigJSON := OpenConfigFile();
   if _ConfigJSON <> nil then
@@ -998,6 +1051,141 @@ end;
 constructor TMVCFun.Create;
 begin
   PageList := TStringList.Create;
+end;
+
+procedure TMVCFun.CreateConfig;
+var
+  jo: ISuperObject;
+  mms: TStringList;
+begin
+  jo := so();
+
+  jo.S['AppTitle'] := 'WebMVC';
+  jo.O['Server'].s['Port'] := '8004';
+  jo.O['Server'].s['Compress'] := 'deflate';
+  jo.O['Server'].i['HTTPQueueLength'] := 1000;
+  jo.O['Server'].i['ChildThreadCount'] := 10;
+
+  jo.O['Config'].s['__APP__'] := '';
+  jo.O['Config'].B['open_log'] := true;
+  jo.O['Config'].B['open_cache'] := true;
+  jo.O['Config'].B['open_interceptor'] := true;
+  jo.O['Config'].B['show_sql'] := true;
+  jo.O['Config'].B['open_debug'] := true;
+
+  jo.O['DBConfig'].O['SQLite'].s['DriverID'] := 'SQLite';
+  jo.O['DBConfig'].O['SQLite'].s['Database'] := 'sqlite.db';
+  jo.O['DBConfig'].O['SQLite'].s['User_Name'] := '';
+  jo.O['DBConfig'].O['SQLite'].s['Password'] := '';
+  jo.O['DBConfig'].O['SQLite'].s['OpenMode'] := 'CreateUTF8';
+  jo.O['DBConfig'].O['SQLite'].s['Pooled'] := 'True';
+  jo.O['DBConfig'].O['SQLite'].s['POOL_CleanupTimeout'] := '30000';
+  jo.O['DBConfig'].O['SQLite'].s['POOL_ExpireTimeout'] := '90000';
+  jo.O['DBConfig'].O['SQLite'].s['POOL_MaximumItems'] := '50';
+  mms := TStringList.Create;
+  mms.Text := jo.AsJSON(true);
+  mms.SaveToFile(Config.config, TEncoding.UTF8);
+  mms.Free;
+
+end;
+
+procedure TMVCFun.CreateMIME;
+var
+  ja: ISuperArray;
+  jo: ISuperObject;
+  mms: TStringList;
+begin
+  ja := sa();
+  jo := so();
+  jo.S['Extensions'] := 'css';
+  jo.S['MimeType'] := 'text/css';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'html;htm';
+  jo.S['MimeType'] := 'text/html';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'js';
+  jo.S['MimeType'] := 'text/javascript';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'jpeg;jpg';
+  jo.S['MimeType'] := 'image/jpeg';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'png';
+  jo.S['MimeType'] := 'image/x-png';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'ico';
+  jo.S['MimeType'] := 'image/x-icon';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'gif';
+  jo.S['MimeType'] := 'image/gif';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'bmp';
+  jo.S['MimeType'] := 'image/bmp';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'xml';
+  jo.S['MimeType'] := 'text/xml';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'json';
+  jo.S['MimeType'] := 'text/json';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'svg';
+  jo.S['MimeType'] := 'image/svg+xml';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'woff';
+  jo.S['MimeType'] := 'application/font-woff';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'woff2';
+  jo.S['MimeType'] := 'application/font-woff2';
+  ja.Add(jo);
+
+  jo := so();
+  jo.S['Extensions'] := 'rtx';
+  jo.S['MimeType'] := 'text/richtext';
+  ja.Add(jo);
+  jo := so();
+  jo.S['Extensions'] := 'zip';
+  jo.S['MimeType'] := 'application/x-zip-compressed';
+  ja.Add(jo);
+  jo := so();
+  jo.S['Extensions'] := 'txt';
+  jo.S['MimeType'] := 'text/plain';
+  ja.Add(jo);
+  jo := so();
+  jo.S['Extensions'] := 'svg;svgz';
+  jo.S['MimeType'] := 'image/svg+xml';
+  ja.Add(jo);
+  jo := so();
+  jo.S['Extensions'] := 'apk';
+  jo.S['MimeType'] := 'application/vnd.android.package-archive';
+  ja.Add(jo);
+
+  mms := TStringList.Create;
+  mms.Text := ja.AsJSON(true);
+  mms.SaveToFile(Config.mime, TEncoding.UTF8);
+  mms.Free;
 end;
 
 destructor TMVCFun.Destroy;

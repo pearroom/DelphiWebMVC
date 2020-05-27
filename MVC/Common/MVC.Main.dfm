@@ -25,9 +25,9 @@ object MVCMain: TMVCMain
     Align = alTop
     TabOrder = 0
     object ButtonOpenBrowser: TButton
-      Left = 76
+      Left = 149
       Top = 1
-      Width = 360
+      Width = 287
       Height = 31
       Align = alClient
       Caption = 'Open Browser'
@@ -62,6 +62,16 @@ object MVCMain: TMVCMain
       Text = '0'
       ExplicitHeight = 27
     end
+    object btnStart: TButton
+      Left = 76
+      Top = 1
+      Width = 73
+      Height = 31
+      Align = alLeft
+      Caption = 'Start'
+      TabOrder = 3
+      OnClick = btnStartClick
+    end
   end
   object pgc1: TPageControl
     Left = 0
@@ -74,21 +84,22 @@ object MVCMain: TMVCMain
     Style = tsFlatButtons
     TabOrder = 1
     object ts3: TTabSheet
-      Caption = #26085#24535
+      Caption = 'Log'
       ImageIndex = 2
       object pnl2: TPanel
         Left = 0
         Top = 0
         Width = 502
-        Height = 27
+        Height = 32
         Align = alTop
+        BevelKind = bkTile
         BevelOuter = bvNone
         TabOrder = 0
         object lbllog: TLabel
-          Left = 499
+          Left = 495
           Top = 0
           Width = 3
-          Height = 27
+          Height = 28
           Align = alRight
           Layout = tlCenter
           ExplicitHeight = 13
@@ -96,26 +107,26 @@ object MVCMain: TMVCMain
         object btnlogget: TButton
           Left = 0
           Top = 0
-          Width = 75
-          Height = 27
+          Width = 67
+          Height = 28
           Align = alLeft
-          Caption = #21047#26032
+          Caption = 'Refresh'
           TabOrder = 0
           OnClick = btnloggetClick
         end
       end
       object mmolog: TMemo
         Left = 0
-        Top = 27
+        Top = 32
         Width = 502
-        Height = 295
+        Height = 290
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 1
       end
     end
     object ts1: TTabSheet
-      Caption = #32531#23384
+      Caption = 'Cache'
       ImageIndex = 2
       object Panel2: TPanel
         Left = 0
@@ -132,7 +143,7 @@ object MVCMain: TMVCMain
           Width = 67
           Height = 28
           Align = alLeft
-          Caption = #21047#26032
+          Caption = 'Refresh'
           TabOrder = 0
           OnClick = btnseachClick
         end
@@ -142,7 +153,7 @@ object MVCMain: TMVCMain
           Width = 72
           Height = 28
           Align = alLeft
-          Caption = #31227#38500
+          Caption = 'Remove'
           TabOrder = 1
           OnClick = btndelClick
         end
@@ -152,7 +163,7 @@ object MVCMain: TMVCMain
           Width = 72
           Height = 28
           Align = alLeft
-          Caption = #31227#38500#20840#37096
+          Caption = 'RemoveAll'
           TabOrder = 2
           OnClick = btndelallClick
         end
@@ -176,8 +187,165 @@ object MVCMain: TMVCMain
         end
       end
     end
+    object ts4: TTabSheet
+      Caption = 'Session'
+      ImageIndex = 3
+      object pnl3: TPanel
+        Left = 0
+        Top = 0
+        Width = 502
+        Height = 32
+        Align = alTop
+        BevelKind = bkTile
+        BevelOuter = bvNone
+        TabOrder = 0
+        object btnSession: TButton
+          Left = 0
+          Top = 0
+          Width = 67
+          Height = 28
+          Align = alLeft
+          Caption = 'Refresh'
+          TabOrder = 0
+          OnClick = btnSessionClick
+        end
+        object btnRemoveSession: TButton
+          Left = 67
+          Top = 0
+          Width = 72
+          Height = 28
+          Align = alLeft
+          Caption = 'Remove'
+          TabOrder = 1
+          OnClick = btnRemoveSessionClick
+        end
+        object btnRemoveSessionAll: TButton
+          Left = 139
+          Top = 0
+          Width = 72
+          Height = 28
+          Align = alLeft
+          Caption = 'RemoveAll'
+          TabOrder = 2
+          OnClick = btnRemoveSessionAllClick
+        end
+      end
+      object lstSession: TListBox
+        Left = 0
+        Top = 32
+        Width = 502
+        Height = 290
+        Align = alClient
+        ItemHeight = 13
+        TabOrder = 1
+      end
+    end
+    object ts5: TTabSheet
+      Caption = 'Config'
+      ImageIndex = 4
+      object mmoConfig: TMemo
+        Left = 0
+        Top = 32
+        Width = 502
+        Height = 290
+        Align = alClient
+        ScrollBars = ssBoth
+        TabOrder = 0
+      end
+      object pnl4: TPanel
+        Left = 0
+        Top = 0
+        Width = 502
+        Height = 32
+        Align = alTop
+        BevelKind = bkTile
+        BevelOuter = bvNone
+        TabOrder = 1
+        object lb1: TLabel
+          Left = 495
+          Top = 0
+          Width = 3
+          Height = 28
+          Align = alRight
+          Layout = tlCenter
+          ExplicitHeight = 13
+        end
+        object btnSaveConfig: TButton
+          Left = 67
+          Top = 0
+          Width = 67
+          Height = 28
+          Align = alLeft
+          Caption = 'Save'
+          TabOrder = 0
+          OnClick = btnSaveConfigClick
+        end
+        object btnRefreshConfig: TButton
+          Left = 0
+          Top = 0
+          Width = 67
+          Height = 28
+          Align = alLeft
+          Caption = 'Refresh'
+          TabOrder = 1
+          OnClick = btnRefreshConfigClick
+        end
+      end
+    end
+    object ts6: TTabSheet
+      Caption = 'MIME'
+      ImageIndex = 5
+      object mmoMIME: TMemo
+        Left = 0
+        Top = 32
+        Width = 502
+        Height = 290
+        Align = alClient
+        ScrollBars = ssVertical
+        TabOrder = 0
+      end
+      object pnl5: TPanel
+        Left = 0
+        Top = 0
+        Width = 502
+        Height = 32
+        Align = alTop
+        BevelKind = bkTile
+        BevelOuter = bvNone
+        TabOrder = 1
+        object lb2: TLabel
+          Left = 495
+          Top = 0
+          Width = 3
+          Height = 28
+          Align = alRight
+          Layout = tlCenter
+          ExplicitHeight = 13
+        end
+        object btnSaveMime: TButton
+          Left = 67
+          Top = 0
+          Width = 67
+          Height = 28
+          Align = alLeft
+          Caption = 'Save'
+          TabOrder = 0
+          OnClick = btnSaveMimeClick
+        end
+        object btnRefreshMime: TButton
+          Left = 0
+          Top = 0
+          Width = 67
+          Height = 28
+          Align = alLeft
+          Caption = 'Refresh'
+          TabOrder = 1
+          OnClick = btnRefreshMimeClick
+        end
+      end
+    end
     object ts2: TTabSheet
-      Caption = #20851#20110
+      Caption = 'About'
       ImageIndex = 2
       object pnl1: TPanel
         Left = 0
@@ -313,11 +481,11 @@ object MVCMain: TMVCMain
     Cursor = crHandPoint
     Panels = <
       item
-        Text = #23448#32593':http://www.delphiwebmvc.com '
-        Width = 250
+        Text = 'https://github.com/pearroom/DelphiWebMVC'
+        Width = 370
       end
       item
-        Text = #26080#27861#35775#38382#26102#35831#20351#29992#31649#29702#21592#26435#38480#36816#34892#26412#31243#24207
+        Text = #38656#20351#29992#31649#29702#21592#26435#38480#36816#34892
         Width = 50
       end>
     OnClick = stat1Click

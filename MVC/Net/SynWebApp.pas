@@ -27,6 +27,8 @@ type
 
 procedure InitApplication;
 
+procedure FreeApplication;
+
 implementation
 
 uses
@@ -70,13 +72,20 @@ end;
 
 destructor TSynWebApplication.Destroy;
 begin
-  fServer.Free;
+  if fServer <> nil then
+    fServer.Free;
+  fServer := nil;
   inherited;
 end;
 
 procedure InitApplication;
 begin
   Application := TSynWebApplication.Create(nil);
+end;
+
+procedure FreeApplication;
+begin
+  Application.Free;
 end;
 
 initialization

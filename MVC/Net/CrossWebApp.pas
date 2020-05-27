@@ -26,7 +26,7 @@ type
   end;
 
 procedure InitApplication;
-
+procedure FreeApplication;
 implementation
 
 { TCrossWebApplication }
@@ -65,7 +65,9 @@ end;
 
 destructor TCrossWebApplication.Destroy;
 begin
-  fServer.Free;
+  if fServer <> nil then
+    fServer.Free;
+  fServer := nil;
   inherited;
 end;
 
@@ -73,7 +75,10 @@ procedure InitApplication;
 begin
   Application := TCrossWebApplication.Create(nil);
 end;
-
+procedure FreeApplication;
+begin
+  Application.Free;
+end;
 initialization
 
 

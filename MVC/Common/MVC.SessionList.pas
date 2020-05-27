@@ -26,7 +26,9 @@ type
     function setValueByKey(sessionid: string; value: string): boolean;
     function setTimeroutByKey(sessionid: string; timerout: string): boolean;
     function deleteSession(key: string): boolean;
+    procedure delAllSessioin();
     function editTimerOut(sessionid: string; value: string): boolean;
+    procedure getAllSession(var list: TStringList);
     constructor Create();
     destructor Destroy; override;
   end;
@@ -54,36 +56,51 @@ begin
 
   end;
 end;
- procedure TSessionList.clearMap();
+
+procedure TSessionList.clearMap();
 var
   key, s: string;
 begin
   try
-      for key in SessionLs_timerout.Keys do
+    for key in SessionLs_timerout.Keys do
+    begin
+      s := SessionLs_timerout.Items[key];
+      if s.Trim <> '' then
       begin
-        s := SessionLs_timerout.Items[key];
-        if s.Trim <> '' then
+        if Now() >= StrToDateTime(s) then
         begin
-          if Now() >= StrToDateTime(s) then
+          if deleteSession(key) then
           begin
-            if deleteSession(key) then
-            begin
             //  log('«Â¿ÌSession-' + key);
-              break;
-            end;
-
+            break;
           end;
+
         end;
       end;
+    end;
   except
     Exit;
   end;
 end;
+
 constructor TSessionList.Create();
 begin
   inherited Create(False);
   SessionLs_vlue := TDictionary<string, string>.Create;
   SessionLs_timerout := TDictionary<string, string>.Create;
+end;
+
+procedure TSessionList.delAllSessioin;
+begin
+  MonitorEnter(SessionLs_vlue);
+  MonitorEnter(SessionLs_timerout);
+  try
+    SessionLs_vlue.Clear;
+    SessionLs_timerout.Clear;
+  finally
+    MonitorExit(SessionLs_vlue);
+    MonitorExit(SessionLs_timerout);
+  end;
 end;
 
 function TSessionList.deleteSession(key: string): boolean;
@@ -132,6 +149,29 @@ begin
       MonitorExit(SessionLs_timerout);
     end;
   end;
+end;
+
+procedure TSessionList.getAllSession(var list: TStringList);
+var
+  key: string;
+  i: Integer;
+  tmp_list: TDictionary<string, string>;
+begin
+  MonitorEnter(SessionLs_timerout);
+  tmp_list := TDictionary<string, string>.Create(SessionLs_timerout);
+  MonitorExit(SessionLs_timerout);
+  i := 0;
+  try
+    for key in tmp_list.Keys do
+    begin
+      list.Add('[' + i.ToString + '] KEY:' + key + ' TimeOut:' + tmp_list[key]);
+      inc(i);
+    end;
+  finally
+    tmp_list.Clear;
+    tmp_list.Free;
+  end;
+
 end;
 
 function TSessionList.getTimeroutByKey(sessionid: string): string;
