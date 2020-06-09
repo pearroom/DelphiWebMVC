@@ -11,9 +11,8 @@ interface
 
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
-  XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin,
-  MVC.RedisM, MVC.RedisList, MVC.PageCache, MVC.DBPoolList,
-  System.RegularExpressions, MVC.JWT;
+  XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin, MVC.RedisM,
+  MVC.RedisList, MVC.PageCache, MVC.DBPoolList, System.RegularExpressions, MVC.JWT;
 
 type
   TView = class(TPersistent)
@@ -578,6 +577,8 @@ begin
   if (Request.MethodType = mtPost) then
   begin
     result := Request.ContentFields.Values[param];
+    if Trim(Result) = '' then
+      result := Request.QueryFields.Values[param];
   end
   else if (Request.MethodType = mtGet) then
   begin

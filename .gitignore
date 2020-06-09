@@ -66,3 +66,4 @@ __recovery/
 # Castalia statistics file (since XE7 Castalia is distributed with Delphi)
 *.stat
 *.txt
+Publish/WebRoot/qrcode/77A2C88B60654D7BA9B1FEAEBD343B11.bmp

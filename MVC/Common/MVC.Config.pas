@@ -38,6 +38,7 @@ type
     Error500: string;
     JsonToLower: boolean;													// 返回json数据以小写形式显示
     Corss_Origin: TCorss_Origin;													// 支持跨域访问
+    auto_start:Boolean;														// 启动自动启动 窗口模式 有效
   end;
 
 var

@@ -147,11 +147,13 @@ begin
     Corss_Origin.Allow_Headers := '';											//跨域 头信息 Origin, X-Requested-With
     Corss_Origin.Allow_Method := '';											//跨域 方法 get, post
     Corss_Origin.Allow_Credentials := false;
-
+    auto_start := false;
   end;
   jo := param.O['Config'];
   if (jo.Count > 0) then
   begin
+    if jo.Check('auto_start') then
+      Config.auto_start := jo['auto_start'].AsBoolean;
     if jo.Check('__APP__') then
       Config.__APP__ := jo['__APP__'].AsString;
     if jo.Check('__WebRoot__') then
@@ -793,7 +795,7 @@ begin
   if _DBPoolList <> nil then
     _DBPoolList.Terminate;
 
-  Sleep(200);
+  Sleep(500);
 
   if _logThread <> nil then
   begin
@@ -999,10 +1001,10 @@ begin
   _ConfigJSON := OpenConfigFile();
   if _ConfigJSON <> nil then
   begin
-    if (_ConfigJSON['AppTitle'] <> nil) and (_ConfigJSON['AppTitle'].AsString <> '') then
-    begin
+    if _ConfigJSON.Check('AppTitle') then
       appTitle := _ConfigJSON['AppTitle'].AsString;
-    end;
+    if _ConfigJSON['Config'].AsObject.Check('auto_start') then
+      Config.auto_start := _ConfigJSON.O['Config']['auto_start'].AsBoolean;
   end;
   if appTitle <> '' then
     title := appTitle;

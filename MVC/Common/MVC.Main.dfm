@@ -86,6 +86,10 @@ object MVCMain: TMVCMain
     object ts3: TTabSheet
       Caption = 'Log'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pnl2: TPanel
         Left = 0
         Top = 0
@@ -99,10 +103,9 @@ object MVCMain: TMVCMain
           Left = 495
           Top = 0
           Width = 3
-          Height = 28
+          Height = 13
           Align = alRight
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object btnlogget: TButton
           Left = 0
@@ -128,6 +131,10 @@ object MVCMain: TMVCMain
     object ts1: TTabSheet
       Caption = 'Cache'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel2: TPanel
         Left = 0
         Top = 0
@@ -190,6 +197,10 @@ object MVCMain: TMVCMain
     object ts4: TTabSheet
       Caption = 'Session'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pnl3: TPanel
         Left = 0
         Top = 0
@@ -295,6 +306,10 @@ object MVCMain: TMVCMain
     object ts6: TTabSheet
       Caption = 'MIME'
       ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mmoMIME: TMemo
         Left = 0
         Top = 32
@@ -317,10 +332,9 @@ object MVCMain: TMVCMain
           Left = 495
           Top = 0
           Width = 3
-          Height = 28
+          Height = 13
           Align = alRight
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object btnSaveMime: TButton
           Left = 67
@@ -347,6 +361,10 @@ object MVCMain: TMVCMain
     object ts2: TTabSheet
       Caption = 'About'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object pnl1: TPanel
         Left = 0
         Top = 0

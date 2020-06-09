@@ -274,6 +274,8 @@ procedure TMVCMain.ButtonOpenBrowserClick(Sender: TObject);
 var
   LURL: string;
 begin
+  if btnStart.Caption = 'Start' then
+    btnStart.Click;
   if Config.__APP__.Trim <> '' then
     LURL := Format('http://localhost:%s%s', [edtport.Text, '/' + Config.__APP__ + '/'])
   else
@@ -307,6 +309,9 @@ procedure TMVCMain.FormShow(Sender: TObject);
 begin
   mmoConfig.Lines.LoadFromFile(Config.config);
   mmoMIME.Lines.LoadFromFile(Config.mime);
+  if Config.auto_start then
+    btnStart.Click;
+
 end;
 
 procedure TMVCMain.TrayIcon1Click(Sender: TObject);
