@@ -1,0 +1,165 @@
+2019-11-06 13:57:15  数据库配置:DriverID=MySQL
+Server=127.0.0.1
+Port=3306
+Database=soft
+User_Name=root
+Password=root
+CharacterSet=utf8
+Compress=False
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 13:57:16  数据库配置:DriverID=SQLite
+Database=sqlite.db
+User_Name=
+Password=
+OpenMode=CreateUTF8
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 13:57:17  数据库配置:DriverID=FB
+Database=firebird.FDB
+User_Name=SYSDBA
+Password=masterkey
+CharacterSet=UTF8
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 13:57:19  数据库配置:DriverID=MSSQL
+Server=127.0.0.1
+Port=1433
+Database=Northwind
+User_Name=sa
+Password=
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 13:57:20  数据库配置:DriverID=Ora
+CharacterSet=UTF8
+Database=192.168.178.102:1521\orcl
+User_Name=
+Password=
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 13:57:21  StartService Port:8004
+2019-11-06 14:39:19  数据库配置:DriverID=MySQL
+Server=127.0.0.1
+Port=3306
+Database=soft
+User_Name=root
+Password=root
+CharacterSet=utf8
+Compress=False
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:20  数据库配置:DriverID=SQLite
+Database=sqlite.db
+User_Name=
+Password=
+OpenMode=CreateUTF8
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:21  数据库配置:DriverID=FB
+Database=firebird.FDB
+User_Name=SYSDBA
+Password=masterkey
+CharacterSet=UTF8
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:22  数据库配置:DriverID=MSSQL
+Server=127.0.0.1
+Port=1433
+Database=Northwind
+User_Name=sa
+Password=
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:23  数据库配置:DriverID=Ora
+CharacterSet=UTF8
+Database=192.168.178.102:1521\orcl
+User_Name=
+Password=
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:24  StartService Port:8004
+2019-11-06 14:39:31  数据库配置:DriverID=MySQL
+Server=127.0.0.1
+Port=3306
+Database=soft
+User_Name=root
+Password=root
+CharacterSet=utf8
+Compress=False
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:32  数据库配置:DriverID=SQLite
+Database=sqlite.db
+User_Name=
+Password=
+OpenMode=CreateUTF8
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:33  数据库配置:DriverID=FB
+Database=firebird.FDB
+User_Name=SYSDBA
+Password=masterkey
+CharacterSet=UTF8
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:34  数据库配置:DriverID=MSSQL
+Server=127.0.0.1
+Port=1433
+Database=Northwind
+User_Name=sa
+Password=
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:35  数据库配置:DriverID=Ora
+CharacterSet=UTF8
+Database=192.168.178.102:1521\orcl
+User_Name=
+Password=
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-06 14:39:36  StartService Port:8004

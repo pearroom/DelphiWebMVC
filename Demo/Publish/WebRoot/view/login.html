@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<#include file="include.html" />
+	<title>DelphiWebMVC</title>
+</head>
+
+<body style="background-color: #F2F2F2">
+
+	
+	<form class="layui-form">
+		<div style="height: 100px;"></div>
+		<div style="margin-left: auto; margin-right: auto; width: 350px;">
+			<div class="layui-card">
+				<div class="layui-card-header">#{name}登录</div>
+				<div class="layui-card-body">
+					<table style="width: 100%;">
+
+						<tr>
+							<td style="width: 60px;">账号</td>
+							<td>
+								<div class="col-md-12" style="margin: 4px">
+									<input type="text" class="layui-input" style="width: 100%;" lay-verify="required"
+										placeholder="" lay-verType="tips" name="username" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td style="width: 60px;">密码</td>
+							<td>
+								<div class="col-md-12" style="margin: 4px">
+									<input type="password" class="layui-input" style="width: 100%;"
+										lay-verify="required" lay-verType="tips" name="pwd" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td style="width: 60px;">验证码</td>
+							<td>
+								<div class="col-md-12" style="margin: 4px">
+									<input type="text" class="layui-input" style="width: 100%;" lay-verify="required"
+										placeholder="" lay-verType="tips" name="vcode" maxlength="4" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td style="width: 60px;"></td>
+							<td>
+								<div class="col-md-12" style="margin: 4px">
+									<img id="imgid" style="cursor:pointer;width:90px;height: 35px;" onclick="changevcode()">
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td style="width: 60px;"></td>
+							<td>
+
+								<div style="float: right; text-align: right; margin: 8px;">
+
+									<button id="btnreg" lay-submit lay-filter="save" class="layui-btn">登录</button>
+								</div>
+							</td>
+						</tr>
+					</table>
+					账号:admin 密码:admin
+				</div>
+			</div>
+		</div>
+
+	</form>
+	<script>
+		
+		var form = layui.form;
+		layui.use('form', function () {
+			form.render("checkbox");
+			changevcode();
+		});
+
+		form.on('submit(save)', function (data) {
+	
+			var ds = data.field;
+			$.post("check", ds, function (ret) {
+				
+				if (ret.code == 0) {
+					window.location = "Main/";
+				} else {
+					changevcode();
+					layer.msg(ret.message);
+				}
+			});
+			return false;
+		});
+
+		function changevcode() {
+			//console.log("刷新验证码");
+			var randomnum = Math.random();
+			// $.get("verifycode?d=" + randomnum,function(ret){
+			// 	var img = document.getElementById("imgid");
+			// 	img.src = ret;
+			// });
+			$.get("index",{name:"你好"},function(ret){
+				alert(ret);
+			})
+			
+
+		}
+	
+	</script>
+</body>
+
+
+</html>

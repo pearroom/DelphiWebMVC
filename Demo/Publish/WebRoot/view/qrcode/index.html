@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <#include file="/include.html" />
+    <title>Document</title>
+</head>
+
+<body>
+    <div style="width:50%;">
+        输入网址:
+        <input type="text" class="layui-input" name="url" id="url" />
+        <br>
+        <button id="btnok" name="btnok" class="layui-btn">生成二维码</button>
+        <br>
+        <br>
+        <img id="imgid" style="cursor:pointer;width:150px;">
+    </div>
+    <script>
+        $("#btnok").click(function () {
+            $.post('makecode', { url: $("#url").val() }, function (ret) {
+                if(ret.code==0){
+
+                    var img = document.getElementById("imgid");
+                    img.src = ret.message;
+                }else{
+                    layer.msg("请输入转换文本");
+                }
+            })
+        });
+    </script>
+</body>
+
+</html>

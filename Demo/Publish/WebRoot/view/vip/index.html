@@ -1,0 +1,165 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>DelphiWebMVC</title>
+    <#include file="/include.html" />
+
+</head>
+
+<div>
+    <script type="text/html" id="barDemo">
+            <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>            
+        </script>
+    <div>
+        <!--   <table>
+            <tr>
+                <td style="padding: 2px;">姓名:</td>
+                <td style="padding: 2px;"><input id="name" type="text" class="layui-input" maxlength="50"></td>
+                <td style="padding: 2px;">手机号:</td>
+                <td style="padding: 2px;"><input id="phone" type="text" class="layui-input" maxlength="11"> </td>
+                <td style="padding: 2px;">
+                    <div class="layui-btn-group">
+                        <button id="btnseach" class="layui-btn"><i class="layui-icon layui-icon-search"></i>查询</button>
+                        <button id="btnadd" class="layui-btn layui-btn-normal">
+                            <i class="layui-icon layui-icon-add-circle-fine"></i>新增</button>
+                    </div>
+
+                </td>
+               
+            </tr>
+        </table>
+    -->
+        <form class="layui-form">
+
+            <div class="layui-row">
+                <div class="layui-col-md1" style="padding: 8px;">
+                    <label>姓名:</label>
+                </div>
+                <div class="layui-col-md2">
+                    <input id="name" type="text" class="layui-input" maxlength="50">
+                </div>
+                <div class="layui-col-md1" style="padding: 8px;">
+                    手机号:
+                </div>
+                <div class="layui-col-md2">
+                    <input id="phone" type="text" class="layui-input" maxlength="11">
+                </div>
+
+                <div class="layui-col-md1" style="padding: 8px;">
+                    性别:
+                </div>
+                <div class="layui-col-md1">
+                    <select id="sex">
+                        <option value='男'>男</option>
+                        <option value='女'>女</option>
+                    </select>
+                </div>
+                <div class="layui-col-md3">
+                    <div class="layui-btn-group">
+                        <a id="btnseach" class="layui-btn">
+                            <i class="layui-icon layui-icon-search"></i>查询
+                        </a>
+                        <a id="btnadd" class="layui-btn layui-btn-normal">
+                            <i class="layui-icon layui-icon-add-circle-fine"></i>新增
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+    <div>
+        <table id="list" lay-filter="list"></table>
+    </div>
+
+</div>
+
+
+<script>
+    var table;
+    layui.use(['table', 'form'], function () {
+        table = layui.table;
+        form = layui.form;
+        form.render();
+        table.render({
+            elem: '#list',
+            url: '/vip/getData',
+            loading: true,
+            title: '会员管理',
+            page: true,
+            id: 'list',
+            where: {
+                name: $("#name").val(),
+                phone: $("#phone").val(),
+                sex: $("#sex").val()
+            },
+            page: {
+                layout: ['prev', 'page', 'next', 'count', 'skip', 'limit'] //自定义分页布局            
+            },
+            cols: [
+                [{
+                    field: 'id',
+                    title: '编号',
+                    width: 60
+                }, {
+                    field: 'name',
+                    title: '用户名称'
+                }, {
+                    field: 'sex',
+                    title: '性别'
+                }, {
+                    field: 'phone',
+                    title: '手机号'
+                }, {
+                    field: 'age',
+                    title: '年龄'
+                }, {
+                    field: '',
+                    title: '操作',
+                    width: 180,
+                    toolbar: '#barDemo',
+                }]
+            ],
+            done: function () {
+                // 关闭loading
+                //   layer.close(index)
+            },
+
+        });
+        table.on('tool(list)', function (obj) {
+            var data = obj.data;
+            if (obj.event == 'edit') {
+                alert('edit')
+            } else if (obj.event == 'del') {
+                alert("del")
+            }
+
+        });
+
+    });
+    $("#btnseach").click(function () {
+
+        table.reload('list', {
+            page: {
+                curr: 1 //重新从第 1 页开始
+            },
+            where: {
+                name: $("#name").val(),
+                phone: $("#phone").val(),
+                sex: $("#sex").val()
+            },
+
+        });
+    });
+    $("#btnadd").click(function () {
+        name = $("#name").val();
+        phone = $("#phone").val();
+        $.post('/vip/add', { name: name, phone: phone }, function (ret) {
+            alert(JSON.stringify(ret));
+        });
+    });        
+</script>
+
+</html>

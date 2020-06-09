@@ -395,9 +395,7 @@ end;
 
 procedure TView.ShowJSON(json: string);
 var
-  S, value: string;
-  matchs: TMatchCollection;
-  match: TMatch;
+  S: string;
 begin
   Response.ContentType := 'application/json; charset=' + Config.document_charset;
   S := Config.Corss_Origin.Allow_Origin;
@@ -442,7 +440,6 @@ end;
 procedure TView.ShowPage(count: Integer; data: ISuperObject);
 var
   json: ISuperObject;
-  s: string;
 begin
 
   json := SO();
@@ -682,6 +679,7 @@ end;
 
 function TView.SessionCount: integer;
 begin
+	Result:=0;
   if (not Config.session_start) then
     exit;
   if _RedisList <> nil then
@@ -692,6 +690,7 @@ end;
 
 function TView.SessionDestroy: Boolean;
 begin
+  Result:=false;
   if (not Config.session_start) then
     exit;
   if _RedisList <> nil then

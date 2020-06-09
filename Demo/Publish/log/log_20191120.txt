@@ -1,0 +1,23 @@
+2019-11-20 11:06:32  数据库配置:DriverID=MySQL
+Server=127.0.0.1
+Port=3306
+Database=soft
+User_Name=root
+Password=root
+CharacterSet=utf8
+Compress=False
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+
+2019-11-20 11:06:34  数据库配置:DriverID=SQLite
+Database=sqlite.db
+User_Name=
+Password=
+OpenMode=CreateUTF8
+Pooled=True
+POOL_CleanupTimeout=30000
+POOL_ExpireTimeout=90000
+POOL_MaximumItems=50
+

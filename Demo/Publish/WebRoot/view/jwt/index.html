@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <#include file="/include.html" />
+    <title>Document</title>
+</head>
+
+<body>
+    <div style="width:80%;">
+        token:
+        <input type="text" class="layui-input" name="token" id="token" />
+        <br>
+        <button id="btnok" name="btnok" class="layui-btn">获取token</button>
+        <button id="btnpost" name="btnpost" class="layui-btn">提交token</button>
+        <br>
+
+    </div>
+    <script>
+        $("#btnok").click(function () {
+            $.get('gettoken', function (ret) {
+                $("#token").val(ret);
+            })
+        });
+        $("#btnpost").click(function () {
+            message = "测试";
+            username = '姓名';
+            $.ajax({
+                'url': 'checktoken',
+                'dataType': 'html',
+                'type': 'post',
+                'beforeSend': function (request) {
+                    request.setRequestHeader("Authorization", $("#token").val());
+                },
+                'data':{message:message,name:username} ,
+                success: function (data) {
+                    alert(data);
+
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

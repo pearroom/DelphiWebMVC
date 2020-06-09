@@ -945,7 +945,7 @@ end;
 
 procedure TMVCFun.showpagelist();
 var
-  index, i: Integer;
+  i: Integer;
   key: string;
 begin
   for key in _PageCache.PageList.Keys do
@@ -1200,7 +1200,7 @@ end;
 function TMVCFun.RunCommand(): Boolean;
 var
   LResponse: string;
-  index, i: Integer;
+  index: Integer;
   key: string;
 begin
   if not isShow then
