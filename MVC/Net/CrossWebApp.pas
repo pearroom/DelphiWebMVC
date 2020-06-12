@@ -10,35 +10,37 @@ unit CrossWebApp;
 interface
 
 uses
-  Classes, SysUtils, WebBroker, HTTPApp, CrossWebServer, Web.HTTPProd,
-  Web.ReqMulti, SynWebConfig, MVC.LogUnit;
+  Classes, SysUtils, WebBroker, HTTPApp, CrossWebServer, Web.HTTPProd, Web.ReqMulti,
+  SynWebConfig, MVC.LogUnit;
 
 var
   AppOpen: boolean;
 
 type
-  TCrossWebApplication = class(TWebApplication)
+  TCrossWebApplication = class
   private
     fServer: TCrossWebServer;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create();
     destructor Destroy; override;
   end;
 
 procedure InitApplication;
+
 procedure FreeApplication;
+
+var
+  CrossWebApplication: TCrossWebApplication;
+
 implementation
 
 { TCrossWebApplication }
 
-constructor TCrossWebApplication.Create(AOwner: TComponent);
+constructor TCrossWebApplication.Create();
 begin
-  inherited;
   AppOpen := False;
   AppRun := False;
   AppClose := false;
-  //self.MaxConnections := -1;
- // self.CacheConnections := true;
   TThread.CreateAnonymousThread(
     procedure
     begin
@@ -51,7 +53,7 @@ begin
         begin
           if AppRun then
           begin
-            fServer := TCrossWebServer.Create(Self);
+            fServer := TCrossWebServer.Create;
             break;
           end;
         end
@@ -73,12 +75,14 @@ end;
 
 procedure InitApplication;
 begin
-  Application := TCrossWebApplication.Create(nil);
+  CrossWebApplication := TCrossWebApplication.Create();
 end;
+
 procedure FreeApplication;
 begin
-  Application.Free;
+  CrossWebApplication.Free;
 end;
+
 initialization
 
 

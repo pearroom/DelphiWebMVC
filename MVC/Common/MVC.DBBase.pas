@@ -81,7 +81,7 @@ type
 implementation
 
 uses
-  MVC.Config, MVC.LogUnit, XSuperJSON;
+  MVC.Config, MVC.LogUnit, XSuperJSON,MVC.Command,MVC.DM;
 
 function TDBBase.AddData(tablename: string): TFDQuery;
 var
@@ -362,6 +362,11 @@ end;
 
 constructor TDBBase.Create(dbtype: string);
 begin
+  if MVC.DM.MVCDM=nil then
+  begin
+    setDataBase(nil);
+  end;
+
   DBType_ := dbtype;
   condb := nil;
   StoredProc := nil;
@@ -455,6 +460,7 @@ begin
   begin
     StoredProc.Free;
   end;
+
   inherited;
 end;
 

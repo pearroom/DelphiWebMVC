@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
-  xsuperobject, MVC.Config, System.RegularExpressions, uDBConfig;
+  xsuperobject, MVC.Config, System.RegularExpressions, uDbConfig;
 
 type
   THTMLParser = class(TPersistent)

@@ -17,18 +17,18 @@ var
   AppOpen: boolean;
 
 type
-  TSynWebApplication = class(TWebApplication)
+  TSynWebApplication = class
   private
     fServer: TSynWebServer;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create();
     destructor Destroy; override;
   end;
 
 procedure InitApplication;
 
 procedure FreeApplication;
-
+var SynWebApplication:TSynWebApplication;
 implementation
 
 uses
@@ -36,9 +36,9 @@ uses
 
 { TSynWebApplication }
 
-constructor TSynWebApplication.Create(AOwner: TComponent);
+constructor TSynWebApplication.Create();
 begin
-  inherited;
+  //inherited;
   AppOpen := False;
   AppRun := False;
   AppClose := false;
@@ -57,7 +57,7 @@ begin
         begin
           if AppRun then
           begin
-            fServer := TSynWebServer.Create(Self);
+            fServer := TSynWebServer.Create();
             break;
           end;
         end
@@ -80,12 +80,12 @@ end;
 
 procedure InitApplication;
 begin
-  Application := TSynWebApplication.Create(nil);
+  SynWebApplication := TSynWebApplication.Create();
 end;
 
 procedure FreeApplication;
 begin
-  Application.Free;
+  SynWebApplication.Free;
 end;
 
 initialization

@@ -10,7 +10,8 @@ unit MVC.LogUnit;
 interface
 
 uses
-  System.SysUtils, System.Classes, Web.HTTPApp, MVC.Config;
+ {$IFDEF WINFORM}      vcl.forms, Winapi.Windows, {$ENDIF} System.SysUtils,
+System.Classes, Web.HTTPApp, MVC.Config;
 
 procedure log(msg: string);
 
@@ -30,10 +31,15 @@ implementation
 
 procedure log(msg: string);
 begin
+{$IFDEF WINFORM}
+  _logThread.writelog(msg);
+  Application.MessageBox(PChar(msg), '“Ï≥£', MB_OK + MB_ICONSTOP);
+{$ELSE}
   if Config.open_log then
   begin
     _LogList.Add(msg);
   end;
+  {$ENDIF}
 end;
 
 { TLogTh }

@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client, MVC.Page,
-  XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser, uDBConfig, uPlugin, MVC.RedisM,
+  XSuperObject, MVC.Config, Data.DB, MVC.HTMLParser,uDbConfig, {$IFDEF WINFORM} MVC.Plugin, {$ELSE} uPlugin, {$ENDIF} MVC.RedisM,
   MVC.RedisList, MVC.PageCache, MVC.DBPoolList, System.RegularExpressions, MVC.JWT;
 
 type

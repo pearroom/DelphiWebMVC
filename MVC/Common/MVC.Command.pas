@@ -12,9 +12,10 @@ interface
 uses
   System.SysUtils, System.Variants, MVC.RouteItem, System.Rtti, System.Classes,
   Web.HTTPApp, System.DateUtils, MVC.SessionList, XSuperObject, SynWebConfig,
-  uInterceptor, uRouteMap, MVC.RedisList, MVC.LogUnit, uGlobal, uPlugin, System.StrUtils,
-  MVC.PackageManager, MVC.PageCache, MVC.DM, XSuperJSON, System.Generics.Collections,
-  Web.WebReq,
+ {$IFDEF WINFORM} MVC.uInterceptor, MVC.RouteMap, MVC.Global, MVC.Plugin, {$ELSE}
+ uInterceptor, uRouteMap, uGlobal, uPlugin, {$ENDIF}
+ MVC.RedisList, MVC.LogUnit, System.StrUtils, MVC.PackageManager, MVC.PageCache,
+ MVC.DM, XSuperJSON, System.Generics.Collections, Web.WebReq,
   {$IFDEF MSWINDOWS} MVC.Main, Vcl.Forms, Winapi.Windows,
   {$IFDEF CROSS} CrossWebApp, {$ELSE} SynWebApp, {$ENDIF}
   {$ELSE} CrossWebApp, {$ENDIF}IdURI, MVC.JWT;
@@ -48,6 +49,8 @@ var
   _directory_permission: TDictionary<string, Boolean>;
   _ConfigJSON: ISuperObject;
   _mime: TDictionary<string, string>;
+
+procedure CreateDBConfig;
 
 function check_directory_permission(path: string): Boolean;
 
@@ -773,83 +776,87 @@ end;
 
 procedure CloseServer();
 begin
-  AppClose := true;
+  try
+    AppClose := true;
+    Sleep(50);
+    FreeApplication;
+  finally
 
-  _directory_permission.Clear;
-  _directory_permission.Free;
-  _directory_permission := nil;
-  _mime.Free;
-  _mime := nil;
-  if _logThread <> nil then
-  begin
-    _logThread.Terminate;
-  end;
-  if _SessionListMap <> nil then
-  begin
-    _SessionListMap.Terminate;
-  end;
-  if Config.open_package and (_PackageManager <> nil) then
-  begin
-    _PackageManager.isstop := true;
-  end;
-  if _DBPoolList <> nil then
-    _DBPoolList.Terminate;
+    _directory_permission.Clear;
+    _directory_permission.Free;
+    _directory_permission := nil;
+    _mime.Free;
+    _mime := nil;
+    if _logThread <> nil then
+    begin
+      _logThread.Terminate;
+    end;
+    if _SessionListMap <> nil then
+    begin
+      _SessionListMap.Terminate;
+    end;
+    if Config.open_package and (_PackageManager <> nil) then
+    begin
+      _PackageManager.isstop := true;
+    end;
+    if _DBPoolList <> nil then
+      _DBPoolList.Terminate;
 
-  Sleep(500);
+    Sleep(300);
 
-  if _logThread <> nil then
-  begin
-    _logThread.Free;
-    _logThread := nil;
-  end;
-  if Config.open_package and (_PackageManager <> nil) then
-  begin
-    _PackageManager.Free;
-    _PackageManager := nil;
-  end;
-  if _LogList <> nil then
-  begin
-    _LogList.Clear;
-    _LogList.Free;
-    _LogList := nil;
-  end;
-  if _Interceptor <> nil then
-  begin
-    _Interceptor.Free;
-    _Interceptor := nil;
-  end;
-  if _SessionListMap <> nil then
-  begin
-    _SessionListMap.Free;
-    _SessionListMap := nil;
-  end;
+    if _logThread <> nil then
+    begin
+      _logThread.Free;
+      _logThread := nil;
+    end;
+    if Config.open_package and (_PackageManager <> nil) then
+    begin
+      _PackageManager.Free;
+      _PackageManager := nil;
+    end;
+    if _LogList <> nil then
+    begin
+      _LogList.Clear;
+      _LogList.Free;
+      _LogList := nil;
+    end;
+    if _Interceptor <> nil then
+    begin
+      _Interceptor.Free;
+      _Interceptor := nil;
+    end;
+    if _SessionListMap <> nil then
+    begin
+      _SessionListMap.Free;
+      _SessionListMap := nil;
+    end;
 
-  if MVCDM <> nil then
-  begin
-    MVCDM.Free;
-    MVCDM := nil;
+    if MVCDM <> nil then
+    begin
+      MVCDM.Free;
+      MVCDM := nil;
+    end;
+    if _RedisList <> nil then
+    begin
+      _RedisList.Free;
+      _RedisList := nil;
+    end;
+    if Global <> nil then
+    begin
+      Global.Free;
+      Global := nil;
+    end;
+    if _PageCache <> nil then
+    begin
+      _PageCache.Free;
+      _PageCache := nil;
+    end;
+    if _DBPoolList <> nil then
+    begin
+      _DBPoolList.Free;
+      _DBPoolList := nil;
+    end;
   end;
-  if _RedisList <> nil then
-  begin
-    _RedisList.Free;
-    _RedisList := nil;
-  end;
-  if Global <> nil then
-  begin
-    Global.Free;
-    Global := nil;
-  end;
-  if _PageCache <> nil then
-  begin
-    _PageCache.Free;
-    _PageCache := nil;
-  end;
-  if _DBPoolList <> nil then
-  begin
-    _DBPoolList.Free;
-    _DBPoolList := nil;
-  end;
-  FreeApplication;
 end;
 
 function OpenPackageConfigFile(): ISuperObject;
@@ -893,7 +900,20 @@ var
   DriverID: string;
   PoolSize: string;
 begin
+  if jo = nil then
+  begin
+    Config.config := 'config.json';
+    CreateDBConfig;
+    jo := OpenConfigFile();
+
+    //SetConfig(jo);
+  end;
+  {$IFDEF WINFORM}
+  MVCDM := TMVCDM.Create(Application);
+  {$ELSE}
   MVCDM := TMVCDM.Create(nil);
+  {$ENDIF}
+
   MVCDM.DBManager.Active := false;
   try
     try
@@ -989,14 +1009,11 @@ begin
   begin
     CreateDir('WebRoot/view');
   end;
-  if not FileExists(config.config) then
-  begin
-    CreateConfig;
-  end;
-  if not FileExists(config.mime) then
-  begin
-    CreateMIME;
-  end;
+
+  CreateConfig;
+
+  CreateMIME;
+
   //////////////////////////////////////////////////
   _ConfigJSON := OpenConfigFile();
   if _ConfigJSON <> nil then
@@ -1060,6 +1077,10 @@ var
   jo: ISuperObject;
   mms: TStringList;
 begin
+  if FileExists(config.config) then
+  begin
+    exit;
+  end;
   jo := so();
 
   jo.S['AppTitle'] := 'WebMVC';
@@ -1091,12 +1112,43 @@ begin
 
 end;
 
+procedure CreateDBConfig;
+var
+  jo: ISuperObject;
+  mms: TStringList;
+begin
+  if FileExists(config.config) then
+  begin
+    exit;
+  end;
+  jo := so();
+
+  jo.O['DBConfig'].O['SQLite'].s['DriverID'] := 'SQLite';
+  jo.O['DBConfig'].O['SQLite'].s['Database'] := 'sqlite.db';
+  jo.O['DBConfig'].O['SQLite'].s['User_Name'] := '';
+  jo.O['DBConfig'].O['SQLite'].s['Password'] := '';
+  jo.O['DBConfig'].O['SQLite'].s['OpenMode'] := 'CreateUTF8';
+  jo.O['DBConfig'].O['SQLite'].s['Pooled'] := 'True';
+  jo.O['DBConfig'].O['SQLite'].s['POOL_CleanupTimeout'] := '30000';
+  jo.O['DBConfig'].O['SQLite'].s['POOL_ExpireTimeout'] := '90000';
+  jo.O['DBConfig'].O['SQLite'].s['POOL_MaximumItems'] := '50';
+  mms := TStringList.Create;
+  mms.Text := jo.AsJSON(true);
+  mms.SaveToFile(Config.config, TEncoding.UTF8);
+  mms.Free;
+
+end;
+
 procedure TMVCFun.CreateMIME;
 var
   ja: ISuperArray;
   jo: ISuperObject;
   mms: TStringList;
 begin
+  if FileExists(config.mime) then
+  begin
+    exit;
+  end;
   ja := sa();
   jo := so();
   jo.S['Extensions'] := 'css';

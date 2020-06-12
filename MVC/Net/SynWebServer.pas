@@ -9,11 +9,9 @@ interface
 
 uses
   SysUtils, Classes, IniFiles, HTTPApp, Contnrs, WebReq, SynCommons, SynCrtSock,
-  SynWebEnv, SynWebConfig,MVC.Page;
+  SynWebEnv, SynWebConfig, MVC.Page;
 
 type
-  TSynWebRequestHandler = class(TWebRequestHandler);
-
   TSynWebServer = class
   private
     FOwner: TObject;
@@ -38,17 +36,6 @@ implementation
 uses
   SynZip, SynWebReqRes, MVC.Config, MVC.command, MVC.LogUnit;
 
-var
-  RequestHandler: TWebRequestHandler = nil;
-  RequestHandler1: TWebRequestHandler = nil;
-
-function GetRequestHandler: TWebRequestHandler;
-begin
-  if RequestHandler = nil then
-    RequestHandler := TSynWebRequestHandler.Create(nil);
-  Result := RequestHandler;
-end;
-
 { TSynWebServer }
 
 constructor TSynWebServer.Create(AOwner: TComponent);
@@ -67,10 +54,7 @@ begin
     ChildThreadCount := syn_ChildThreadCount;
     FRoot := '';
     FHttpServer := THttpApiServer.Create(False);
-    if (FOwner <> nil) and (FOwner.InheritsFrom(TWebRequestHandler)) then
-      FReqHandler := TWebRequestHandler(FOwner)
-    else
-      FReqHandler := GetRequestHandler;
+
     FHttpServer.AddUrl(StringTOUTF8(FRoot), StringTOUTF8(FPort), False, '+', true);
     if UpperCase(Compress) = UpperCase('deflate') then
       FHttpServer.RegisterCompress(CompressDeflate)
@@ -167,7 +151,6 @@ begin
         end;
 
       end;
-    //  Result := TSynWebRequestHandler(FReqHandler).HandleRequest(HTTPRequest, HTTPResponse);
     finally
       HTTPResponse.Free;
     end;
@@ -175,13 +158,6 @@ begin
     HTTPRequest.Free;
   end;
 end;
-
-initialization
-  WebReq.WebRequestHandlerProc := GetRequestHandler;
-
-finalization
-  if RequestHandler <> nil then
-    FreeAndNil(RequestHandler);
 
 end.
 

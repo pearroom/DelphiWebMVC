@@ -10,20 +10,17 @@ interface
 uses
   SysUtils, Classes, IniFiles, HTTPApp, WebBroker, Contnrs, WebReq,
   CrossWebReqRes, CrossWebEnv, Rtti, Net.CrossHttpServer, Net.CrossHttpParams,
-  Net.CrossSocket.Base, SynWebConfig, Web.HTTPProd, Web.ReqMulti, MVC.LogUnit,MVC.Page;
+  Net.CrossSocket.Base, SynWebConfig, Web.HTTPProd, Web.ReqMulti, MVC.LogUnit,
+  MVC.Page;
 
 var
   _LContext: TRttiContext;
 
 type
-  TCrossWebRequestHandler = class(TWebRequestHandler);
-
   TCrossWebServer = class
   private
     FOwner: TObject;
     FIniFile: TIniFile;
-
-//    FActive: Boolean;
     FRoot, FPort: string;
     FReqHandler: TWebRequestHandler;
     procedure ONCrossHttpRequest(Sender: TObject; ARequest: ICrossHttpRequest; AResponse: ICrossHttpResponse; var AHandled: Boolean);
@@ -50,17 +47,6 @@ implementation
 
 uses
   MVC.Command, MVC.Config;
-
-var
-  RequestHandler: TWebRequestHandler = nil;
-
-function GetRequestHandler: TWebRequestHandler;
-begin
-  if RequestHandler = nil then
-    RequestHandler := TCrossWebRequestHandler.Create(nil);
-  Result := RequestHandler;
-end;
-
 { TCrossWebServer }
 
 constructor TCrossWebServer.Create(AOwner: TComponent);
@@ -77,11 +63,6 @@ begin
       Compress := syn_Compress;
       HTTPQueueLength := syn_HTTPQueueLength;
       ChildThreadCount := syn_ChildThreadCount;
-
-      if (FOwner <> nil) and (FOwner.InheritsFrom(TWebRequestHandler)) then
-        FReqHandler := TWebRequestHandler(FOwner)
-      else
-        FReqHandler := GetRequestHandler;
 
       FRoot := '';
       FHttpServer := TWebCrossHttpServer.Create(ChildThreadCount);
@@ -191,7 +172,6 @@ begin
         end;
 
       end;
-    //  Result := TCrossWebRequestHandler(FReqHandler).HandleRequest(HTTPRequest, HTTPResponse);
     finally
       HTTPResponse.Free;
     end;
@@ -232,13 +212,6 @@ begin
   if Assigned(OnPostDataBegin) then
     OnPostDataBegin(Self, AConnection);
 end;
-
-initialization
-  WebReq.WebRequestHandlerProc := GetRequestHandler;
-
-finalization
-  if RequestHandler <> nil then
-    FreeAndNil(RequestHandler);
 
 end.
 

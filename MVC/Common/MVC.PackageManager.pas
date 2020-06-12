@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, Generics.Collections, xsuperobject, MVC.Config,
-  uDBConfig, System.Variants;
+   System.Variants,uDbConfig;
 
 type
   TPackageMethod = function(map: ISuperObject): ISuperObject of object;
