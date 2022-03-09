@@ -52,6 +52,8 @@ type
     function Input(param: string): string;
     function InputByIndex(index: Integer): string;
     function InputToJSON: IJObject;
+    function InputToJSONArray: IJArray;
+    function InputBody: string;  //返回请求内容
     function InputInt(param: string): Integer;
     property Session: TSession read FSession;
     property WebPath: string read FWebPath; //系统物理根目录
@@ -297,6 +299,11 @@ begin
   Result := StrToInt(Input(param));
 end;
 
+function TController.InputBody: string;
+begin
+  Result := Request.Content;
+end;
+
 function TController.InputByIndex(index: Integer): string;
 var
   s, s1: string;
@@ -328,13 +335,79 @@ function TController.InputToJSON: IJObject;
 var
   jo: IJObject;
   i: Integer;
+  isok: boolean;
+  key, value: string;
 begin
-  jo := IIJObject();
-  for i := 0 to Request.QueryFields.Count - 1 do
-    jo.O.AddPair(Request.QueryFields.Names[i], Request.QueryFields.ValueFromIndex[i]);
-  for i := 0 to Request.ContentFields.Count - 1 do
-    jo.O.AddPair(Request.ContentFields.Names[i], Request.ContentFields.ValueFromIndex[i]);
-  Result := jo;
+  isok := False;
+  var body: string := InputBody;
+  try
+    if body.Trim <> '' then
+    begin
+      if (body.Substring(0, 1) = '[') and (body.Substring(body.Length - 1, 1) = ']') then
+        exit;   //不处理json数组由InputToJSONArray处理
+      if (body.Substring(0, 1) = '{') and (body.Substring(body.Length - 1, 1) = '}') then
+      begin
+        try
+          jo := IIJObject(body);
+          isok := true;
+        except
+          jo := nil;
+        end;
+      end
+      else if Request.ContentFields.Count > 0 then
+      begin
+        jo := IIJObject();
+        for i := 0 to Request.ContentFields.Count - 1 do
+        begin
+          key := Request.ContentFields.Names[i];
+          value := Request.ContentFields.ValueFromIndex[i];
+          if (key.Trim <> '') and (value.Trim <> '') then
+          begin
+            isok := True;
+            jo.O.AddPair(key, value);
+          end;
+        end;
+      end;
+    end
+    else
+    begin
+      jo := IIJObject();
+      for i := 0 to Request.QueryFields.Count - 1 do
+      begin
+        key := Request.QueryFields.Names[i];
+        value := Request.QueryFields.ValueFromIndex[i];
+        if (key.Trim <> '') and (value.Trim <> '') then
+        begin
+          jo.O.AddPair(key, value);
+          isok := True;
+        end;
+      end;
+    end;
+  finally
+    if not isok then
+      jo := nil;
+    Result := jo;
+  end;
+
+end;
+
+function TController.InputToJSONArray: IJArray;
+var
+  ja: IJArray;
+begin
+  var body: string := InputBody;
+  if body.Trim <> '' then
+  begin
+    if (body.Substring(0, 1) = '[') and (body.Substring(body.Length - 1, 1) = ']') then
+    begin
+      try
+        ja := IIJArray(body);
+      except
+        ja := nil;
+      end;
+    end
+  end;
+  Result := ja;
 end;
 
 function TController.Input(param: string): string;
