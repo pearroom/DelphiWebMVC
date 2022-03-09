@@ -1,0 +1,53 @@
+<#include file="/include.html" />
+
+<body>
+
+	<div id="add" class="content" style="margin: 10px; width:400px;">
+
+		<form class="layui-form">
+			<div class="register-box-con2-box clearfix mar-bottom20">
+				<div class="layui-form-item">
+					<label class="layui-form-label">权限</label>
+					<div class="layui-input-block">
+						<select id="roleid" name="roleid">
+							<#list data=role item=i>
+								<option value="#{i.id}">#{i.rolename}</option>
+							</#list>
+						</select>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label"><span class="bitian">*</span>用户名称</label>
+					<div class="layui-input-block">
+						<input type="text" id="username" name="username" lay-verify="username" autocomplete="off"
+							placeholder="请输入内容" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label"><span class="bitian">*</span>姓名</label>
+					<div class="layui-input-block">
+						<input type="text" id="realname" name="realname" lay-verify="realname" autocomplete="off"
+							placeholder="请输入内容" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label"><span class="bitian">*</span>密码</label>
+					<div class="layui-input-block">
+						<input type="password" id="pwd" name="pwd" lay-verify="pwd" autocomplete="off"
+							placeholder="请输入内容" class="layui-input">
+					</div>
+				</div>
+
+				<div class="layui-form-item">
+					<div class="layui-input-block">
+						<button id="add" class="layui-btn" lay-submit="" lay-filter="add">立即提交</button>
+
+					</div>
+				</div>
+			</div>
+
+		</form>
+
+	</div>
+	<script src="__APP__/js/user/add.js"></script>
+</body>

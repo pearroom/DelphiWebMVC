@@ -1,0 +1,88 @@
+﻿{	
+	"AppTitle":"MVC演示Demo",
+
+	"Server": {
+		"Port": "8004",
+		"Compress":"deflate",
+		"HTTPQueueLength":1000,
+		"ChildThreadCount":10	
+	},
+	"WinService":{
+		"Name":"myMVCService",
+		"DisplayName":"MVC演示Demo服务描述",
+		"ServiceType":"stWin32",
+		"StartType":"stAuto"
+	},
+	"Config":{
+		"auto_start":true,
+		"APP":"",
+		"session_timer":30,
+		"open_log":true,
+		"open_debug":true,
+		"Corss_Origin":{
+			"Allow_Origin":"*",
+			"Allow_Headers":"*",
+			"Allow_Method":"*",
+			"Allow_Credentials":true
+		},
+		"directory":[
+			{
+				"path":"/view/",
+				"permission":false
+			}
+		]			
+	},
+	"DBConfig":{
+		"db1": {
+			"DriverID": "SQLite",
+			"Database": "sqlite.db",
+			"User_Name": "",
+			"Password": "",
+			"OpenMode": "CreateUTF8",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		},	
+		"db2": {
+			"DriverID": "MySQL",
+			"Server": "127.0.0.1",
+			"Port": "3306",
+			"Database": "test",
+			"User_Name": "root",
+			"Password": "root",
+			"CharacterSet": "utf8",
+			"Compress": "False",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		},	
+
+		"db5": {
+			"DriverID": "Ora",
+			"CharacterSet": "UTF8",
+			"Database": "192.168.1.56:1521/orcl",
+			"User_Name": "soft",
+			"Password": "000000",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		},
+		"db3": {
+			"DriverID": "MSSQL",
+			"Server": "192.168.1.56",
+			"Port": "1433",
+			"Database": "test",
+			"User_Name": "sa",
+			"Password": "sa",
+			"Pooled": "True",
+			"POOL_CleanupTimeout": "30000",
+			"POOL_ExpireTimeout": "90000",
+			"POOL_MaximumItems": "50"
+		}	
+
+
+	}
+}

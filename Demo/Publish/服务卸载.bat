@@ -1,0 +1,1 @@
+WebDemo.exe /uninstall
