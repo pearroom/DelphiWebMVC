@@ -525,12 +525,12 @@ begin
     begin
       CreateDir(path);
     end;
-    s := ExtractFileName(Request.Files[k].filename);
+    s := ExtractFileName(Request.Files[i].filename);
     if filename.Trim <> '' then
     begin
       p := '';
-      if k > 0 then
-        p := k.ToString;
+      if i > 0 then
+        p := i.ToString;
       filetmp := filename.Trim + p + copy(s, Pos('.', s), s.Length - pos('.', s) + 1)
     end
     else
@@ -540,8 +540,8 @@ begin
     FFileName := path + '\' + filetmp;
     Afile := TFileStream.Create(FFileName, fmCreate);
     try
-      Request.Files[k].Stream.Position := 0;
-      Afile.CopyFrom(Request.Files[k].Stream, Request.Files[k].Stream.Size);  //测试保存文件，通过。
+      Request.Files[i].Stream.Position := 0;
+      Afile.CopyFrom(Request.Files[i].Stream, Request.Files[i].Stream.Size);  //测试保存文件，通过。
     finally
       Afile.Free;
     end;
