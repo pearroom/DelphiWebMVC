@@ -1,20 +1,20 @@
-
-{*******************************************************}
-{                                                       }
-{       DelphiWebMVC 5.0                                }
-{       E-Mail:pearroom@yeah.net                        }
-{       版权所有 (C) 2022-2 苏兴迎(PRSoft)              }
-{                                                       }
-{*******************************************************}
-//第三方模块可以参考本模块开发
+{ ******************************************************* }
+{ }
+{ DelphiWebMVC 5.0 }
+{ E-Mail:pearroom@yeah.net }
+{ 版权所有 (C) 2022-2 苏兴迎(PRSoft) }
+{ }
+{ ******************************************************* }
+// 第三方模块可以参考本模块开发
 unit MVC.JWT;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, IdHMACSHA1, System.JSON, System.Generics.Collections, IdURI,
-  IdGlobal, IdCoderMIME, EncdDecd, IdSSLOpenSSL, MVC.LogUnit;
+  System.Classes, System.JSON, System.Generics.Collections, IdURI, IdGlobal,
+  IdCoderMIME, EncdDecd, IdHMACSHA1, IdSSLOpenSSL, MVC.LogUnit,
+  IdHashMessageDigest, IdHash;
 
 type
   TJWT = class
@@ -56,19 +56,19 @@ type
     property Header: string read FHeader write SetHeader;
     property Payload: string read FPayload write SetPayload;
     property sign: string read Fsign write Setsign;
-    procedure claimAdd(key, value: string);
+    procedure claimAdd(key, Value: string);
     function claimGet(key: string): string;
     function compact(): string;
-    function parser(sign, value: string): Boolean;
+    function parser(sign, Value: string): Boolean;
     constructor Create;
     destructor Destroy; override;
   end;
 
-  IJWT = interface// 接口实现类将自动释放
-    function O: TJWT;// 开放外部调用方法
+  IJWT = interface // 接口实现类将自动释放
+    function O: TJWT; // 开放外部调用方法
   end;
 
-  TJWTObject = class(TInterfacedObject, IJWT)//需要继承接口类，和接口
+  TJWTObject = class(TInterfacedObject, IJWT) // 需要继承接口类，和接口
   private
     sJWT: TJWT;
   public
@@ -79,34 +79,48 @@ type
 
 function IIJWT: TJWTObject;
 
-procedure JWT_Init();
+function JWT_Init: Boolean;
 
 implementation
 
 function IIJWT: TJWTObject;
+var
+  err: string;
 begin
-  JWT_Init();
-  Result := TJWTObject.Create as TJWTObject;
+  if JWT_Init then
+    Result := TJWTObject.Create as TJWTObject
+  else
+  begin
+    err := '缺少ssleay32.dll,libeay32.dll,msvcr110.dll;JWT功能无法使用';
+    raise Exception.Create(err);
+    Result := nil;
+  end;
 end;
 { TJWTBuilder }
 
-procedure JWT_Init();
+function JWT_Init: Boolean;
 begin
+     // IdSSLOpenSSL.UnLoadOpenSSLLibrary;
   if not IdSSLOpenSSL.LoadOpenSSLLibrary then
-    log('缺少SSL相关dll文件,JWT功能将无法正常使用');
+  begin
+    log('缺少ssleay32.dll,libeay32.dll,msvcr110.dll;JWT功能无法使用');
+    Result := false;
+  end
+  else
+    Result := true;
 end;
 
 function TJWT.Base64Decode(S: string): string;
 var
   base64: TIdDeCoderMIME;
- // tmpBytes: TBytes;
+  // tmpBytes: TBytes;
 begin
   Result := S;
-  base64 := TIdDecoderMIME.Create(nil);
+  base64 := TIdDeCoderMIME.Create(nil);
   try
     base64.FillChar := '=';
-   // tmpBytes := TBytes(base64.DecodeBytes(S));
-    //Result := TEncoding.UTF8.GetString(tmpBytes);
+    // tmpBytes := TBytes(base64.DecodeBytes(S));
+    // Result := TEncoding.UTF8.GetString(tmpBytes);
     Result := base64.DecodeString(S);
   finally
     base64.Free;
@@ -116,14 +130,14 @@ end;
 function TJWT.Base64Encode(S: string): string;
 var
   base64: TIdEncoderMIME;
- // tmpBytes: TBytes;
+  // tmpBytes: TBytes;
 begin
   base64 := TIdEncoderMIME.Create(nil);
   try
     base64.FillChar := '=';
     Result := base64.EncodeString(S);
-   // tmpBytes := TEncoding.UTF8.GetBytes(S);
-   // Result := base64.EncodeBytes(TIdBytes(tmpBytes));
+    // tmpBytes := TEncoding.UTF8.GetBytes(S);
+    // Result := base64.EncodeBytes(TIdBytes(tmpBytes));
   finally
     base64.Free;
   end;
@@ -132,47 +146,47 @@ end;
 function TJWT.Base64EncodeByte(S: Tidbytes): string;
 var
   base64: TIdEncoderMIME;
- // tmpBytes: TBytes;
+  // tmpBytes: TBytes;
 begin
   base64 := TIdEncoderMIME.Create(nil);
   try
     base64.FillChar := '=';
-   // Result := base64.EncodeString(S);
-   // tmpBytes := TEncoding.UTF8.GetBytes(S);
+    // Result := base64.EncodeString(S);
+    // tmpBytes := TEncoding.UTF8.GetBytes(S);
     Result := base64.EncodeBytes(S);
   finally
     base64.Free;
   end;
 end;
 
-procedure TJWT.claimAdd(key, value: string);
+procedure TJWT.claimAdd(key, Value: string);
 begin
-  claimList.TryAdd(key, value);
+  claimList.TryAdd(key, Value);
 end;
 
 function TJWT.claimGet(key: string): string;
 var
-  value: string;
+  Value: string;
 begin
-  self.claimList.TryGetValue(key, value);
-  Result := value;
+  self.claimList.TryGetValue(key, Value);
+  Result := Value;
 end;
 
 function TJWT.compact: string;
 var
   headjson, Payloadjson: TJSONObject;
   key, v: string;
-  ret, ret2: TIdBytes;
+  ret, ret2: Tidbytes;
   token: string;
 begin
-  //header
+
   headjson := TJSONObject.Create;
   headjson.AddPair('typ', 'JWT');
   headjson.AddPair('alg', 'HS256');
   Header := headjson.ToJSON;
   headjson.Free;
 
-  //Payload
+  // Payload
   Payloadjson := TJSONObject.Create;
   with Payloadjson do
   begin
@@ -196,17 +210,23 @@ begin
         AddPair(key, v);
     end;
     Payload := ToJSON;
-    free;
+    Free;
   end;
 
   with TIdHMACSHA256.Create do
   begin
     try
-      key := ToBytes(sign);
-      token := Base64Encode(Header) + '.' + Base64Encode(Payload);
-      ret := ToBytes(token);
-      ret2 := HashValue(ret);
-      Result := token + '.' + Base64EncodeByte(ret2);
+      try
+        key := ToBytes(sign);
+        token := Base64Encode(Header) + '.' + Base64Encode(Payload);
+        ret := ToBytes(token);
+        ret2 := HashValue(ret);
+        Result := token + '.' + Base64EncodeByte(ret2);
+      except
+        begin
+          Result := '';
+        end;
+      end;
     finally
       Free;
     end;
@@ -219,34 +239,31 @@ begin
 end;
 
 destructor TJWT.Destroy;
-var
-  key: TObject;
 begin
-
   claimList.Clear;
   claimList.Free;
   inherited;
 end;
 
-function TJWT.parser(sign, value: string): Boolean;
+function TJWT.parser(sign, Value: string): Boolean;
 var
-  ret, ret2: TIdBytes;
+  ret, ret2: Tidbytes;
   SH256: TIdHMACSHA256;
   tmp: TStringList;
   body: string;
   head: string;
   sgin_: string;
 begin
-  Self.sign := sign;
+  self.sign := sign;
   SH256 := TIdHMACSHA256.Create;
   tmp := TStringList.Create;
   try
     try
       tmp.Delimiter := '.';
-      tmp.DelimitedText := value;
+      tmp.DelimitedText := Value;
       if tmp.Count <> 3 then
       begin
-   // Result := false;
+        // Result := false;
         exit(False);
       end;
       head := tmp[0];
@@ -268,11 +285,11 @@ begin
         end
         else
         begin
-          Result := false;
+          Result := False;
         end;
       end;
     except
-      Result := false;
+      Result := False;
     end;
   finally
     tmp.Free;
@@ -291,8 +308,8 @@ var
   JSONPair: TJSONPair;
 begin
   claimList.Clear;
+  PayJson := TJSONObject.ParseJSONValue(Payload) as TJSONObject;
   try
-    PayJson := TJSONObject.ParseJSONValue(Payload) as TJSONObject;
     for JSONPair in PayJson do
     begin
       if JSONPair.JsonString.Value = 'jti' then

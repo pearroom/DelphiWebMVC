@@ -10,6 +10,7 @@ object MVCMain: TMVCMain
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  OldCreateOrder = True
   Position = poScreenCenter
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
@@ -24,7 +25,6 @@ object MVCMain: TMVCMain
     Height = 33
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 493
     object ButtonOpenBrowser: TButton
       Left = 149
       Top = 1
@@ -34,7 +34,6 @@ object MVCMain: TMVCMain
       Caption = #25171#24320#27983#35272#22120'(&W)'
       TabOrder = 0
       OnClick = ButtonOpenBrowserClick
-      ExplicitWidth = 197
     end
     object btnClose: TButton
       Left = 438
@@ -45,7 +44,6 @@ object MVCMain: TMVCMain
       Caption = #36864#20986'(&Q)'
       TabOrder = 1
       OnClick = btnCloseClick
-      ExplicitLeft = 419
     end
     object edtport: TEdit
       AlignWithMargins = True
@@ -84,7 +82,6 @@ object MVCMain: TMVCMain
       Caption = #39640#32423#35774#32622'(&E)'
       TabOrder = 4
       OnClick = btnSetClick
-      ExplicitLeft = 346
     end
   end
   object pgc1: TPageControl
@@ -97,7 +94,6 @@ object MVCMain: TMVCMain
     MultiLine = True
     Style = tsFlatButtons
     TabOrder = 1
-    ExplicitWidth = 504
     object ts3: TTabSheet
       Caption = #26085#24535
       ImageIndex = 2
@@ -110,7 +106,6 @@ object MVCMain: TMVCMain
         BevelKind = bkTile
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 485
         object lbllog: TLabel
           Left = 497
           Top = 0
@@ -118,7 +113,6 @@ object MVCMain: TMVCMain
           Height = 28
           Align = alRight
           Layout = tlCenter
-          ExplicitLeft = 478
           ExplicitHeight = 13
         end
         object btnlogget: TButton
@@ -140,8 +134,6 @@ object MVCMain: TMVCMain
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 1
-        ExplicitWidth = 485
-        ExplicitHeight = 303
       end
     end
     object ts1: TTabSheet
@@ -156,7 +148,6 @@ object MVCMain: TMVCMain
         BevelKind = bkTile
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 496
         object btnseach: TButton
           Left = 0
           Top = 0
@@ -196,7 +187,6 @@ object MVCMain: TMVCMain
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitWidth = 496
         object lstpage: TListBox
           Left = 0
           Top = 0
@@ -205,7 +195,6 @@ object MVCMain: TMVCMain
           Align = alClient
           ItemHeight = 13
           TabOrder = 0
-          ExplicitWidth = 496
         end
       end
     end
@@ -221,7 +210,6 @@ object MVCMain: TMVCMain
         BevelKind = bkTile
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 496
         object Button1: TButton
           Left = 0
           Top = 0
@@ -261,7 +249,6 @@ object MVCMain: TMVCMain
         Align = alClient
         ItemHeight = 13
         TabOrder = 1
-        ExplicitWidth = 496
       end
     end
     object ts4: TTabSheet
@@ -276,7 +263,6 @@ object MVCMain: TMVCMain
         BevelKind = bkTile
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 496
         object btnSession: TButton
           Left = 0
           Top = 0
@@ -316,7 +302,6 @@ object MVCMain: TMVCMain
         Align = alClient
         ItemHeight = 13
         TabOrder = 1
-        ExplicitWidth = 496
       end
     end
     object ts5: TTabSheet
@@ -330,7 +315,6 @@ object MVCMain: TMVCMain
         Align = alClient
         ScrollBars = ssBoth
         TabOrder = 0
-        ExplicitWidth = 496
       end
       object pnl4: TPanel
         Left = 0
@@ -341,7 +325,6 @@ object MVCMain: TMVCMain
         BevelKind = bkTile
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitWidth = 496
         object lb1: TLabel
           Left = 497
           Top = 0
@@ -349,7 +332,6 @@ object MVCMain: TMVCMain
           Height = 28
           Align = alRight
           Layout = tlCenter
-          ExplicitLeft = 478
           ExplicitHeight = 13
         end
         object btnSaveConfig: TButton
@@ -385,7 +367,6 @@ object MVCMain: TMVCMain
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitWidth = 496
       end
       object pnl5: TPanel
         Left = 0
@@ -396,7 +377,6 @@ object MVCMain: TMVCMain
         BevelKind = bkTile
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitWidth = 496
         object lb2: TLabel
           Left = 497
           Top = 0
@@ -404,7 +384,6 @@ object MVCMain: TMVCMain
           Height = 28
           Align = alRight
           Layout = tlCenter
-          ExplicitLeft = 478
           ExplicitHeight = 13
         end
         object btnSaveMime: TButton
@@ -430,7 +409,7 @@ object MVCMain: TMVCMain
       end
     end
     object ts2: TTabSheet
-      Caption = #20351#29992#25163#20876
+      Caption = #24320#21457#25991#26723
       ImageIndex = 2
       object pnl1: TPanel
         Left = 0
@@ -441,22 +420,20 @@ object MVCMain: TMVCMain
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 496
         DesignSize = (
           504
           337)
         object pnl6: TPanel
           Left = 86
-          Top = 47
+          Top = 23
           Width = 328
-          Height = 214
+          Height = 274
           Anchors = []
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitLeft = 82
           object Image1: TImage
-            Left = 114
-            Top = 56
+            Left = 113
+            Top = 72
             Width = 87
             Height = 101
             AutoSize = True
@@ -510,7 +487,7 @@ object MVCMain: TMVCMain
           end
           object Label1: TLabel
             Left = 41
-            Top = 0
+            Top = -8
             Width = 235
             Height = 42
             Caption = 'DelphiWebMVC'
@@ -521,14 +498,36 @@ object MVCMain: TMVCMain
             Font.Style = []
             ParentFont = False
           end
+          object Label2: TLabel
+            Left = 72
+            Top = 39
+            Width = 164
+            Height = 19
+            Caption = #25216#26415'QQ'#32676': 685072623'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -16
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+          end
           object btn1: TBitBtn
-            Left = 114
+            Left = 113
             Top = 171
             Width = 88
-            Height = 38
-            Caption = #26597#30475#20351#29992#25163#20876
+            Height = 35
+            Caption = #24320#21457#25991#26723
             TabOrder = 0
             OnClick = btn1Click
+          end
+          object BitBtn1: TBitBtn
+            Left = 113
+            Top = 212
+            Width = 88
+            Height = 35
+            Caption = #24320#21457#35270#39057
+            TabOrder = 1
+            OnClick = BitBtn1Click
           end
         end
       end
@@ -550,12 +549,10 @@ object MVCMain: TMVCMain
         Width = 50
       end>
     OnClick = stat1Click
-    ExplicitTop = 403
-    ExplicitWidth = 504
   end
   object TrayIcon1: TTrayIcon
     OnClick = TrayIcon1Click
-    Left = 224
-    Top = 328
+    Left = 480
+    Top = 368
   end
 end

@@ -18,7 +18,7 @@ type
     procedure check;                        //check 没有设置 请求路径，将以check 路径访问
     procedure verifycode;
     function Intercept: Boolean; override;  //实现自己的拦截器 ，这里不采取拦截返回 false
-    [MURL('getdata', sGET)]                 //这里请求rqdata地址并且请求是post方式，将会访问 getdata 方法,
+    [MURL('getdata', GET)]                 //这里请求rqdata地址并且请求是post方式，将会访问 getdata 方法,
     procedure getdata;
     procedure getone;
     procedure socket;

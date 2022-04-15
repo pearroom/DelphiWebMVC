@@ -1,7 +1,5 @@
 program WebDemo;
- //{$APPTYPE CONSOLE}  //控制台模式
 {$I mvc.inc}
-{$R *.res}
 
 uses
   MVC.App,
@@ -17,13 +15,9 @@ uses
   TableMap in '..\Service\Map\TableMap.pas',
   ServiceMap in '..\Service\Map\ServiceMap.pas';
 
-begin
-   {
-    生成windows服务(注:无法在控制台模式下使用)：
-    1：在Project目录mvc.inc文件中打开SERVICE开关。
-    2：在config文件中设置WinService参数。
-  }
-  MVCApp.Run();
+{$R *.res}
 
+begin
+  MVCApp.Run();
 end.
 

@@ -11,8 +11,9 @@ unit MVC.LogUnit;
 interface
 
 uses
-{$IFDEF WINFORM}                                                        vcl.forms, {$ENDIF}
-Winapi.Windows, System.SysUtils, System.Classes, Web.HTTPApp;
+  Winapi.Windows, System.SysUtils,
+  {$IFDEF MSWINDOWS}vcl.forms, {$ENDIF}
+  System.Classes, Web.HTTPApp, MVC.Tool;
 
 type
   TLogThread = class(TThread)
@@ -109,12 +110,13 @@ begin
 
   try
     log := FormatDateTime('yyyy-MM-dd hh:mm:ss', Now) + '  ' + msg;
-    logfile := WebApplicationDirectory + 'log/';
+    logfile := WebApplicationDirectory + 'Log/';
+    logfile := IITool.PathFmt(logfile);
     if not DirectoryExists(logfile) then
     begin
       CreateDir(logfile);
     end;
-    logfile := logfile + 'log_' + FormatDateTime('yyyyMMdd', Now) + '.txt';
+    logfile := logfile + 'Log_' + FormatDateTime('yyyyMMdd', Now) + '.txt';
 
     AssignFile(tf, logfile);
     if FileExists(logfile) then

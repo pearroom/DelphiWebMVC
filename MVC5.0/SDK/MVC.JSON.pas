@@ -119,7 +119,11 @@ function TJObject.GetS(key: string): string;
 begin
   Result := '';
   if jsonObj.Get(key) <> nil then
+  begin
     Result := jsonObj.GetValue(key).Value;
+    if Result = '' then
+      Result := jsonObj.GetValue(key).ToJSON;
+  end;
 end;
 
 function TJObject.O: TJSONObject;

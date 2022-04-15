@@ -18,6 +18,12 @@ uses
   web.HTTPApp, mvc.Tool, Data.DB;
 
 type
+  TResData = record
+    Code: integer;
+    Msg: string;
+    procedure Value(sCode: Integer; sMsg: string);
+  end;
+
   ISQL = interface
     procedure Select(fields: string);
     procedure From(tables: string);
@@ -70,7 +76,6 @@ type
     FSet: string;
     SQL_V: TStringList;
   public
-
     function SQL: TStringList;
     procedure Select(fields: string);
     procedure From(tables: string);
@@ -126,7 +131,6 @@ type
 
   TSQLTpl = class(TInterfacedObject, ISQLTpl)
   private
-
     FTpl: string;
     Fkey: string;
     FParam: IJObject;
@@ -146,11 +150,22 @@ type
 
   IDataSet = interface
     function DS: TFDQuery;
-    function Count: Integer;
-    procedure setCount(n: integer);
-    function isEmpty: boolean;
     function toJSONArray: string;
     function toJSONObject: string;
+    function S(fieldname: string): string;
+    function I(fieldname: string): Integer;
+    function D(fieldname: string): Double;
+    procedure setS(fieldname: string; value: string);
+    procedure setI(fieldname: string; value: Integer);
+    procedure setD(fieldname: string; value: Double);
+    function isEmpty: Boolean;
+    function Eof: Boolean;
+    function Count: Integer;
+    procedure Next;
+    procedure Post;
+    procedure Append;
+    procedure Edit;
+    procedure setCount(n: Integer);
     function JsonToDataSet(json: string; var dataset: TFDMemTable): boolean;
   end;
 
@@ -158,14 +173,31 @@ type
   private
     FCount: integer;
     dataset: TFDQuery;
+    function checkType(dbtype: TFieldType): Boolean;
   public
     function DS: TFDQuery;
-    function isEmpty: boolean;
+
     function toJSONArray: string;
     function toJSONObject: string;
-    function JsonToDataSet(json: string; var dataset: TFDMemTable): boolean;
+    function S(fieldname: string): string;
+    function I(fieldname: string): Integer;
+    function D(fieldname: string): Double;
+
+    procedure setS(fieldname: string; value: string);
+    procedure setI(fieldname: string; value: Integer);
+    procedure setD(fieldname: string; value: Double);
+
+    function isEmpty: Boolean;
+    function Eof: Boolean;
     function Count: Integer;
-    procedure setCount(n: integer);
+    procedure Next;
+    procedure Post;
+    procedure Append;
+    procedure Edit;
+    procedure setCount(n: Integer);
+
+    function JsonToDataSet(json: string; var dataset: TFDMemTable): boolean;
+
     constructor Create();
     destructor Destroy; override;
   end;
@@ -204,6 +236,23 @@ begin
 end;
 { TDataSet }
 
+procedure TDataSet.Append;
+begin
+  DS.Append;
+end;
+
+function TDataSet.checkType(dbtype: TFieldType): Boolean;
+begin
+  if dbtype in [ftString, ftWideString, ftUnknown, ftWideMemo, ftMemo, ftDate, ftDateTime, ftTime, ftFmtMemo, ftTimeStamp, ftTimeStampOffset] then
+  begin
+    Result := true;
+  end
+  else
+  begin
+    Result := false;
+  end;
+end;
+
 function TDataSet.Count: Integer;
 begin
   if FCount <> 0 then
@@ -229,6 +278,31 @@ begin
   Result := dataset;
 end;
 
+procedure TDataSet.Edit;
+begin
+  ds.Edit;
+end;
+
+function TDataSet.Eof: Boolean;
+begin
+  Result := ds.Eof;
+end;
+
+function TDataSet.D(fieldname: string): Double;
+begin
+  Result := ds.FieldByName(fieldname).AsFloat;
+end;
+
+function TDataSet.I(fieldname: string): Integer;
+begin
+  Result := ds.FieldByName(fieldname).AsInteger;
+end;
+
+function TDataSet.S(fieldname: string): string;
+begin
+  Result := ds.FieldByName(fieldname).AsString;
+end;
+
 function TDataSet.isEmpty: boolean;
 begin
   Result := dataset.IsEmpty;
@@ -241,7 +315,6 @@ var
   j, i: integer;
   s: string;
   ja: IJArray;
-
 begin
   if dataset.Active and not dataset.IsEmpty then
   begin
@@ -295,9 +368,34 @@ begin
   Result := true;
 end;
 
+procedure TDataSet.Next;
+begin
+  ds.Next;
+end;
+
+procedure TDataSet.Post;
+begin
+  DS.Post;
+end;
+
 procedure TDataSet.setCount(n: integer);
 begin
   FCount := n;
+end;
+
+procedure TDataSet.setD(fieldname: string; value: Double);
+begin
+  ds.FieldByName(fieldname).AsFloat := value;
+end;
+
+procedure TDataSet.setI(fieldname: string; value: Integer);
+begin
+  ds.FieldByName(fieldname).AsInteger := value;
+end;
+
+procedure TDataSet.setS(fieldname, value: string);
+begin
+  ds.FieldByName(fieldname).AsString := value;
 end;
 
 function TDataSet.toJSONArray: string;
@@ -324,21 +422,18 @@ begin
         item := '{';
         for i := 0 to Fields.Count - 1 do
         begin
+          ftype := Fields[i].DataType;
           if Config.JsonToLower then
             key := Fields[i].DisplayLabel.ToLower
           else
             key := Fields[i].DisplayLabel;
-          ftype := Fields[i].DataType;
-          if (ftype = ftAutoInc) or (ftype = ftShortint) or (ftype = ftSingle) or (ftype = ftLargeint) then
-            value := Fields[i].AsString
-          else if (ftype = ftInteger) or (ftype = ftWord) or (ftype = ftBCD) or (ftype = ftFMTBcd) then
-            value := Fields[i].AsString
-          else if (ftype = ftBoolean) then
-            value := Fields[i].AsString
+          if checkType(ftype) then
+            value := '"' + IITool.UnicodeEncode(Fields[i].AsString) + '"'
+          else if ftype = ftBoolean then
+            value := Fields[i].AsString.ToLower
           else
-          begin
-            value := '"' + IITool.UnicodeEncode(Fields[i].AsString) + '"';
-          end;
+            value := Fields[i].AsString;
+
           if value = '' then
             value := '0';
           item := item + '"' + key + '"' + ':' + value + ',';
@@ -382,21 +477,19 @@ begin
         item := '{';
         for i := 0 to Fields.Count - 1 do
         begin
+          ftype := Fields[i].DataType;
           if Config.JsonToLower then
             key := Fields[i].DisplayLabel.ToLower
           else
             key := Fields[i].DisplayLabel;
-          ftype := Fields[i].DataType;
-          if (ftype = ftAutoInc) then
-            value := Fields[i].AsString
-          else if (ftype = ftInteger) then
-            value := Fields[i].AsString
-          else if (ftype = ftBoolean) then
-            value := Fields[i].AsString
+
+          if checkType(ftype) then
+            value := '"' + IITool.UnicodeEncode(Fields[i].AsString) + '"'
+          else if ftype = ftBoolean then
+            value := Fields[i].AsString.ToLower
           else
-          begin
-            value := '"' + IITool.UnicodeEncode(Fields[i].AsString) + '"';
-          end;
+            value := Fields[i].AsString;
+
           if value = '' then
             value := '0';
           item := item + '"' + key + '"' + ':' + value + ',';
@@ -726,7 +819,6 @@ var
   key, s: string;
   matchs: TMatchCollection;
   match: TMatch;
-
 begin
   s := '';
   if not _T then
@@ -761,7 +853,6 @@ end;
 function TSQLTpl.getSQL(sql: string; sType: string): ISQL;
 var
   retsql: string;
-
   select, from, where, order, insert, edit, del, value, set_: string;
   FSQL: ISQL;
   arr: TArray<string>;
@@ -924,6 +1015,14 @@ begin
     Parser.free;
   end;
 
+end;
+
+{ TResData }
+
+procedure TResData.value(sCode: Integer; sMsg: string);
+begin
+  Self.Code := sCode;
+  Self.Msg := sMsg;
 end;
 
 end.

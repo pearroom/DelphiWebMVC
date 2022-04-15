@@ -231,6 +231,7 @@ destructor THTTPServer.Destroy;
 begin
   if Assigned(HServer) then
   begin
+ //   HServer.Shutdown;
     HServer.Free;
   end;
   inherited;
@@ -267,7 +268,7 @@ begin
     else if UpperCase(compress) = UpperCase('gzip') then
       HServer.RegisterCompress(CompressGZip);
 
-    HServer.AddUrl('', Config.Port, False, '+', true);
+    HServer.AddUrl('', Config.Port, False, '+', false);
     HServer.HTTPQueueLength := Config.HTTPQueueLength;
     HServer.Clone(Config.ThreadCount);   //ChildThreadCount∆Ù∂Øhttpº‡Ã˝œﬂ≥Ã
     Action := true;

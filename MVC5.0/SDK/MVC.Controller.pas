@@ -16,7 +16,7 @@ uses
   MVC.DataSet;
 
 type
-  THTTPMethod = (sGET, sPOST, sPUT, sHEAD, sDELETE, sPATCH, sOPTIONS);
+  THTTPMethod = (None, GET, POST, PUT, HEAD, DELETE, PATCH, OPTIONS);
 
   TMURL = class(TCustomAttribute)
   private
@@ -26,8 +26,8 @@ type
     routeUrl: string;
     tplPath: string;
     function getMethodType: string;
-    constructor Create(sRouteUrl: string; sMethod: THTTPMethod = THTTPMethod.sGET); overload;
-    constructor Create(sRouteUrl: string; sTplPath: string; sMethod: THTTPMethod = THTTPMethod.sGET); overload;
+    constructor Create(sRouteUrl: string; sMethod: THTTPMethod = THTTPMethod.None); overload;
+    constructor Create(sRouteUrl: string; sTplPath: string; sMethod: THTTPMethod = THTTPMethod.None); overload;
   end;
 
   TController = class
@@ -72,10 +72,13 @@ type
     procedure ShowJSON(jsonJO: IJObject); overload;
     procedure ShowJSON(jsonJA: IJArray); overload;
     procedure ShowJSON(dataset: IDataSet); overload;
+    procedure ShowJSON(res: TResData); overload;
     procedure Show(htmlTpl: string);
-    procedure ShowFile(AFileName: string);
+    /// <param name="isdown">是否下载文件</param>
+    procedure ShowFile(AFileName: string; isDown: Boolean = false);
     procedure Success(code: Integer = 0; msg: string = '');
     procedure Fail(code: Integer = -1; msg: string = '');
+
     procedure Redirect(action: string; path: string = '');
 
     function Intercept(): Boolean; virtual; //访问拦截处理方法需子类继承使用
@@ -121,7 +124,7 @@ end;
 
 procedure TController.CreateController;
 begin
-  FWebPath := WebApplicationDirectory;
+  FWebPath := Config.BasePath;
   PageParams := TStringList.Create;
   FSession := TSession.Create(Request, Response);
 end;
@@ -203,7 +206,7 @@ begin
   FtplPath := Value;
 end;
 
-procedure TController.ShowFile(AFileName: string);
+procedure TController.ShowFile(AFileName: string; isDown: Boolean);
 var
   sFileName: string;
 begin
@@ -214,7 +217,13 @@ begin
   sFileName := sFileName.Replace('/', '\');
   Response.Content := sFileName;
   Response.ContentType := '!STATICFILE';
-  Response.SetCustomHeader('Content-Disposition', 'attachment;filename=' + ExtractFileName(sFileName));
+  if not isDown then
+    //浏览器内显示
+    Response.SetCustomHeader('Content-Disposition', 'inline;filename=' + ExtractFileName(sFileName))
+  else
+    //下载文件
+    Response.SetCustomHeader('Content-Disposition', 'attachment;filename=' + ExtractFileName(sFileName));
+
   Response.ContentEncoding := Config.document_charset;
 end;
 
@@ -249,23 +258,33 @@ begin
 
   try
     htmlcontent := PageCache.LoadPage(key);
-    pagepars := TTplParser.Create;
-    try
-      pagepars.Parser(htmlcontent, PageParams, tplPath);
-    finally
-      pagepars.Free;
+    if htmlcontent = '' then
+    begin
+      htmlcontent := '<h1>模板文件不存在</h1><hr>' + key;
+    end
+    else
+    begin
+      pagepars := TTplParser.Create;
+      try
+        pagepars.Parser(htmlcontent, PageParams, tplPath);
+      finally
+        pagepars.Free;
+      end;
     end;
   finally
     Response.ContentType := 'text/html; charset=' + Config.document_charset;
     Response.Content := htmlcontent;
-    Response.SendResponse;
   end;
-
 end;
 
 procedure TController.ShowJSON(dataset: IDataSet);
 begin
   ShowJSON(dataset.toJSONArray)
+end;
+
+procedure TController.ShowJSON(res: TResData);
+begin
+  Success(res.Code, res.Msg);
 end;
 
 procedure TController.ShowJSON(jsonJA: IJArray);
@@ -283,7 +302,6 @@ begin
   Corss_Origin;
   Response.ContentType := 'application/json; charset=' + Config.document_charset;
   Response.Content := json;
-
 end;
 
 procedure TController.ShowText(text: string);
@@ -291,7 +309,6 @@ begin
   Corss_Origin;
   Response.ContentType := 'text/html; charset=' + Config.document_charset;
   Response.Content := text;
-
 end;
 
 function TController.InputInt(param: string): Integer;
@@ -337,9 +354,10 @@ var
   i: Integer;
   isok: boolean;
   key, value: string;
+  body: string;
 begin
   isok := False;
-  var body: string := InputBody;
+  body := InputBody;
   try
     if body.Trim <> '' then
     begin
@@ -388,14 +406,14 @@ begin
       jo := nil;
     Result := jo;
   end;
-
 end;
 
 function TController.InputToJSONArray: IJArray;
 var
   ja: IJArray;
+  body: string;
 begin
-  var body: string := InputBody;
+  body := InputBody;
   if body.Trim <> '' then
   begin
     if (body.Substring(0, 1) = '[') and (body.Substring(body.Length - 1, 1) = ']') then
@@ -485,7 +503,6 @@ begin
     end;
     ShowText(xmlcontent);
   end;
-
 end;
 
 procedure TController.Success(code: Integer; msg: string);
@@ -525,12 +542,12 @@ begin
     begin
       CreateDir(path);
     end;
-    s := ExtractFileName(Request.Files[k].filename);
+    s := ExtractFileName(Request.Files[i].filename);
     if filename.Trim <> '' then
     begin
       p := '';
-      if k > 0 then
-        p := k.ToString;
+      if i > 0 then
+        p := i.ToString;
       filetmp := filename.Trim + p + copy(s, Pos('.', s), s.Length - pos('.', s) + 1)
     end
     else
@@ -540,13 +557,12 @@ begin
     FFileName := path + '\' + filetmp;
     Afile := TFileStream.Create(FFileName, fmCreate);
     try
-      Request.Files[k].Stream.Position := 0;
-      Afile.CopyFrom(Request.Files[k].Stream, Request.Files[k].Stream.Size);  //测试保存文件，通过。
+      Request.Files[i].Stream.Position := 0;
+      Afile.CopyFrom(Request.Files[i].Stream, Request.Files[i].Stream.Size);  //测试保存文件，通过。
     finally
       Afile.Free;
     end;
     ret := ret + filetmp + ',';
-
   end;
   ret := ret.Substring(0, ret.Length - 1);
   Result := ret;
@@ -577,7 +593,6 @@ begin
       s := s.Substring(1, s.Length);
     if s.Substring(s.Length - 1, 1) = '/' then
       s := s.Substring(0, s.Length - 1);
-
   end;
   Result := s;
 end;
@@ -599,20 +614,21 @@ end;
 
 function TMURL.getMethodType: string;
 begin
+  Result := '';
   case httpMethod of
-    sGET:
+    GET:
       result := 'GET';
-    sPOST:
+    POST:
       result := 'POST';
-    sPUT:
+    PUT:
       result := 'PUT';
-    sHEAD:
+    HEAD:
       result := 'HEAD';
-    sDELETE:
+    DELETE:
       result := 'DELETE';
-    sPATCH:
+    PATCH:
       result := 'PATCH';
-    sOPTIONS:
+    OPTIONS:
       result := 'OPTIONS';
   end;
 end;

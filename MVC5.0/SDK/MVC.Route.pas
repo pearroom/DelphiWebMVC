@@ -13,7 +13,7 @@ interface
 uses
   System.SysUtils, System.DateUtils, System.Classes, System.StrUtils,
   System.Generics.Collections, system.TypInfo, System.Rtti, MVC.Config, HTTPApp,
-  IdURI, SynCommons, MVC.Controller, MVC.LogUnit, MVC.TplUnit;
+  IdURI, SynCommons, MVC.Controller, MVC.LogUnit, MVC.TplUnit, MVC.Tool;
 
 type
   TRouteItem = class
@@ -68,7 +68,6 @@ type
 var
   RouteMap: TRoute;
 
-
 procedure initRoute;
 
 procedure OpenRoute(_Request: TWebRequest; _Response: TWebResponse);
@@ -86,7 +85,6 @@ var
   cl: TClass;
   _RTTIContext: TRttiContext;
   AttrMethod, AttrClass: TCustomAttribute;
-
 begin
   tts := _RTTIContext.GetTypes;
   for tt in tts do
@@ -137,9 +135,12 @@ begin
 end;
 
 function LoadFile(_Response: TWebResponse; url: string): boolean;
+var
+  filepath: string;
+  page: TPage;
 begin
-  var filepath := WebApplicationDirectory + Config.WebRoot + '\' + Config.template + url + Config.template_type;
-  var page: TPage := Tpage.Create(filepath);
+  filepath := Config.BasePath + Config.WebRoot + '\' + Config.template + url + Config.template_type;
+  page := Tpage.Create(filepath);
   try
     if page.Text() <> '' then
     begin
@@ -173,24 +174,17 @@ var
 begin
   InterceptRet := false;
   _Response.ContentEncoding := Config.document_charset;
-  _Response.Server := 'IIS/6.0';
   _Response.Date := Now;
   httpMethod := _Request.Method;
-  {$IFDEF CROSS}
   url := _Request.PathInfo;
-  {$ELSE}
-  {$IFDEF MSWINDOWS}
-  url := TIdURI.URLDecode(_Request.PathInfo);
-  {$ELSE}
-  url := _Request.PathInfo;
-  {$ENDIF }
-  {$ENDIF}
   //
+  url := IITool.UrlFmt(url);
   if Config.App <> '' then
   begin
-    url := url.Replace(Config.App, '').Replace('//', '/');
+    url := url.Replace(Config.App, '');
   end;
-  assetsfile := WebApplicationDirectory + Config.WebRoot + url;
+  assetsfile := Config.BasePath + Config.WebRoot + url;
+  assetsfile := IITool.PathFmt(assetsfile);
   if (Config.suffix.Trim <> '') and (not FileExists(assetsfile)) then
   begin
     if RightStr(url, Length(Config.suffix)) = Config.suffix then
@@ -260,7 +254,10 @@ begin
           RouteMap.Error404(_Response, url);
           exit;
         end;
-        if (item.getMethodType(methodname) <> '') and (httpMethod.ToUpper <> item.getMethodType(methodname)) then
+        if (item.getMethodType(methodname) <> '')
+          and (httpMethod.ToUpper <> item.getMethodType(methodname)
+
+          ) then
         begin
           RouteMap.Error404(_Response, url);
           exit;
@@ -274,7 +271,10 @@ begin
 
             if not InterceptRet then
             begin
-              ActionMethod.Invoke(Action, aValueArray);
+              if length(aValueArray) > 0 then
+                ActionMethod.Invoke(Action, aValueArray)
+              else
+                ActionMethod.Invoke(Action, []);
               if _Response.ContentType = '' then
                 Show.Invoke(Action, [methodname]);
               _Response.SendResponse;
@@ -323,14 +323,12 @@ begin
   begin
     RouteMap.loadAssets(_Request, _Response, url); //加载资源文件
   end;
-
 end;
 
 constructor TRoute.Create;
 begin
   list := TObjectList<TRouteItem>.Create;
   listkey := TStringList.Create;
-
 end;
 
 function TRoute.DateTimeToGMT(const ADate: TDateTime): string;
@@ -354,7 +352,6 @@ begin
   listkey.Free;
   list.Clear;
   list.Free;
-
 end;
 
 procedure TRoute.Error500(Response: TWebResponse; msg: string);
@@ -369,7 +366,7 @@ begin
   Content := Content + '<hr><div>[ ' + msg + ' ]' + '</div></div></body></html>';
   if Trim(Config.Error500) <> '' then
   begin
-    tplFile := WebApplicationDirectory + config.WebRoot + '\' + Config.Error500 + '.html';
+    tplFile := Config.BasePath + config.WebRoot + '\' + Config.Error500 + '.html';
     if FileExists(tplFile) then
     begin
       page := Tpage.Create(tplFile);
@@ -397,7 +394,7 @@ begin
   Content := Content + '<hr><div>[ ' + msg + ' ] Not Find Page' + '</div></div></body></html>';
   if Trim(Config.Error404) <> '' then
   begin
-    tplFile := WebApplicationDirectory + config.WebRoot + '\' + Config.Error404 + '.html';
+    tplFile := Config.BasePath + config.WebRoot + '\' + Config.Error404 + '.html';
     if FileExists(tplFile) then
     begin
       page := Tpage.Create(tplFile);
@@ -651,7 +648,7 @@ begin
   begin
     _Response.SetCustomHeader('Cache-Control', 'no-cache,no-store');
   end;
-  webpath := WebApplicationDirectory;
+  webpath := Config.BasePath;
   assetsfile := webpath + Config.WebRoot + url;
   if FileExists(assetsfile) then
   begin
@@ -726,12 +723,10 @@ begin
       Response := ActoinClass.GetProperty('Response');
       routeUrl_pro := ActoinClass.GetProperty('routeUrl');
       tplPath_pro := ActoinClass.GetProperty('tplPath');
-
     end;
     List.Add(item);
     listkey.Add(routeUrl);
     listkey.CustomSort(DescCompareStrings);
-
   end
   else
   begin
@@ -782,7 +777,6 @@ begin
     else
       Result := methodname;
   end;
-
 end;
 
 function TRouteItem.getMethodTpl(methodname: string): string;
@@ -819,7 +813,6 @@ end;
 
 initialization
   RouteMap := TRoute.Create;
-
 
 finalization
   RouteMap.Free;

@@ -69,6 +69,8 @@ type
     Image1: TImage;
     btn1: TBitBtn;
     Label1: TLabel;
+    BitBtn1: TBitBtn;
+    Label2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ButtonOpenBrowserClick(Sender: TObject);
     procedure WMSysCommand(var Msg: TWMSysCommand); message WM_SYSCOMMAND;
@@ -96,6 +98,7 @@ type
     procedure LinkLabel1Click(Sender: TObject);
     procedure btn1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure BitBtn1Click(Sender: TObject);
   private
     function readlog(var str: TMemo; var Msg: string): boolean;
     procedure OpenDelphiWebMVC;
@@ -106,7 +109,6 @@ type
 
 var
   MVCMain: TMVCMain;
-
 
 implementation
 
@@ -120,6 +122,11 @@ begin
     Application.Minimize;
     ShowWindow(Application.Handle, SW_HIDE);
   end;
+end;
+
+procedure TMVCMain.BitBtn1Click(Sender: TObject);
+begin
+  OpenURL('https://space.bilibili.com/18184783');
 end;
 
 procedure TMVCMain.btn1Click(Sender: TObject);
@@ -279,7 +286,6 @@ end;
 procedure TMVCMain.btnSetClick(Sender: TObject);
 begin
   Application.MessageBox('¾´ÇëÆÚ´ý£¡£¡£¡', 'ÌáÊ¾', MB_OK);
-
 end;
 
 procedure TMVCMain.btnStartClick(Sender: TObject);
@@ -296,7 +302,6 @@ begin
     else
     begin
       btnStart.Caption := 'Í£Ö¹';
-
     end;
   end
   else
@@ -305,7 +310,6 @@ begin
     edtport.Text := '0';
     btnStart.Caption := 'Æô¶¯';
   end;
-
 end;
 
 procedure TMVCMain.Button1Click(Sender: TObject);
@@ -358,8 +362,7 @@ end;
 
 procedure TMVCMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if btnStart.Caption = 'Í£Ö¹' then
-    CloseServer;
+  CloseServer;
 end;
 
 procedure TMVCMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -375,18 +378,17 @@ begin
   end
   else
     CanClose := true;
-
 end;
 
 procedure TMVCMain.FormCreate(Sender: TObject);
 begin
   Caption := Application.Title;
   TrayIcon1.SetDefaultIcon;
-  TrayIcon1.Visible := true;
+  if not Config.open_log then
+    TrayIcon1.Visible := true;
   mmolog.Clear;
   edtport.ReadOnly := true;
   pgc1.ActivePageIndex := 0;
-
 end;
 
 procedure TMVCMain.FormShow(Sender: TObject);
@@ -395,7 +397,6 @@ begin
   mmoMIME.Lines.LoadFromFile(Config.mime_path);
   if Config.auto_start then
     btnStart.Click;
-
 end;
 
 procedure TMVCMain.LinkLabel1Click(Sender: TObject);

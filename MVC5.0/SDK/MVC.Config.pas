@@ -11,7 +11,7 @@ interface
 
 uses
   MVC.LogUnit, MVC.JSON, System.JSON, System.SysUtils, System.Classes, HTTPApp,
-  MVC.DES, System.Generics.Collections;
+  MVC.DES, System.Generics.Collections, MVC.Tool;
 
 type
   TCorss_Origin = record
@@ -19,6 +19,16 @@ type
     Allow_Headers: string;
     Allow_Method: string;
     Allow_Credentials: Boolean;
+  end;
+
+  TRedisParams = record
+    Host: string;
+    Port: integer;
+    PassWrod: string;
+    InitSize: integer;
+    TimeOut: integer;
+    ReadTimeOut: integer;
+
   end;
 
   TConfig = class
@@ -54,6 +64,10 @@ type
     FDBConfig: string;
     Fshow_sql: Boolean;
     FWinServiceConfig: string;
+    FBasePath: string;
+    FleftFmt: string;
+    FrightFmt: string;
+    Fredis: TRedisParams;
     procedure SetApp(const Value: string);
     procedure SetPort(const Value: string);
     procedure SetWebRoot(const Value: string);
@@ -83,10 +97,14 @@ type
     procedure SetDBConfig(const Value: string);
     procedure Setshow_sql(const Value: Boolean);
     procedure SetWinServiceConfig(const Value: string);
+    procedure SetBasePath(const Value: string);
+    procedure SetleftFmt(const Value: string);
+    procedure SetrightFmt(const Value: string);
+    procedure Setredis(const Value: TRedisParams);
 
   public
     MIME: TDictionary<string, string>;
-
+    property BasePath: string read FBasePath write SetBasePath;
     property AppTitle: string read FAppTitle write SetAppTitle;
     property App: string read FApp write SetApp;
     property Port: string read FPort write SetPort;
@@ -116,7 +134,9 @@ type
     property DBConfig: string read FDBConfig write SetDBConfig; //存储数据库配置数据
     property show_sql: Boolean read Fshow_sql write Setshow_sql;
     property WinServiceConfig: string read FWinServiceConfig write SetWinServiceConfig;
-
+    property leftFmt: string read FleftFmt write SetleftFmt; //左边分割字符
+    property rightFmt: string read FrightFmt write SetrightFmt; //右边分割字符
+    property redis: TRedisParams read Fredis write Setredis; //redis 参数
     //
     function check_directory_permission(path: string): Boolean; //检查目录的访问权限
     function read_config(): IJObject; // 读取 config.json 配置文件
@@ -133,7 +153,6 @@ type
 
 var
   Config: TConfig;
-
 
 procedure Lock(aObject: TObject);
 
@@ -164,7 +183,6 @@ end;
 procedure UnLock(aObject: TObject);
 begin
   MonitorExit(aObject);
-
 end;
 
 function TConfig.check_directory_permission(path: string): Boolean;
@@ -215,8 +233,10 @@ begin
   template_type := '.html';
   Error404 := '404';
   Error500 := '500';
-  config_path := 'Resources\config.json';
-  mime_path := 'Resources\mime.json';
+  leftFmt := '#{';
+  rightFmt := '}';
+  config_path := Config.BasePath + 'Resources\config.json';
+  mime_path := Config.BasePath + 'Resources\mime.json';
   HTTPQueueLength := 1000;
   session_timer := 30;
   suffix := '.html';
@@ -241,7 +261,8 @@ var
   jo: IJObject;
 begin
 
-  filepath := WebApplicationDirectory + config_path;
+  filepath := config_path;
+  filepath := IITool.PathFmt(filepath);
   if not FileExists(filepath) then
   begin
     WriteLog(config_path + '配置文件不存在');
@@ -296,7 +317,8 @@ var
   ekey, mValue: string;
   filepath: string;
 begin
-  filepath := WebApplicationDirectory + mime_path;
+  filepath := mime_path;
+  filepath := IITool.PathFmt(filepath);
   if not FileExists(filepath) then
   begin
     WriteLog(config_path + '配置文件不存在');
@@ -322,7 +344,6 @@ begin
       jarr := nil;
       over := false;
     end;
-
   finally
     f.Free;
   end;
@@ -352,6 +373,11 @@ end;
 procedure TConfig.Setauto_start(const Value: boolean);
 begin
   Fauto_start := Value;
+end;
+
+procedure TConfig.SetBasePath(const Value: string);
+begin
+  FBasePath := Value;
 end;
 
 procedure TConfig.Setcache_max_age(const Value: string);
@@ -404,6 +430,11 @@ begin
   FJsonToLower := Value;
 end;
 
+procedure TConfig.SetleftFmt(const Value: string);
+begin
+  FleftFmt := Value;
+end;
+
 procedure TConfig.Setmime_path(const Value: string);
 begin
   Fmime_path := Value;
@@ -426,10 +457,14 @@ end;
 
 procedure TConfig.setParams(json: IJObject);
 var
-  server_jo, Config_jo, corss_jo, dbconfig_jo, winservice_jo: TJSONObject;
+  server_jo, Config_jo, corss_jo, dbconfig_jo, winservice_jo, redis_jo: TJSONObject;
   directory_jo: TJSONArray;
   corss: TCorss_Origin;
   i: integer;
+  jo: TJSONObject;
+  path: string;
+  permission: Boolean;
+  tm_redis: TRedisParams;
 begin
   if json.O.GetValue('AppTitle') <> nil then
     AppTitle := json.O.GetValue('AppTitle').Value;
@@ -445,7 +480,25 @@ begin
     if server_jo.GetValue('ChildThreadCount') <> nil then
       ThreadCount := server_jo.GetValue('ChildThreadCount').Value.ToInteger;
   end;
-//
+  // redis参数设置
+  redis_jo := json.O.GetValue('Redis') as TJSONObject;
+  if redis_jo <> nil then
+  begin
+
+    if redis_jo.GetValue('Host') <> nil then
+      tm_redis.Host := redis_jo.GetValue('Host').Value;
+    if redis_jo.GetValue('Port') <> nil then
+      tm_redis.Port := redis_jo.GetValue('Port').Value.ToInteger();
+    if redis_jo.GetValue('PassWord') <> nil then
+      tm_redis.PassWrod := redis_jo.GetValue('PassWord').Value;
+    if redis_jo.GetValue('InitSize') <> nil then
+      tm_redis.InitSize := redis_jo.GetValue('InitSize').Value.ToInteger;
+    if redis_jo.GetValue('TimeOut') <> nil then
+      tm_redis.TimeOut := redis_jo.GetValue('TimeOut').Value.ToInteger;
+    if redis_jo.GetValue('ReadTimeOut') <> nil then
+      tm_redis.ReadTimeOut := redis_jo.GetValue('ReadTimeOut').Value.ToInteger;
+    redis := tm_redis;
+  end;
  // config文件解析
   Config_jo := json.O.GetValue('Config') as TJSONObject;
   //log(Config_jo.ToJSON);
@@ -479,7 +532,10 @@ begin
       suffix := Config_jo.GetValue('suffix').Value;
     if Config_jo.GetValue('JsonToLower') <> nil then
       JsonToLower := Config_jo.GetValue('JsonToLower').Value.ToBoolean;
-
+    if Config_jo.GetValue('leftFmt') <> nil then
+      leftFmt := Config_jo.GetValue('leftFmt').Value;
+    if Config_jo.GetValue('rightFmt') <> nil then
+      rightFmt := Config_jo.GetValue('rightFmt').Value;
   end;
   //跨域访问设置
   with corss do
@@ -519,9 +575,14 @@ begin
     for i := 0 to directory_jo.Count - 1 do
     begin
       try
-        var jo: TJSONObject := directory_jo.Items[i] as TJSONObject;
-        var path: string := jo.GetValue('path').Value;
-        var permission: Boolean := jo.GetValue('permission').Value.ToLower = 'true';
+        jo := directory_jo.Items[i] as TJSONObject;
+        path := jo.GetValue('path').Value;
+        path := path.Replace('\', '/');
+        if (path.Substring(0, 1) <> '/') then
+          path := '/' + path;
+        if (path.Substring(path.Length - 1, 1) <> '/') then
+          path := path + '/';
+        permission := jo.GetValue('permission').Value.ToLower = 'true';
         directory_permission.Add(path, permission);
       except
         log('directory参数错误,服务启动失败');
@@ -544,6 +605,16 @@ end;
 procedure TConfig.SetPort(const Value: string);
 begin
   FPort := Value;
+end;
+
+procedure TConfig.Setredis(const Value: TRedisParams);
+begin
+  Fredis := Value;
+end;
+
+procedure TConfig.SetrightFmt(const Value: string);
+begin
+  FrightFmt := Value;
 end;
 
 procedure TConfig.Setroute_suffix(const Value: string);
@@ -598,7 +669,6 @@ end;
 
 initialization
   Config := TConfig.Create();
-
 
 finalization
   Config.Free;

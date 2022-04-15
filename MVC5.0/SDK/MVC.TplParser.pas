@@ -5,11 +5,13 @@ interface
 uses
   System.Generics.Collections, System.SysUtils, System.Classes, MVC.Config,
   MVC.LogUnit, web.HTTPApp, Web.ReqMulti, System.RegularExpressions, mvc.json,
-  System.JSON, MVC.Service;
+  System.JSON, MVC.Service, MVC.Tool;
 
 type
   TTplParser = class(TService)
   private
+    leftFmt: string; //×ó±ß×Ö·û
+    rightFmt: string; //ÓÒ±ß×Ö·û
     function foreachvalue(text, key, value: string; var isok: Boolean): string;
     function foreach(text: string; param: TStringList): string;
     procedure foreachinclude(var text: string; param: TStringList; url: string);
@@ -33,7 +35,9 @@ uses
 
 function ckdata(value: string): boolean;
 begin
-  if (value = 'neq') or (value = 'eq') or (value = 'and') or (value = 'or') or (value = 'gte') or (value = 'gt') or (value = 'lte') or (value = 'lt') or (value = '==') then
+  if (value = 'neq') or (value = 'eq') or (value = 'and')
+    or (value = 'or') or (value = 'gte') or (value = 'gt')
+    or (value = 'lte') or (value = 'lt') or (value = '==') then
     Result := true
   else
     Result := false;
@@ -47,7 +51,8 @@ var
   device: string;
   mssqlver: string;
   sql: string;
-
+  ver: string;
+  dataset: IDataset;
 begin
   strlist := TStringList.Create;
   try
@@ -61,7 +66,6 @@ begin
         s := Q(s);
         strlist[i] := s;
       end;
-
     end;
     s := '';
     for i := 0 to strlist.Count - 1 do
@@ -95,7 +99,7 @@ begin
       if device.ToLower = 'mssql' then
       begin
         mssqlver := db.GetMSSQLVer;
-        var ver: string := mssqlver.Split(['.'])[0];
+        ver := mssqlver.Split(['.'])[0];
         if ver.ToInteger = 10 then   // °æ±¾ÊÇ10 ÊÇ mssql2008
         begin
           sql := 'select 1 as sn where ' + where;
@@ -109,7 +113,7 @@ begin
           sql := 'select 1 as sn where ' + where;
         end;
       end;
-      var dataset: IDataset := db.Find(sql);
+      dataset := db.Find(sql);
       if dataset.ds.FieldByName('sn').AsString = '1' then
         Result := true
       else
@@ -157,7 +161,7 @@ var
   matchs: TMatchCollection;
   match: TMatch;
 begin
-  matchs := TRegEx.Matches(text, '#\{[\s\S]*?\}');
+  matchs := TRegEx.Matches(text, Self.leftFmt + '[\s\S]*?\' + self.rightFmt);
   for match in matchs do
   begin
     text := TRegEx.Replace(text, match.Value, '');
@@ -284,9 +288,10 @@ begin
       end;
       htmlfile := htmlfile.Replace('''', '').Replace('"', '');
       if (htmlfile.IndexOf('/') = 0) then
-        htmlfile := WebApplicationDirectory + root + Config.template + htmlfile
+        htmlfile := Config.BasePath + root + Config.template + htmlfile
       else
-        htmlfile := WebApplicationDirectory + root + Config.template + '/' + url + htmlfile;
+        htmlfile := Config.BasePath + root + Config.template + '/' + url + htmlfile;
+      htmlfile := IITool.PathFmt(htmlfile);
       if (Trim(htmlfile) <> '') then
       begin
         if (not FileExists(htmlfile)) then
@@ -330,7 +335,7 @@ begin
     for i := 0 to json.Count - 1 do
     begin
     //  html := foreachif(html, key + '.' + json.Pairs[i].JsonString.Value, json.Pairs[i].JsonValue.Value, isok);
-      s := '#{' + key + '.' + json.Pairs[i].JsonString.Value + '}';
+      s := self.leftFmt + key + '.' + json.Pairs[i].JsonString.Value + self.rightFmt;
       matchs := TRegEx.Matches(html, s, [roIgnoreCase]);
       for match in matchs do
       begin
@@ -340,7 +345,7 @@ begin
           isok := true;
         end;
       end;
-      s := '#{' + key + '.' + json.Pairs[i].JsonString.Value + '\|s}';
+      s := self.leftFmt + key + '.' + json.Pairs[i].JsonString.Value + '\|s' + self.rightFmt;
       matchs := TRegEx.Matches(html, s, [roIgnoreCase]);
       for match in matchs do
       begin
@@ -362,7 +367,7 @@ var
   s: string;
 begin
   isok := false;
-  s := '#{' + key + '}';
+  s := self.leftFmt + key + self.rightFmt;
   matchs := TRegEx.Matches(text, s, [roIgnoreCase]);
   for match in matchs do
   begin
@@ -372,7 +377,7 @@ begin
       isok := true;
     end;
   end;
-  s := '#{' + key + '\|s}';
+  s := self.leftFmt + key + '\|s' + Self.rightFmt;
   matchs := TRegEx.Matches(text, s, [roIgnoreCase]);
   for match in matchs do
   begin
@@ -531,7 +536,8 @@ procedure TTplParser.Parser(var text: string; param: TStringList; url: string);
 begin
   if text = '' then
     Exit;
-
+  self.leftFmt := Config.leftFmt;
+  self.rightFmt := Config.rightFmt;
   foreachinclude(text, param, url);
   text := foreach(text, param);
  // foreachclear(text);

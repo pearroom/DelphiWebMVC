@@ -1,3 +1,8 @@
+2022-03-11 V5.0.5
+增加CrossSocket库引用，可实现跨平台开发，
+	1.进行linux等跨平台开发
+	2.打开{$APPTYPE CONSOLE},{$DEFINE CROSSSOCKET}
+实现exe项目与资源路经分离，资源可以不在exe同级目录下
 2022-03-01 V5.0.4
 1:MVC.DB 单元增加 IConn 接口，可在任意单元引用。
 使用 var conn:IConn:=IIConn;

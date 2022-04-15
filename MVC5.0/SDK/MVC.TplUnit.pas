@@ -12,7 +12,7 @@ interface
 uses
   System.Generics.Collections, System.SysUtils, System.Classes, MVC.Config,
   MVC.LogUnit, web.HTTPApp, Web.ReqMulti, System.RegularExpressions, mvc.json,
-  System.JSON, MVC.Service, MVC.DataSet;
+  System.JSON, MVC.Service, MVC.DataSet,MVC.Tool;
 
 type
   TPage = class
@@ -141,8 +141,8 @@ begin
   end
   else
   begin
-    pagefile := WebApplicationDirectory + config.WebRoot + '\' + Config.template + '\' + key;
-    pagefile := pagefile.Replace('\\', '\').Replace('//', '/');
+    pagefile := Config.BasePath + config.WebRoot + '\' + Config.template + '\' + key;
+    pagefile := IITool.PathFmt(pagefile);
     if FileExists(pagefile) then
     begin
       page := TPage.Create(pagefile);
@@ -162,8 +162,6 @@ begin
   end;
   Result := htmlcontent;
 end;
-
-{ TPageParser }
 
 { TSQLCache }
 
@@ -191,8 +189,8 @@ begin
   end
   else
   begin
-    pagefile := WebApplicationDirectory + key;
-    pagefile := pagefile.Replace('\\', '\').Replace('//', '/');
+    pagefile := Config.BasePath + key;
+    pagefile := IITool.PathFmt(pagefile);
     if FileExists(pagefile) then
     begin
       page := TPage.Create(pagefile);

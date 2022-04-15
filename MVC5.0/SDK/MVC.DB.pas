@@ -15,7 +15,7 @@ uses
   FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async,
   FireDAC.Phys.FBDef, FireDAC.Phys.FB, FireDAC.DApt, Data.DB,
   FireDAC.Comp.Client, MVC.Config, MVC.LogUnit, MVC.DM, MVC.JSON, system.json,
-  MVC.DataSet, FireDAC.Comp.DataSet;
+  MVC.DataSet, FireDAC.Comp.DataSet, MVC.Tool;
 
 type
   TDBConns = class
@@ -479,7 +479,7 @@ begin
       sq := 'select count(1) as N ' + sql.getFrom;
       sq := filterSQL(sq);
       count := conn.ExecSQLScalar(sq);
-      sq := 'select FIRST ' + inttostr(pSize) + ' SKIP ' + inttostr(pNumber * pSize) + ' ' + sql.getSelect + sql.getFrom + Trim(order);
+      sq := 'select FIRST ' + inttostr(pSize) + ' SKIP ' + inttostr(pNumber * pSize) + ' ' + sql.getSelect + sql.getFrom + ' ' + Trim(order);
       dataset := Query(sq);
       dataset.setCount(count);
       Result := dataset;
@@ -523,7 +523,7 @@ begin
       begin
         sq := sq + tmp + ' id not in(select top ' + IntToStr(pSize * pNumber) + ' id ' + sql.getFrom + ')';
       end;
-      sq := sq + Trim(order);
+      sq := sq + ' ' + Trim(order);
       dataset := Query(sq);
       dataset.setCount(count);
     except
@@ -560,7 +560,7 @@ begin
       sq := ' select *,ROW_NUMBER() OVER(ORDER BY row) AS RowNo from (' + sql.getSelect + ',0 row' + sql.getFrom + ') tmp1 ';
 
       sq := ' select * from (' + sq + ') tmp2 where RowNo between ' + IntToStr(pNumber * pSize) + ' and ' + IntToStr(pNumber * pSize + pSize);
-      sq := sq + order;
+      sq := sq + ' ' + order;
       dataset := Query(sq);
       dataset.setCount(count);
     except
@@ -590,7 +590,7 @@ begin
       sq := 'select count(1) as N ' + sql.getFrom;
       sq := filterSQL(sq);
       count := Conn.ExecSQLScalar(sq);
-      sq := sql.getSelect + sql.getFrom + Trim(order) + ' offset ' + inttostr(pNumber * pSize) + ' rows fetch next ' + inttostr(pSize) + ' rows only ';
+      sq := sql.getSelect + sql.getFrom + ' ' + Trim(order) + ' offset ' + inttostr(pNumber * pSize) + ' rows fetch next ' + inttostr(pSize) + ' rows only ';
       dataset := Query(sq);
       dataset.setCount(count);
     except
@@ -621,7 +621,7 @@ begin
       sq := 'select count(1) as N' + sql.getFrom;
       sq := filterSQL(sq);
       count := Conn.ExecSQLScalar(sq);
-      sq := sql.getSelect + sql.getFrom + sql.getOrder + ' limit ' + inttostr(pNumber * pSize) + ',' + inttostr(pSize);
+      sq := sql.getSelect + sql.getFrom + ' ' + sql.getOrder + ' limit ' + inttostr(pNumber * pSize) + ',' + inttostr(pSize);
       dataset := Query(sq);
       dataset.setCount(count);
     except
@@ -650,7 +650,7 @@ begin
       sq := 'select count(1) as N ' + sql.getFrom;
       sq := filterSQL(sq);
       count := conn.ExecSQLScalar(sq);
-      sq := 'select A.*,to_number(rownum) rn from(' + sql.getSelect + sql.getFrom + sql.getOrder + ') A ';
+      sq := 'select A.*,to_number(rownum) rn from(' + sql.getSelect + sql.getFrom + ' ' + sql.getOrder + ') A ';
       sq := 'select * from (' + sq + ') where rn > ' + IntToStr(pSize * pNumber) + ' and rn <=' + IntToStr(pSize * pNumber + pSize);
 
       dataset := Query(sq);
@@ -682,7 +682,7 @@ begin
       sq := 'select count(1) as N ' + sql.getFrom;
       sq := filterSQL(sq);
       count := Conn.ExecSQLScalar(sq);
-      sq := sql.getSelect + sql.getFrom + sql.getOrder + ' limit ' + inttostr(pNumber * pSize) + ',' + inttostr(pSize);
+      sq := sql.getSelect + sql.getFrom + ' ' + sql.getOrder + ' limit ' + inttostr(pNumber * pSize) + ',' + inttostr(pSize);
       dataset := Query(sq);
       dataset.setCount(count);
     except
@@ -832,8 +832,6 @@ begin
     dbitem := DBPool.getDbItem;
   //连接池查找dbitem
   dbitem.SetConn(DbName);
-  var s: string := dbitem.Conn.ConnectionString;
-  LogDebug('数据库链接地址:' + s);
   Result := dbitem;
 
 end;
@@ -855,7 +853,6 @@ begin
     DbType := dbconfig.O.Pairs[i].JsonString.Value;
     Db := TFDConnection.Create(nil);
     Db.ConnectionDefName := DbType;
-   // var s:string:=Db.DriverName;
     ConnList.Add(Db);
   end;
 
@@ -883,7 +880,6 @@ begin
   begin
     if ConnList[i].ConnectionDefName = DbName then
     begin
-     // var s: string := ConnList[i].DriverName;
       Result := ConnList[i];
       Break;
     end;
@@ -1076,18 +1072,16 @@ begin
           Database := connValue;
         if (driverID = 'SQLite') and (Database <> '') then
         begin
-          Database := WebApplicationDirectory + oParams.Values['Database'];
+		      {$IFDEF SERVICE}
+          Database := Config.BasePath + oParams.Values['Database'];
+		      {$ELSE}
+          Database := oParams.Values['Database'];
+		      {$ENDIF}
+          Database := IITool.PathFmt(Database);
           LogDebug(Database);
           oParams.Values['Database'] := Database;
           Database := '';
         end;
-//        if (driverID = 'FB') and (Database <> '') then
-//        begin
-//          Database := WebApplicationDirectory + oParams.Values['Database'];
-//          LogDebug(Database);
-//          oParams.Values['Database'] := Database;
-//          Database := '';
-//        end;
       end;
       DBManager.AddConnectionDef(key, driverID, oParams);
       oParams.Free;

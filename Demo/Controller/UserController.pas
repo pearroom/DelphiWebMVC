@@ -12,7 +12,7 @@ type
   public
     procedure index;
     //
-    [MURL('getData', TMethod.sGET)]
+    [MURL('getData', TMethod.GET)]
     procedure getData;
     procedure getrole;
     procedure add;
@@ -21,7 +21,7 @@ type
 //    [MURL('del/:id', TMethod.sGET)]
     procedure del(id: string);
 
-    [MURL('save', TMethod.sPOST)]
+    [MURL('save', TMethod.POST)]
     procedure save;
     procedure print;
 

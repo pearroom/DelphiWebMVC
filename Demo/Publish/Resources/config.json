@@ -13,9 +13,19 @@
 		"ServiceType":"stWin32",
 		"StartType":"stAuto"
 	},
+	"Redis":{
+		"Host":"127.0.0.1",
+		"Port":6379,
+		"PassWord":"admin",
+		"InitSize":5,
+		"TimeOut":60,
+		"ReadTimeOut":10
+	},
 	"Config":{
 		"auto_start":true,
 		"APP":"",
+		"leftFmt":"#{",
+		"rightFmt":"}",
 		"session_timer":30,
 		"open_log":true,
 		"open_debug":true,

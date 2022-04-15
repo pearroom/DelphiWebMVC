@@ -9,6 +9,9 @@ uses
 
 const
   SessionKey = '__guid_session';
+  _ConnectionTimeout = 1000;
+  _ResponseTimeout = 1000;
+  _SendTimeout = 1000;
 
 
 type
@@ -52,11 +55,12 @@ type
     FFileName: string;
     FPostParam: string;
     HttpType: string;
+    FIsSyn: Boolean;
   protected
     procedure Execute; override;
   public
     procedure SynRun;
-    constructor Create(sUrlData: TURLData; RetMethod: TRetMethod);
+    constructor Create(sUrlData: TURLData; RetMethod: TRetMethod; isSyn: Boolean = true);
     destructor Destroy; override;
   end;
 
@@ -84,6 +88,9 @@ begin
   if Trim(url) <> '' then
   begin
     http := TNetHTTPClient.Create(nil);
+    http.ConnectionTimeout := _ConnectionTimeout;
+    http.ResponseTimeout := _ResponseTimeout;
+//    http.SendTimeout := _SendTimeout;
     html := TStringStream.Create('', TEncoding.UTF8);
     PostParm := TStringStream.Create(params, TEncoding.UTF8);
     try
@@ -139,6 +146,9 @@ begin
   if Trim(url) <> '' then
   begin
     http := TNetHTTPClient.Create(nil);
+    http.ConnectionTimeout := _ConnectionTimeout;
+    http.ResponseTimeout := _ResponseTimeout;
+//    http.SendTimeout := _SendTimeout;
     html := TStringStream.Create('', TEncoding.UTF8);
     req := TMultipartFormData.Create();
     try
@@ -196,6 +206,9 @@ begin
   begin
     try
       http := TNetHTTPClient.Create(nil);
+      http.ConnectionTimeout := _ConnectionTimeout;
+      http.ResponseTimeout := _ResponseTimeout;
+//    http.SendTimeout := _SendTimeout;
       html := TStringStream.Create('', TEncoding.UTF8);
 
       http.UserAgent := 'User-Agent:Mozilla/4.0(compatible;MSIE7.0;WindowsNT5.1;360SE)';
@@ -235,9 +248,10 @@ end;
 
 { TNetSyn }
 
-constructor TNetSyn.Create(sUrlData: TURLData; RetMethod: TRetMethod);
+constructor TNetSyn.Create(sUrlData: TURLData; RetMethod: TRetMethod; isSyn: Boolean);
 begin
-  inherited Create(False);
+
+  FIsSyn := isSyn;
   if sUrlData.FMethod <> sPost then
     if sUrlData.FMethod <> sPostFile then
       sUrlData.FMethod := sGet;
@@ -253,7 +267,11 @@ begin
   FPostParam := sUrlData.FPostParams;
   FFileName := sUrlData.FFileName;
   FCookie := sUrlData.FSessionID;
-
+  if not self.FIsSyn then
+  begin
+    SynRun;
+  end;
+  inherited Create(False);
 end;
 
 destructor TNetSyn.Destroy;
@@ -264,7 +282,8 @@ end;
 
 procedure TNetSyn.Execute;
 begin
-  SynRun;
+  if FIsSyn then
+    SynRun;
 end;
 
 procedure TNetSyn.SynRun;
@@ -272,42 +291,29 @@ var
   ret: TRetData;
   net: TNet;
   Cookie: string;
-  s: string;
-
+  content: string;
 begin
 
+  net := TNet.Create;
   try
-  //  Sleep(5000);
-    net := TNet.Create;
-    try
-      net.Cookie := FCookie;
-      if HttpType.ToUpper = 'GET' then
-        s := net.Get(FUrl);
-      if HttpType.ToUpper = 'POST' then
-        s := net.Post(FUrl, FPostParam);
-      if HttpType.ToUpper = 'POSTFILE' then
-        s := net.PostMedia(FUrl, FFileName);
-      Cookie := net.Cookie;
-      ret.FSessionID := Cookie;
-      ret.FData := s;
-    finally
-      net.Free;
-    end;
-
-    Synchronize(
-      procedure
-      begin
-
-        FRetMethod(ret);
-      end);
-  except
+    net.Cookie := FCookie;
+    if HttpType.ToUpper = 'GET' then
+      content := net.Get(FUrl);
+    if HttpType.ToUpper = 'POST' then
+      content := net.Post(FUrl, FPostParam);
+    if HttpType.ToUpper = 'POSTFILE' then
+      content := net.PostMedia(FUrl, FFileName);
+    Cookie := net.Cookie;
+    ret.FSessionID := Cookie;
+    ret.FData := content;
+  finally
+    net.Free;
     Synchronize(
       procedure
       begin
         FRetMethod(ret);
       end);
   end;
-
 end;
 
 end.
