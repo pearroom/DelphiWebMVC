@@ -3,9 +3,9 @@ unit IndexController;
 interface
 
 uses
-  System.SysUtils, System.Classes, MVC.Route, MVC.JSON, MVC.Controller,
-  MVC.LogUnit, System.JSON, MVC.DataSet, BaseController, MVC.Verify, MVC.Tool,
-  IndexService;
+  System.Generics.Collections, System.SysUtils, System.Classes, MVC.Route,
+  MVC.JSON, MVC.Controller, MVC.LogUnit, System.JSON, MVC.DataSet,
+  BaseController, MVC.Verify, MVC.Tool, IndexService;
 
 type
   [MURL('')]                                //设置空值为根目录
@@ -52,7 +52,6 @@ begin
   if ds.IsEmpty then
   begin
     Fail(-1, '账号密码错误');
-
   end
   else if vcode.ToUpper = scode.ToUpper then
   begin

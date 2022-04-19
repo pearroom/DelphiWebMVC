@@ -280,7 +280,7 @@ begin
     end
     else
     begin
-      txt := DeCryptStr(txt, key);
+      txt := string(DeCryptStr(AnsiString(txt), AnsiString(key)));
     end;
     try
       jo := IIJObject(txt);

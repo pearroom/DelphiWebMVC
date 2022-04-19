@@ -149,7 +149,6 @@ type
 var
   DBPool: TDBPool;
 
-
 function IIConn: IConn; //获取一个新的链接
 
 function IIStoredProc(db: TDB; StoredProcName: string): IStoredProc;
@@ -243,12 +242,12 @@ end;
 
 destructor TDBItem.Destroy;
 begin
-
   if Assigned(DbConns) then
   begin
     DbConns.Free;
   end;
-  TMP_CDS.Free;
+  if Assigned(TMP_CDS) then
+    TMP_CDS.Free;
   inherited;
 end;
 
@@ -311,7 +310,6 @@ begin
     cds := IIDataSet;
     cds.DS.Connection := Conn;
     Result := cds.DS.ExecSQL(sql);
-
   except
     on e: Exception do
     begin
@@ -342,10 +340,8 @@ begin
         log('SQL执行异常:' + e.Message);
         Result := nil;
       end;
-
     end;
   end;
-
 end;
 
 function TDBItem.Find(sql: ISQL; pNumber, pSize: integer): IDataSet;
@@ -444,7 +440,6 @@ begin
       log(e.Message);
       Result := nil;
     end;
-
   end;
 end;
 
@@ -489,12 +484,10 @@ begin
         log('SQL执行异常:' + e.Message + '-' + sq);
         Result := nil;
       end;
-
     end;
   finally
     Result := dataset;
   end;
-
 end;
 
 function TDBItem.PageMSSQL(sql: ISQL; pNumber, pSize: Integer): IDataSet;
@@ -599,12 +592,10 @@ begin
         log('SQL执行异常:' + e.Message + '-' + sq);
         Result := nil;
       end;
-
     end;
   finally
     Result := dataset;
   end;
-
 end;
 
 function TDBItem.PageMySql(sql: ISQL; pNumber, pSize: Integer): IDataSet;
@@ -691,12 +682,10 @@ begin
         log('SQL执行异常:' + e.Message + '-' + sq);
         Result := nil;
       end;
-
     end;
   finally
     Result := dataset;
   end;
-
 end;
 
 function TDBItem.Query(sql: string): IDataSet;
@@ -722,11 +711,9 @@ begin
       begin
         log('SQL执行异常:' + e.Message + '-' + sql);
         Result := nil;
-
       end;
     end;
   end;
-
 end;
 
 procedure TDBItem.Rollback;
@@ -794,13 +781,11 @@ begin
       Result := False;
       LogDebug('数据库链接失败');
     end;
-
   except
     on e: Exception do
     begin
       log(e.Message);
       Result := false;
-
     end;
   end;
 end;
@@ -833,7 +818,6 @@ begin
   //连接池查找dbitem
   dbitem.SetConn(DbName);
   Result := dbitem;
-
 end;
 
 { TDBConns }
@@ -855,7 +839,6 @@ begin
     Db.ConnectionDefName := DbType;
     ConnList.Add(Db);
   end;
-
 end;
 
 destructor TDBConns.Destroy;
@@ -923,7 +906,6 @@ begin
     DBList.Items[key].Free;
   DBList.Free;
 //  Sleep(20);   //等待20 等线程10后退出
-
 end;
 
 procedure TDBPool.ClearAction;
@@ -1035,7 +1017,6 @@ begin
   DBList.AddOrSetValue(item.ID, item);
   UnLock(DBList);
   Result := item;
-
 end;
 
 procedure TDBPool.setParams;
@@ -1088,7 +1069,6 @@ begin
     end;
     DBManager.Active := true;
   end;
-
 end;
 
 { TStoredProc }
@@ -1195,7 +1175,6 @@ begin
       log(e.Message);
       result := '';
     end;
-
   end;
 end;
 
@@ -1219,7 +1198,6 @@ end;
 
 initialization
   DBPool := TDBPool.Create;
-
 
 finalization
   DBPool.Free;

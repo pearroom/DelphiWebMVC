@@ -341,7 +341,7 @@ begin
   StrResult := '';
   for I := 0 to Length(TempResult) - 1 do
   begin
-    Temp := Format('%x', [Ord(TempResult[I + 1])]);
+    Temp := AnsiString(Format('%x', [Ord(TempResult[I + 1])]));
     if Length(Temp) = 1 then
       Temp := '0' + Temp;
     StrResult := StrResult + Temp;

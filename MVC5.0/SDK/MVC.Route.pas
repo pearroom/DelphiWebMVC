@@ -364,7 +364,7 @@ begin
   Content := '<html><body><div style="text-align: left;">';
   Content := Content + '<div><h1>Error 500</h1></div>';
   Content := Content + '<hr><div>[ ' + msg + ' ]' + '</div></div></body></html>';
-  if Trim(Config.Error500) <> '' then
+  if Config.Error500.Trim <> '' then
   begin
     tplFile := Config.BasePath + config.WebRoot + '\' + Config.Error500 + '.html';
     if FileExists(tplFile) then
@@ -392,7 +392,7 @@ begin
   Content := '<html><body><div style="text-align: left;">';
   Content := Content + '<div><h1>Error 404</h1></div>';
   Content := Content + '<hr><div>[ ' + msg + ' ] Not Find Page' + '</div></div></body></html>';
-  if Trim(Config.Error404) <> '' then
+  if Config.Error404.Trim <> '' then
   begin
     tplFile := Config.BasePath + config.WebRoot + '\' + Config.Error404 + '.html';
     if FileExists(tplFile) then
@@ -420,7 +420,7 @@ begin
   for j := 0 to listkey.Count - 1 do
   begin
     key := listkey.Strings[j];
-    if UpperCase(key) = UpperCase(name) then
+    if key.ToUpper = name.ToUpper then
     begin
       Result := true;
       break;
@@ -441,7 +441,7 @@ begin
   for j := 0 to listkey.Count - 1 do
   begin
     key := listkey.Strings[j];
-    if (UpperCase(key) = LeftStr(UpperCase(Route), Length(key))) or (UpperCase(key) = LeftStr(UpperCase(Route + '/'), Length(key))) then
+    if (key.ToUpper = LeftStr(Route.ToUpper, key.Length)) or (key.ToUpper = LeftStr(Route.ToUpper + '/', key.Length)) then
     begin
       isFind := true;
       break;
@@ -452,7 +452,7 @@ begin
     for I := 0 to list.Count - 1 do
     begin
       item := list.Items[I];
-      if ((key = item.routeUrl) or ((key + '/') = item.routeUrl)) and (Length(item.routeUrl) > 1) then
+      if ((key = item.routeUrl) or ((key + '/') = item.routeUrl)) and (item.routeUrl.Length > 1) then
       begin
         Result := item;
         break;
@@ -473,7 +473,7 @@ var
   url1: string;
   tmp: string;
 begin
-  url1 := Trim(url);
+  url1 := url.Trim;
   item := GetItem(url1);
   if item <> nil then
   begin

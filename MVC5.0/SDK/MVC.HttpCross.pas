@@ -5,8 +5,8 @@ interface
 uses
   System.DateUtils, System.SysUtils, Classes, IniFiles, Contnrs, Web.WebReq,
   Web.HTTPProd, Web.ReqMulti, system.rtti, Web.HTTPApp, MVC.Config, IdURI,
-  MVC.Route, MVC.LogUnit, WebBroker, Net.CrossHttpServer, Net.CrossHttpParams,
-  Net.CrossSocket.Base, MVC.CrossCommon;
+  IdGlobal, MVC.Route, MVC.LogUnit, WebBroker, Net.CrossHttpServer,
+  Net.CrossHttpParams, Net.CrossSocket.Base, MVC.CrossCommon;
 
 const
   // Request Header String
@@ -65,7 +65,6 @@ const
 
 var
   LContext: TRttiContext;
-
 
 type
 {$IF (CompilerVersion<20.0) OR (CompilerVersion>=30.0) }
@@ -222,7 +221,6 @@ type
 var
   httpServer: THTTPServer;
 
-
 function UTF8ToWBString(const AVal: RawUTF8): WBString;
 
 function WBStringToUTF8(const AVal: WBString): RawUTF8;
@@ -364,12 +362,11 @@ end;
 procedure TWebCrossHttpServer.TriggerPostDataBegin(AConnection: ICrossHttpConnection);
 var
   LRequest: TCrossHttpRequest;
-  LMultiPart: THttpMultiPartFormData;
+//  LMultiPart: THttpMultiPartFormData;
   LStream: TStream;
   LType: TRttiType;
   LField: TRttiField;
   LBody: TObject;
-
 begin
   LRequest := AConnection.Request as TCrossHttpRequest;
 
@@ -386,8 +383,8 @@ end;
 { THttpApi }
 
 constructor THttpApi.Create(const ARequest: ICrossHttpRequest; AResponse: ICrossHttpResponse);
-var
-  nQPos, nAPos: Integer;
+//var
+//  nQPos, nAPos: Integer;
 begin
   FStatusCode := 200;
   FQueryFields := TStringList.Create;
@@ -398,10 +395,10 @@ begin
   FRemoteIP := ARequest.Connection.PeerAddr;
   FMethod := StringToUTF8(FRequest.Method);
   FURL := PrepareURL;
-  nAPos := pos('#', FURL);
-  nQPos := pos('?', FURL);
-  FPathInfo := ARequest.path;
-  FQueryString := ARequest.Query.Encode;
+//  nAPos := pos('#', string(FURL));
+ // nQPos := pos('?', string(FURL));
+  FPathInfo := RawUTF8(ARequest.path);
+  FQueryString := RawUTF8(ARequest.Query.Encode);
   FAnchor := '';
   FQueryFields.Text := ARequest.Query.Encode;
 end;
@@ -418,8 +415,8 @@ begin
   if FContentFields.Count = 0 then
   begin
     if IdemPChar(PUTF8Char(StringToUTF8(Request.ContentType)), 'APPLICATION/X-WWW-FORM-URLENCODED') then
-      FContentFields.Text := UTF8ToString(StringReplaceAll(TEncoding.UTF8.GetString(GetRawContent), '&', #13#10))
-    else if IdemPChar(PUTF8Char(FRequest.ContentType), 'MULTIPART/FORM-DATA') then
+      FContentFields.Text := UTF8ToString(StringReplaceAll(RawUTF8(TEncoding.UTF8.GetString(GetRawContent)), '&', #13#10))
+    else if IdemPChar(PUTF8Char(RawUTF8(FRequest.ContentType)), 'MULTIPART/FORM-DATA') then
       processMultiPartFormData;
   end;
   Result := FContentFields;
@@ -427,15 +424,15 @@ end;
 
 function THttpApi.GetHeader(const AUpKey: RawUTF8): RawUTF8;
 begin
-  result := FRequest.GetHeader.Params[AUpKey];
+  result := RawUTF8(FRequest.GetHeader.Params[string(AUpKey)]);
 end;
 
 function THttpApi.GetRawContent: TBytes;
-var
-  vFormField: TBytes;
-  i: Integer;
-  vlen: UInt64;
-  vstr: string;
+//var
+////  vFormField: TBytes;
+////  i: Integer;
+//  vlen: UInt64;
+//  vstr: string;
 begin
   case Request.GetBodyType of
     btNone:
@@ -479,7 +476,7 @@ begin
   begin
     OutHeader(HEADER_CONTENT_TYPE + ContentType);
   end;
-  OutContent := AFileName;
+  OutContent := SockString(AFileName);
 end;
 
 procedure THttpApi.OutHeader(const ANewHeaderAppended: RawUTF8);
@@ -488,7 +485,7 @@ begin
   begin
     with Context do
     begin
-      Header.Decode(ANewHeaderAppended, false);
+      Header.Decode(string(ANewHeaderAppended), false);
     end;
   end;
 end;
@@ -504,7 +501,7 @@ begin
     AStream.Position := 0;
     FOutPutstream.CopyFrom(AStream, AStream.Size);
     if Length(AContentType) > 0 then
-      Context.ContentType := AContentType;
+      Context.ContentType := string(AContentType);
   end;
 end;
 
@@ -566,7 +563,7 @@ end;
 
 function TRequest.GetRawContent: TBytes;
 var
-  AContent, AContent2: AnsiString;
+  AContent, AContent2: RawUTF8;
   k: integer;
 begin
   if ContentType.StartsWith('multipart/form-data') then
@@ -575,8 +572,8 @@ begin
   end
   else
   begin
-    AContent := TIdURI.URLDecode(EncodingGetString(ContentType, Env.GetRawContent));
-    if (Pos('{', AContent) > 0) and (Pos('}', AContent) > 0) then
+    AContent := RawUTF8(TIdURI.URLDecode(EncodingGetString(ContentType, Env.GetRawContent)));
+    if (Pos('{', string(AContent)) > 0) and (Pos('}', string(AContent)) > 0) then
     begin
       Result := Env.GetRawContent;
     end
@@ -584,7 +581,7 @@ begin
     begin
       k := TEncoding.UTF8.GetCharCount(BytesOf(AContent));
       if k > 0 then
-        AContent2 := EncodingGetString(ContentType, BytesOf(AContent))
+        AContent2 := RawUTF8(EncodingGetString(ContentType, BytesOf(AContent)))
       else
         AContent2 := AContent;
 
@@ -592,7 +589,9 @@ begin
         Result := Env.GetRawContent
       else
       begin
-        AContent := StringReplaceAll(TIdURI.URLEncode('http://api/?' + AContent2), 'http://api/?', '');
+        AContent := RawUTF8(StringReplaceAll(
+          RawUTF8(TIdURI.URLEncode('http://api/?' + string(AContent2))),
+          'http://api/?', ''));
         Result := BytesOf(AContent);
       end;
     end;
@@ -610,8 +609,8 @@ begin
 end;
 
 function TRequest.GetStringVariable(Index: Integer): WBString;
-var
-  vInContent: TBytes;
+//var
+//  vInContent: TBytes;
 begin
   if Index = cstInHeaderMethod then
   begin
@@ -795,7 +794,7 @@ function TResponse.GetStringVariable(Index: Integer): string;
 begin
   Result := '';
   if Index = cstOutHeaderContentType then
-    Result := UTF8ToWBString(Response.ContentType);
+    Result := Response.ContentType;
 end;
 
 procedure TResponse.OutCookiesAndCustomHeaders;
@@ -813,7 +812,6 @@ begin
   Env.Redirect(URI);
   Env.OutContent := ' ';
   FSent := True;
-
 end;
 
 procedure TResponse.SendResponse;
@@ -824,7 +822,7 @@ begin
   Response.StatusCode := Env.StatusCode;
   if Length(Env.OutContent) > 0 then
   begin
-    Response.Send(Env.OutContent);
+    Response.Send(string(Env.OutContent));
   end;
 
   if Assigned(env.OutPutstream) then
@@ -865,19 +863,16 @@ end;
 procedure TResponse.SetDateVariable(Index: Integer; const Value: TDateTime);
 begin
   inherited;
-
 end;
 
 procedure TResponse.SetIntegerVariable(Index: Integer; Value: WBInt);
 begin
   inherited;
-
 end;
 
 procedure TResponse.SetLogMessage(const Value: string);
 begin
   inherited;
-
 end;
 
 procedure TResponse.SetStatusCode(Value: Integer);

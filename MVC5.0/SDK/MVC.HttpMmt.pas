@@ -63,7 +63,7 @@ type
   WBString = string;
 {$ELSE}
 
-  WBString = AnsiString;
+  WBString = RawUTF8;
 {$IFEND}
   {$IF CompilerVersion>33 }
 
@@ -127,6 +127,18 @@ type
     function GetRawContent: TBytes; override;
   public
     property Context: THttpServerRequest read GetContext;
+    // Read count bytes from client
+    function ReadClient(var Buffer; Count: Integer): Integer; override;
+    // Read count characters as a WBString from client
+    function ReadString(Count: Integer): WBString; override;
+    // Translate a relative URI to a local absolute path
+    function TranslateURI(const URI: string): string; override;
+    // Write count bytes back to client
+    function WriteClient(var Buffer; Count: Integer): Integer; override;
+    // Write WBString contents back to client
+    function WriteString(const AString: WBString): Boolean; override;
+    // Write HTTP header WBString
+    function GetFieldByName(const Name: WBString): WBString; override;
     function WriteHeaders(StatusCode: Integer; const ReasonString, Headers: WBString): Boolean; override;
     property Env: THttpApi read FEnv;
     constructor Create(const AEnv: THttpApi);
@@ -185,7 +197,6 @@ type
 var
   httpServer: THTTPServer;
 
-
 function UTF8ToWBString(const AVal: RawUTF8): WBString;
 
 function WBStringToUTF8(const AVal: WBString): RawUTF8;
@@ -224,7 +235,6 @@ begin
     HServer := THttpApiServer.Create(False);
     HServer.OnRequest := Process;
   end;
-
 end;
 
 destructor THTTPServer.Destroy;
@@ -254,21 +264,20 @@ begin
     response.Free;
     httpApi.Free;
   end;
-
 end;
 
 procedure THTTPServer.Start;
 var
-  compress: string;
+  compress: RawUTF8;
 begin
   try
-    compress := Config.Compress;
+    compress := RawUTF8(Config.Compress);
     if UpperCase(compress) = UpperCase('deflate') then
       HServer.RegisterCompress(CompressDeflate)
     else if UpperCase(compress) = UpperCase('gzip') then
       HServer.RegisterCompress(CompressGZip);
 
-    HServer.AddUrl('', Config.Port, False, '+', false);
+    HServer.AddUrl('', RawUTF8(Config.Port), False, '+', false);
     HServer.HTTPQueueLength := Config.HTTPQueueLength;
     HServer.Clone(Config.ThreadCount);   //ChildThreadCount启动http监听线程
     Action := true;
@@ -286,7 +295,7 @@ end;
 
 procedure THTTPServer.Stop;
 begin
-  HServer.RemoveUrl('', config.Port, False, '+');
+  HServer.RemoveUrl('', RawUTF8(config.Port), False, '+');
   log('服务停止');
 end;
 
@@ -300,10 +309,10 @@ begin
   FContext := vContext;
   FQueryFields := TStringList.Create;
   FContentFields := TStringList.Create;
-  FHost := GetHeader('HOST:');
+  FHost := string(GetHeader('HOST:'));
   FRemoteIP := UTF8ToString(GetHeader('REMOTEIP:'));
-  FMethod := FContext.Method;
-  FURL := FContext.URL;
+  FMethod := string(FContext.Method);
+  FURL := string(FContext.URL);
   nAPos := Pos('#', FURL);
   nQPos := Pos('?', FURL);
   if nQPos > 0 then
@@ -334,7 +343,7 @@ begin
       FAnchor := '';
     end;
   end;
-  FQueryFields.Text := UTF8ToString(StringReplaceAll(URLDecode(FQueryString), '&', #13#10));
+  FQueryFields.Text := UTF8ToString(StringReplaceAll(URLDecode(RawUTF8(FQueryString)), '&', #13#10));
 end;
 
 destructor THttpApi.Destroy;
@@ -362,13 +371,13 @@ var
   headls: TStringList;
   key: string;
 begin
-  key := AUpKey;
+  key := string(AUpKey);
   key := key.Replace(':', '');
   headls := TStringList.Create;
   try
-    text := FContext.InHeaders;
+    text := string(FContext.InHeaders);
     headls.Text := text.Replace(': ', '=');
-    Result := headls.Values[key];
+    Result := RawUTF8(headls.Values[key]);
   finally
     headls.Free;
   end;
@@ -405,7 +414,7 @@ end;
 
 procedure THttpApi.Redirect(const AURI: string);
 begin
-  OutHeader('Location: ' + AURI);
+  OutHeader('Location: ' + RawUTF8(AURI));
   FStatusCode := 302;
 end;
 
@@ -425,6 +434,11 @@ end;
 function TRequest.GetDateVariable(Index: Integer): TDateTime;
 begin
   Result := Now;
+end;
+
+function TRequest.GetFieldByName(const Name: WBString): WBString;
+begin
+
 end;
 
 function TRequest.GetIntegerVariable(Index: Integer): WBInt;
@@ -449,7 +463,7 @@ end;
 
 function TRequest.GetRawContent: TBytes;
 var
-  AContent: AnsiString;
+  AContent: RawUTF8;
   k: Integer;
 begin
   if ContentType.StartsWith('multipart/form-data') then
@@ -458,7 +472,7 @@ begin
   end
   else
   begin
-    if (Pos('{', Context.InContent) > 0) and (Pos('}', Context.InContent) > 0) then
+    if (Pos('{', string(Context.InContent)) > 0) and (Pos('}', string(Context.InContent)) > 0) then
     begin
       AContent := Context.InContent;
     end
@@ -467,9 +481,11 @@ begin
       k := TEncoding.UTF8.GetCharCount(BytesOf(Context.InContent));
       if (k > 0) then
       begin
-        AContent := EncodingGetString(ContentType, BytesOf(Context.InContent));
+        AContent := RawUTF8(EncodingGetString(ContentType, BytesOf(Context.InContent)));
         if (Context.InContent <> AContent) then
-          AContent := StringReplaceAll(TIdURI.URLEncode('http://api/?' + AContent), 'http://api/?', '');
+          AContent := RawUTF8(StringReplaceAll(RawUTF8(TIdURI.URLEncode('http://api/?'
+            + string(AContent))), 'http://api/?', ''));
+      //    AContent := RawUTF8(TIdURI.PathEncode(string(AContent)));
       end
       else
         AContent := Context.InContent;
@@ -488,7 +504,7 @@ function TRequest.GetStringVariable(Index: Integer): WBString;
 begin
   if Index = cstInHeaderMethod then
   begin
-    Result := UTF8ToWBString(FEnv.Method);
+    Result := UTF8ToWBString(RawUTF8(FEnv.Method));
   end
   else if Index = cstInHeaderProtocolVersion then
   begin
@@ -496,19 +512,19 @@ begin
   end
   else if Index = cstInHeaderURL then
   begin
-    Result := UTF8ToWBString(FEnv.URL);
+    Result := UTF8ToWBString(RawUTF8(FEnv.URL));
   end
   else if Index = cstInHeaderQuery then
   begin
-    Result := UTF8ToWBString(FEnv.QueryString);
+    Result := UTF8ToWBString(RawUTF8(FEnv.QueryString));
   end
   else if Index = cstInHeaderPathInfo then
   begin
-    Result := UTF8ToWBString(FEnv.PathInfo);
+    Result := UTF8ToWBString(RawUTF8(FEnv.PathInfo));
   end
   else if Index = cstInHeaderPathTranslated then
   begin
-    Result := UTF8ToWBString(FEnv.PathInfo);
+    Result := UTF8ToWBString(RawUTF8(FEnv.PathInfo));
   end
   else if Index = cstInHeaderCacheControl then
   begin
@@ -580,7 +596,32 @@ begin
   end;
 end;
 
+function TRequest.ReadClient(var Buffer; Count: Integer): Integer;
+begin
+  Result := 0;
+end;
+
+function TRequest.ReadString(Count: Integer): WBString;
+begin
+  Result := '';
+end;
+
+function TRequest.TranslateURI(const URI: string): string;
+begin
+  Result := '';
+end;
+
+function TRequest.WriteClient(var Buffer; Count: Integer): Integer;
+begin
+  Result := 0;
+end;
+
 function TRequest.WriteHeaders(StatusCode: Integer; const ReasonString, Headers: WBString): Boolean;
+begin
+  Result := False;
+end;
+
+function TRequest.WriteString(const AString: WBString): Boolean;
 begin
   Result := False;
 end;
@@ -662,7 +703,6 @@ end;
 procedure TResponse.SendStream(AStream: TStream);
 begin
   Env.OutStream(AStream);
-
 end;
 
 function TResponse.Sent: Boolean;
@@ -673,13 +713,11 @@ end;
 procedure TResponse.SetContent(const Value: string);
 begin
   Context.OutContent := WBStringToUTF8(Value);
-
 end;
 
 procedure TResponse.SetContentStream(Value: TStream);
 begin
   SendStream(Value);
-
 end;
 
 procedure TResponse.SetDateVariable(Index: Integer; const Value: TDateTime);
@@ -690,26 +728,22 @@ end;
 procedure TResponse.SetIntegerVariable(Index: Integer; Value: WBInt);
 begin
   inherited;
-
 end;
 
 procedure TResponse.SetLogMessage(const Value: string);
 begin
   inherited;
-
 end;
 
 procedure TResponse.SetStatusCode(Value: Integer);
 begin
   Env.StatusCode := Value;
-
 end;
 
 procedure TResponse.SetStringVariable(Index: Integer; const Value: string);
 begin
   if Index = cstOutHeaderContentType then
     Context.OutContentType := WBStringToUTF8(Value);
-
 end;
 
 end.

@@ -15,11 +15,11 @@ type
     function foreachvalue(text, key, value: string; var isok: Boolean): string;
     function foreach(text: string; param: TStringList): string;
     procedure foreachinclude(var text: string; param: TStringList; url: string);
-    procedure foreachclear(var text: string);
+ //   procedure foreachclear(var text: string);
     function foreachjson(text: string; key: string; json: TJSONObject; var isok: Boolean): string;
     function foreachlist(text, key: string; json: TJSONArray; var isok: boolean): string;
-    function foreachsubjson(text: string; key: string; json: IJArray; var isok: Boolean): string;
-    function foreachsublist(text: string; key: string; json: IJArray; var isok: boolean): string;
+   // function foreachsubjson(text: string; key: string; json: IJArray; var isok: Boolean): string;
+  //  function foreachsublist(text: string; key: string; json: IJArray; var isok: boolean): string;
     function foreachsetif(text: string): string;
     function foreachelseif(text: string): string;
     function checkifwhere(where: string): boolean;
@@ -156,27 +156,27 @@ begin
   Result := text;
 end;
 
-procedure TTplParser.foreachclear(var text: string);
-var
-  matchs: TMatchCollection;
-  match: TMatch;
-begin
-  matchs := TRegEx.Matches(text, Self.leftFmt + '[\s\S]*?\' + self.rightFmt);
-  for match in matchs do
-  begin
-    text := TRegEx.Replace(text, match.Value, '');
-  end;
-  matchs := TRegEx.Matches(text, '<#list[\s\S]*?</#list>');
-  for match in matchs do
-  begin
-    text := TRegEx.Replace(text, match.Value, '');
-  end;
-  matchs := TRegEx.Matches(text, '<#if[\s\S]*?</#if>');
-  for match in matchs do
-  begin
-    text := TRegEx.Replace(text, match.Value, '');
-  end;
-end;
+//procedure TTplParser.foreachclear(var text: string);
+//var
+//  matchs: TMatchCollection;
+//  match: TMatch;
+//begin
+//  matchs := TRegEx.Matches(text, Self.leftFmt + '[\s\S]*?\' + self.rightFmt);
+//  for match in matchs do
+//  begin
+//    text := TRegEx.Replace(text, match.Value, '');
+//  end;
+//  matchs := TRegEx.Matches(text, '<#list[\s\S]*?</#list>');
+//  for match in matchs do
+//  begin
+//    text := TRegEx.Replace(text, match.Value, '');
+//  end;
+//  matchs := TRegEx.Matches(text, '<#if[\s\S]*?</#if>');
+//  for match in matchs do
+//  begin
+//    text := TRegEx.Replace(text, match.Value, '');
+//  end;
+//end;
 
 function TTplParser.foreachelseif(text: string): string;
 var
@@ -456,11 +456,11 @@ begin
   Result := text;
 end;
 
-function TTplParser.foreachsubjson(text, key: string; json: IJArray; var isok: Boolean): string;
+//function TTplParser.foreachsubjson(text, key: string; json: IJArray; var isok: Boolean): string;
 //var
 //  match: TMatch;
 //  s, html: string;
-begin
+//begin
 //  html := text;
 //  isok := false;
  // if json.IsType(TSuperType.stObject) then
@@ -483,54 +483,54 @@ begin
 //    end;
 //  end;
 //  Result := html;
-end;
+//end;
 
-function TTplParser.foreachsublist(text, key: string; json: IJArray; var isok: boolean): string;
-var
-  matchs: TMatchCollection;
-  match: TMatch;
-  s, datavalue, itemvalue: string;
-  strls: TStringList;
-  html, html1: string;
-  arr: IJArray;
-  I: Integer;
-begin
-  strls := TStringList.Create;
-
-  arr := json;
-  isok := false;
-  matchs := TRegEx.Matches(text, '<#sublist.*data=' + key + ' [\s\S]*?</#sublist>');
-  try
-    for match in matchs do
-    begin
-      strls.Text := match.Value;
-
-      s := TRegEx.Replace(strls.Text, '<#sublist.*?>', '');
-      s := TRegEx.Replace(s, '</#sublist>', '');
-      html1 := s;
-      s := Trim(TRegEx.Match(strls.Text, '<#sublist.*?>').value);
-      datavalue := Trim(TRegEx.Match(s, 'data=.*? ').value);
-      itemvalue := Trim(TRegEx.Match(s, 'item=.*?>').value.Replace('>', ''));
-      datavalue := Copy(datavalue, 6, Length(datavalue) - 5);
-      itemvalue := Copy(itemvalue, 6, Length(itemvalue) - 5);
-      if datavalue = key then
-      begin
-        for I := 0 to arr.A.Count - 1 do
-        begin
-        //  html := html + foreachsubjson(html1, itemvalue, arr.A.Get(i) as System.JSON.TJSONArray, isok);
-        end;
-        html := foreachsetif(html);
-        text := text.Replace(match.Value, html);
-        isok := true;
-      end;
-    end;
-
-    Result := text;
-  finally
-    strls.Clear;
-    strls.Free;
-  end;
-end;
+//function TTplParser.foreachsublist(text, key: string; json: IJArray; var isok: boolean): string;
+//var
+//  matchs: TMatchCollection;
+//  match: TMatch;
+//  s, datavalue, itemvalue: string;
+//  strls: TStringList;
+//  html, html1: string;
+//  arr: IJArray;
+//  I: Integer;
+//begin
+//  strls := TStringList.Create;
+//
+//  arr := json;
+//  isok := false;
+//  matchs := TRegEx.Matches(text, '<#sublist.*data=' + key + ' [\s\S]*?</#sublist>');
+//  try
+//    for match in matchs do
+//    begin
+//      strls.Text := match.Value;
+//
+//      s := TRegEx.Replace(strls.Text, '<#sublist.*?>', '');
+//      s := TRegEx.Replace(s, '</#sublist>', '');
+//      html1 := s;
+//      s := Trim(TRegEx.Match(strls.Text, '<#sublist.*?>').value);
+//      datavalue := Trim(TRegEx.Match(s, 'data=.*? ').value);
+//      itemvalue := Trim(TRegEx.Match(s, 'item=.*?>').value.Replace('>', ''));
+//      datavalue := Copy(datavalue, 6, Length(datavalue) - 5);
+//      itemvalue := Copy(itemvalue, 6, Length(itemvalue) - 5);
+//      if datavalue = key then
+//      begin
+//        for I := 0 to arr.A.Count - 1 do
+//        begin
+//        //  html := html + foreachsubjson(html1, itemvalue, arr.A.Get(i) as System.JSON.TJSONArray, isok);
+//        end;
+//        html := foreachsetif(html);
+//        text := text.Replace(match.Value, html);
+//        isok := true;
+//      end;
+//    end;
+//
+//    Result := text;
+//  finally
+//    strls.Clear;
+//    strls.Free;
+//  end;
+//end;
 
 procedure TTplParser.Parser(var text: string; param: TStringList; url: string);
 begin

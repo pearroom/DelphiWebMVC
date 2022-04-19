@@ -321,7 +321,6 @@ begin
     dataset.Delete;
     dataset.FieldDefs.Clear;
     dataset.Close;
-
   end;
   ja := IIJArray(json);
 
@@ -338,7 +337,6 @@ begin
         field.Name := jo1.Pairs[j].JsonString.Value;
         field.DataType := ftString;
         field.Size := 500;
-
       end;
       break;
     end;
@@ -551,6 +549,8 @@ begin
   SQL_V.Clear;
 end;
 
+
+
 procedure TSQL.AndEq(key, value: string);
 begin
   if (Trim(value) = '') or (Trim(key) = '') then
@@ -729,7 +729,6 @@ begin
     FOrder := ' order by ';
   FOrder := FOrder + value;
   SQL_V.Clear;
-
 end;
 
 procedure TSQL.Select(fields: string);
@@ -740,7 +739,6 @@ begin
     FSelect := 'select ';
   FSelect := FSelect + fields;
   SQL_V.Clear;
-
 end;
 
 procedure TSQL.Set_(value: string);
@@ -767,7 +765,6 @@ begin
     FSelect := 'select * ';
   SQL_V.Text := FSelect + FFrom + FWhere + FOrder;
   Result := SQL_V.Text;
-
 end;
 
 procedure TSQL.value(value: string);
@@ -1014,7 +1011,6 @@ begin
     TplContent.Free;
     Parser.free;
   end;
-
 end;
 
 { TResData }
