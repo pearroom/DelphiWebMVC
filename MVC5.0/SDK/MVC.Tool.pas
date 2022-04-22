@@ -8,6 +8,7 @@ uses
 
 type
   ITool = interface
+    ['{178CA435-81DE-4D50-AC60-6FA8E4C56A9A}']
     function URLDecode(Asrc: string; AByteEncoding: IIdtextEncoding): string;
     function URLEncode(Asrc: string; AByteEncoding: IIdTextEncoding): string;
     function UnicodeDecode(Asrc: string): string;
@@ -138,7 +139,6 @@ begin
     temp := temp + Copy(Asrc, index + 1, 6); // 取出编码，包括 \u,如\u4e3f
     Delete(temp, 1, 2);
     Delete(Asrc, 1, index + 6);
-
   end;
   Result := Result + top + WideChar(StrToInt('$' + temp));
 end;
@@ -192,7 +192,6 @@ begin
     Result := TIdURI.URLEncode(Asrc, AByteEncoding)
   else
     Result := TIdURI.URLEncode(Asrc);
-
 end;
 
 function TTool.UrlFmt(url: string): string;
@@ -229,7 +228,6 @@ begin
   s := s.Replace(#39, '''').Replace(#34, '\"').Replace(#63, '\?');
   s := s.Replace(#13, '\\r').Replace(#10, '\\n');
   Result := s;
-
 end;
 
 function TTool.StringFormatF(Asrc: string): string;
@@ -239,7 +237,6 @@ begin
   s := Asrc;
   s := s.Replace(#92, '\\');
   Result := s;
-
 end;
 
 function TTool.StringToBitmap(imgStr: string): TBitmap;
@@ -319,5 +316,4 @@ begin
 end;
 
 end.
-
 

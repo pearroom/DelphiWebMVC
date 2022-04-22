@@ -15,7 +15,7 @@ uses
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
   FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet,
   FireDAC.Comp.Client, MVC.Config, MVC.LogUnit, MVC.JSON, System.JSON,
-  web.HTTPApp, mvc.Tool, Data.DB;
+  web.HTTPApp, mvc.Tool, Data.DB, MVC.DSQuery;
 
 type
   TResData = record
@@ -25,6 +25,7 @@ type
   end;
 
   ISQL = interface
+    ['{5F91D807-77FE-46B8-8C8F-79A3402E565A}']
     procedure Select(fields: string);
     procedure From(tables: string);
     procedure And_(value: string);
@@ -123,6 +124,7 @@ type
   end;
 
   ISQLTpl = interface
+    ['{18CF7EB9-4334-468B-B4FC-AD8FCCA2BD26}']
     procedure SetKey(key: string; sParam: IJObject = nil);
     procedure SetParam(sParam: IJObject);
     procedure SetTpl(tpl: string);
@@ -149,15 +151,10 @@ type
   end;
 
   IDataSet = interface
-    function DS: TFDQuery;
+    ['{4CE4BA08-23A7-4B04-AFF0-B37FF0CD4995}']
+    function DS: TDSQuery;
     function toJSONArray: string;
     function toJSONObject: string;
-    function S(fieldname: string): string;
-    function I(fieldname: string): Integer;
-    function D(fieldname: string): Double;
-    procedure setS(fieldname: string; value: string);
-    procedure setI(fieldname: string; value: Integer);
-    procedure setD(fieldname: string; value: Double);
     function isEmpty: Boolean;
     function Eof: Boolean;
     function Count: Integer;
@@ -172,20 +169,30 @@ type
   TDataSet = class(TInterfacedObject, IDataSet)
   private
     FCount: integer;
-    dataset: TFDQuery;
+    FDataSet: TDSQuery;
     function checkType(dbtype: TFieldType): Boolean;
+    function GetB(key: string): boolean;
+    function GetD(key: string): TDateTime;
+    function GetF(key: string): double;
+    function GetI(key: string): integer;
+    function GetS(key: string): string;
+
+    procedure SetB(key: string; Value: boolean);
+    procedure setD(key: string; value: TDateTime);
+    procedure SetF(key: string; Value: double);
+    procedure setI(key: string; value: Integer);
+    procedure setS(key: string; value: string);
   public
-    function DS: TFDQuery;
+    function DS: TDSQuery;
 
     function toJSONArray: string;
     function toJSONObject: string;
-    function S(fieldname: string): string;
-    function I(fieldname: string): Integer;
-    function D(fieldname: string): Double;
 
-    procedure setS(fieldname: string; value: string);
-    procedure setI(fieldname: string; value: Integer);
-    procedure setD(fieldname: string; value: Double);
+    property S[key: string]: string read GetS write SetS;
+    property I[key: string]: integer read GetI write SetI;
+    property B[key: string]: boolean read GetB write SetB;
+    property D[key: string]: TDateTime read GetD write SetD;
+    property F[key: string]: double read GetF write SetF;
 
     function isEmpty: Boolean;
     function Eof: Boolean;
@@ -263,19 +270,19 @@ end;
 
 constructor TDataSet.Create;
 begin
-  dataset := TFDQuery.Create(nil);
+  FDataSet := TDSQuery.Create(nil);
 end;
 
 destructor TDataSet.Destroy;
 begin
  // dataset.Close;
-  dataset.Free;
+  FDataSet.Free;
   inherited;
 end;
 
-function TDataSet.DS: TFDQuery;
+function TDataSet.DS: TDSQuery;
 begin
-  Result := dataset;
+  Result := FDataSet;
 end;
 
 procedure TDataSet.Edit;
@@ -288,24 +295,34 @@ begin
   Result := ds.Eof;
 end;
 
-function TDataSet.D(fieldname: string): Double;
+function TDataSet.GetB(key: string): boolean;
 begin
-  Result := ds.FieldByName(fieldname).AsFloat;
+  Result := FDataSet.FieldByName(key).value;
 end;
 
-function TDataSet.I(fieldname: string): Integer;
+function TDataSet.GetD(key: string): TDateTime;
 begin
-  Result := ds.FieldByName(fieldname).AsInteger;
+  Result := FDataSet.FieldByName(key).value;
 end;
 
-function TDataSet.S(fieldname: string): string;
+function TDataSet.GetF(key: string): double;
 begin
-  Result := ds.FieldByName(fieldname).AsString;
+  Result := FDataSet.FieldByName(key).value;
+end;
+
+function TDataSet.GetI(key: string): integer;
+begin
+  Result := FDataSet.FieldByName(key).value;
+end;
+
+function TDataSet.GetS(key: string): string;
+begin
+  Result := FDataSet.FieldByName(key).value;
 end;
 
 function TDataSet.isEmpty: boolean;
 begin
-  Result := dataset.IsEmpty;
+  Result := FDataSet.IsEmpty;
 end;
 
 function TDataSet.JsonToDataSet(json: string; var dataset: TFDMemTable): boolean;
@@ -376,75 +393,85 @@ begin
   DS.Post;
 end;
 
+procedure TDataSet.SetB(key: string; Value: boolean);
+begin
+  FDataSet.FieldByName(key).Value := Value;
+end;
+
 procedure TDataSet.setCount(n: integer);
 begin
   FCount := n;
 end;
 
-procedure TDataSet.setD(fieldname: string; value: Double);
+procedure TDataSet.setD(key: string; value: TDateTime);
 begin
-  ds.FieldByName(fieldname).AsFloat := value;
+  FDataSet.FieldByName(key).value := value;
 end;
 
-procedure TDataSet.setI(fieldname: string; value: Integer);
+procedure TDataSet.SetF(key: string; Value: double);
 begin
-  ds.FieldByName(fieldname).AsInteger := value;
+  FDataSet.FieldByName(key).Value := Value;
 end;
 
-procedure TDataSet.setS(fieldname, value: string);
+procedure TDataSet.setI(key: string; value: Integer);
 begin
-  ds.FieldByName(fieldname).AsString := value;
+  FDataSet.FieldByName(key).value := value;
+end;
+
+procedure TDataSet.setS(key, value: string);
+begin
+  FDataSet.FieldByName(key).value := value;
 end;
 
 function TDataSet.toJSONArray: string;
 var
-  i: Integer;
+  k: Integer;
   ret: string;
   ftype: TFieldType;
   json, item, key, value: string;
 begin
   ret := '';
   try
-    if dataset = nil then
+    if FDataSet = nil then
     begin
       Result := '[]';
       exit;
     end;
-    json := '[';
-    with dataset do
+    json := '';
+    with FDataSet do
     begin
       First;
 
       while not Eof do
       begin
-        item := '{';
-        for i := 0 to Fields.Count - 1 do
+        item := '';
+        for k := 0 to Fields.Count - 1 do
         begin
-          ftype := Fields[i].DataType;
+          ftype := Fields[k].DataType;
           if Config.JsonToLower then
-            key := Fields[i].DisplayLabel.ToLower
+            key := Fields[k].DisplayLabel.ToLower
           else
-            key := Fields[i].DisplayLabel;
+            key := Fields[k].DisplayLabel;
           if checkType(ftype) then
-            value := '"' + IITool.UnicodeEncode(Fields[i].AsString) + '"'
+            value := '"' + IITool.UnicodeEncode(Fields[k].AsString) + '"'
           else if ftype = ftBoolean then
-            value := Fields[i].AsString.ToLower
+            value := Fields[k].AsString.ToLower
           else
-            value := Fields[i].AsString;
+            value := Fields[k].AsString;
 
           if value = '' then
             value := '0';
           item := item + '"' + key + '"' + ':' + value + ',';
         end;
         item := copy(item, 1, item.Length - 1);
-        item := item + '},';
+        item := '{' + item + '},';
         json := json + item;
         Next;
       end;
     end;
     if json.Length > 1 then
       json := copy(json, 1, json.Length - 1);
-    json := json + ']';
+    json := '[' + json + ']';
     Result := json;
   except
     on e: Exception do
@@ -456,37 +483,37 @@ end;
 
 function TDataSet.toJSONObject: string;
 var
-  i: Integer;
+  k: Integer;
   ftype: TFieldType;
   json, item, key, value: string;
 begin
   json := '';
   try
-    if dataset = nil then
+    if FDataSet = nil then
     begin
       Result := '{}';
       exit;
     end;
-    with dataset do
+    with FDataSet do
     begin
 
       if not IsEmpty then
       begin
         item := '{';
-        for i := 0 to Fields.Count - 1 do
+        for k := 0 to Fields.Count - 1 do
         begin
-          ftype := Fields[i].DataType;
+          ftype := Fields[k].DataType;
           if Config.JsonToLower then
-            key := Fields[i].DisplayLabel.ToLower
+            key := Fields[k].DisplayLabel.ToLower
           else
-            key := Fields[i].DisplayLabel;
+            key := Fields[k].DisplayLabel;
 
           if checkType(ftype) then
-            value := '"' + IITool.UnicodeEncode(Fields[i].AsString) + '"'
+            value := '"' + IITool.UnicodeEncode(Fields[k].AsString) + '"'
           else if ftype = ftBoolean then
-            value := Fields[i].AsString.ToLower
+            value := Fields[k].AsString.ToLower
           else
-            value := Fields[i].AsString;
+            value := Fields[k].AsString;
 
           if value = '' then
             value := '0';
@@ -548,8 +575,6 @@ begin
   FEdit := tables;
   SQL_V.Clear;
 end;
-
-
 
 procedure TSQL.AndEq(key, value: string);
 begin
@@ -767,7 +792,7 @@ begin
   Result := SQL_V.Text;
 end;
 
-procedure TSQL.value(value: string);
+procedure TSQL.Value(value: string);
 begin
   if Trim(value) = '' then
     exit;
@@ -1015,7 +1040,7 @@ end;
 
 { TResData }
 
-procedure TResData.value(sCode: Integer; sMsg: string);
+procedure TResData.Value(sCode: Integer; sMsg: string);
 begin
   Self.Code := sCode;
   Self.Msg := sMsg;

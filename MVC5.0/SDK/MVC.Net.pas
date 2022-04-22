@@ -13,9 +13,9 @@ const
   _ResponseTimeout = 1000;
   _SendTimeout = 1000;
 
-
 type
   INet = interface
+    ['{B9A85A1E-4866-4D5B-B0FB-D849F53404BC}']
     function Post(url, params: string): string;
     function PostMedia(url, filepath: string): string;
     function Get(url: string): string;
@@ -104,7 +104,6 @@ begin
           SetLength(head, 1);
           head[0] := head1;
           request := http.Post(url, PostParm, html, head);
-
         end
         else
           request := http.Post(url, PostParm, html);
@@ -164,7 +163,6 @@ begin
           SetLength(head, 1);
           head[0] := head1;
           request := http.Post(url, req, html, head);
-
         end
         else
           request := http.Post(url, req, html);
@@ -220,7 +218,6 @@ begin
           SetLength(head, 1);
           head[0] := head1;
           request := http.Get(url, html, head);
-
         end
         else
           request := http.Get(url, html);

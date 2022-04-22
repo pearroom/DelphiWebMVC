@@ -15,7 +15,7 @@ uses
   FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async,
   FireDAC.Phys.FBDef, FireDAC.Phys.FB, FireDAC.DApt, Data.DB,
   FireDAC.Comp.Client, MVC.Config, MVC.LogUnit, MVC.DM, MVC.JSON, system.json,
-  MVC.DataSet, FireDAC.Comp.DataSet, MVC.Tool;
+  MVC.DataSet, FireDAC.Comp.DataSet, MVC.Tool, MVC.DSQuery;
 
 type
   TDBConns = class
@@ -33,7 +33,7 @@ type
     Conn: TFDConnection;
     FDbState: Integer;
     FID: string;
-    TMP_CDS: TFDQuery;
+    TMP_CDS: TDSQuery;
     FOverTime: TDateTime;
     FDriverName: string;
     procedure SetDbState(const Value: Integer);
@@ -71,8 +71,8 @@ type
     function Find(sqltpl: ISQLTpl; pNumber: Integer; pSize: integer): IDataSet; overload;
     function Find(sql: ISQL; pNumber: Integer; pSize: integer): IDataSet; overload;//分页查询
     function FindByKey(tablename: string; key: string; value: string): IDataSet;
-    function Add(tablename: string): TFDQuery;
-    function Edit(tablename: string; key: string; value: string): TFDQuery;
+    function Add(tablename: string): TDSQuery;
+    function Edit(tablename: string; key: string; value: string): TDSQuery;
     function DelByKey(tablename: string; key: string; value: string): Boolean;
     function filterSQL(sql: string): string;
   //
@@ -114,6 +114,7 @@ type
   TParamT = TParamType;
 
   IStoredProc = interface
+    ['{1AB05D47-9A7C-490B-BE50-ABE9DECCF11C}']
     function Open: boolean;
     function StoredProc: TFDStoredProc;
     procedure AddParams(FieldName: string; FieldType: TFieldType; ParamValue: Variant; ParamType: TParamType = TParamT.ptInput);
@@ -134,6 +135,7 @@ type
   end;
 
   IConn = interface
+    ['{9837B6A3-176C-4247-8BB7-D566D76A4297}']
     function Db: TDb;
   end;
 
@@ -166,7 +168,7 @@ begin
 end;
 { TDBItem }
 
-function TDBItem.Add(tablename: string): TFDQuery;
+function TDBItem.Add(tablename: string): TDSQuery;
 var
   sql: string;
 begin
@@ -259,7 +261,7 @@ begin
   Result := sql;
 end;
 
-function TDBItem.Edit(tablename, key, value: string): TFDQuery;
+function TDBItem.Edit(tablename, key, value: string): TDSQuery;
 var
   sql: string;
 begin
@@ -768,7 +770,7 @@ begin
       Conn.Connected := true;
     if TMP_CDS = nil then
     begin
-      TMP_CDS := TFDQuery.Create(nil);
+      TMP_CDS := TDSQuery.Create(nil);
       TMP_CDS.Connection := Conn;
     end;
     if Conn.Connected then

@@ -65,6 +65,7 @@ type
   end;
 
   IJWT = interface // 接口实现类将自动释放
+    ['{274AF4C1-5317-4506-914D-5DA75E88A789}']
     function O: TJWT; // 开放外部调用方法
   end;
 

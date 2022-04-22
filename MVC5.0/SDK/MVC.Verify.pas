@@ -22,6 +22,7 @@ type
   end;
 
   IVerify = interface
+    ['{8D7D66E0-EE72-4850-AD5C-1FFF3CEFD52F}']
     procedure Add(sKey: string; sVerify: string; sErrMsg: string);
     function Verify(sParam: IJObject; var retArr: IJArray): boolean;
   end;
@@ -54,7 +55,6 @@ type
 var
   VerifyType: TVerifyType;
 
-
 function IIVerify: IVerify;
 
 implementation
@@ -79,7 +79,6 @@ end;
 function TVerify.check(value, sVerify: string): Boolean;
 var
   matchs: TMatchCollection;
-
 begin
   matchs := TRegEx.Matches(value, sVerify, [roIgnoreCase]);
   Result := matchs.Count > 0;
@@ -88,7 +87,6 @@ end;
 constructor TVerify.Create();
 begin
   FData := TObjectList<TVerifyItem>.Create;
-
 end;
 
 destructor TVerify.Destroy;

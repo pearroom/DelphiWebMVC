@@ -52,7 +52,7 @@ var
   mssqlver: string;
   sql: string;
   ver: string;
-  dataset: IDataset;
+  cds: IDataset;
 begin
   strlist := TStringList.Create;
   try
@@ -113,8 +113,8 @@ begin
           sql := 'select 1 as sn where ' + where;
         end;
       end;
-      dataset := db.Find(sql);
-      if dataset.ds.FieldByName('sn').AsString = '1' then
+      cds := db.Find(sql);
+      if cds.ds.FieldByName('sn').AsString = '1' then
         Result := true
       else
         Result := False;

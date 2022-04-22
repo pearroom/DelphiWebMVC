@@ -12,41 +12,62 @@ type
 //  TJSONArray = TJSONArray;
 
   IJObject = interface
+    ['{FEC2FAB3-E39D-461B-8A1C-ECE2B83436E2}']
     function O: TJSONObject;
     function ParseJSON(value: string): TJSONObject;
     function toJSON: string;
+    procedure Remove(key: string);
+    procedure SetF(key: string; const Value: double);
     procedure SetS(key: string; value: string); overload;
     procedure SetI(key: string; value: Integer); overload;
-    procedure SetD(key: string; value: Double); overload;
+    procedure SetD(key: string; value: TDateTime); overload;
     procedure SetB(key: string; value: Boolean); overload;
     function GetI(key: string): Integer;
-    function GetD(key: string): Double;
+    function GetF(key: string): Double;
+    function GetD(key: string): TDateTime;
     function GetS(key: string): string;
     function GetB(key: string): Boolean;
-    procedure Remove(key: string);
+    property S[key: string]: string read GetS write SetS;
+    property I[key: string]: integer read GetI write SetI;
+    property B[key: string]: boolean read GetB write SetB;
+    property D[key: string]: TDateTime read GetD write SetD;
+    property F[key: string]: double read GetF write SetF;
   end;
 
   TJObject = class(TInterfacedObject, IJObject)
   private
     jsonObj: TJSONObject;
+
   public
     function O: TJSONObject;
     function ParseJSON(value: string): TJSONObject;
     function toJSON: string;
+
+    procedure SetF(key: string; const Value: double);
     procedure SetS(key: string; value: string); overload;
     procedure SetI(key: string; value: Integer); overload;
-    procedure SetD(key: string; value: Double); overload;
+    procedure SetD(key: string; value: TDateTime); overload;
     procedure SetB(key: string; value: Boolean); overload;
+
     function GetI(key: string): Integer;
-    function GetD(key: string): Double;
+    function GetF(key: string): Double;
+    function GetD(key: string): TDateTime;
     function GetS(key: string): string;
     function GetB(key: string): Boolean;
+
+    property S[key: string]: string read GetS write SetS;
+    property I[key: string]: integer read GetI write SetI;
+    property B[key: string]: boolean read GetB write SetB;
+    property D[key: string]: TDateTime read GetD write SetD;
+    property F[key: string]: double read GetF write SetF;
+
     procedure Remove(key: string);
     constructor Create(json: string = '');
     destructor Destroy; override;
   end;
 
   IJArray = interface
+    ['{5131E207-0B1E-4AB8-B0D8-B9B8453342B7}']
     function A: TJSONArray;
     function ParseJSON(value: string): TJSONArray;
     function toJSON: string;
@@ -101,11 +122,18 @@ begin
     Result := jsonObj.GetValue(key).Value.ToBoolean;
 end;
 
-function TJObject.GetD(key: string): Double;
+function TJObject.GetD(key: string): TDateTime;
 begin
   Result := 0;
   if jsonObj.Get(key) <> nil then
-    Result := jsonObj.GetValue(key).Value.ToDouble;
+    Result := StrToDateTime(jsonObj.GetValue(key).Value);
+end;
+
+function TJObject.GetF(key: string): double;
+begin
+  Result := 0;
+  if jsonObj.Get(key) <> nil then
+    Result := jsonObj.GetValue(key).Value.ToDouble();
 end;
 
 function TJObject.GetI(key: string): Integer;
@@ -143,10 +171,16 @@ begin
   jsonObj.RemovePair(key).Free;
 end;
 
-procedure TJObject.SetD(key: string; value: Double);
+procedure TJObject.SetD(key: string; value: TDateTime);
 begin
   jsonObj.RemovePair(key).Free;
-  jsonObj.AddPair(key, TJSONNumber.Create(value));
+  jsonObj.AddPair(key, TJSONString.Create(DateTimeToStr(value)));
+end;
+
+procedure TJObject.SetF(key: string; const Value: double);
+begin
+  jsonObj.RemovePair(key).Free;
+  jsonObj.AddPair(key, TJSONNumber.Create(Value));
 end;
 
 procedure TJObject.SetS(key, value: string);
